@@ -1,0 +1,175 @@
+<!-- ===== BF Product Card - Hermès Quality ===== -->
+<!-- 飛熊入夢 - 愛馬仕等級產品卡片 -->
+<!-- 直接複製整段 HTML 即可使用 -->
+
+<style>
+    /* ===== BF Product Card - Hermès Quality ===== */
+    .bf-product-card {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-text: #3D3D3D;
+        --bf-text-light: #7A7A7A;
+        --bf-white: #FFFFFF;
+        --bf-black: #1A1A1A;
+
+        font-family: 'Noto Sans TC', -apple-system, sans-serif;
+        background: transparent;
+        cursor: pointer;
+    }
+
+    .bf-product-card * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ===== Image Container ===== */
+    .bf-product-card-image {
+        position: relative;
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        background: var(--bf-cream);
+        margin-bottom: 30px;
+    }
+
+    .bf-product-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .bf-product-card:hover .bf-product-card-image img {
+        transform: scale(1.03);
+    }
+
+    .bf-product-card-badge {
+        position: absolute;
+        top: 24px;
+        left: 24px;
+        background: var(--bf-white);
+        color: var(--bf-brown);
+        font-size: 10px;
+        font-weight: 400;
+        padding: 8px 14px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    /* ===== Quick View - Hermès Style ===== */
+    .bf-product-card-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.5s ease;
+    }
+
+    .bf-product-card:hover .bf-product-card-overlay {
+        background: rgba(255, 255, 255, 0.4);
+    }
+
+    .bf-product-card-quick {
+        background: var(--bf-white);
+        color: var(--bf-brown);
+        border: none;
+        padding: 16px 32px;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 2px;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s ease;
+    }
+
+    .bf-product-card:hover .bf-product-card-quick {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .bf-product-card-quick:hover {
+        background: var(--bf-brown);
+        color: var(--bf-white);
+    }
+
+    /* ===== Content - Minimal Info ===== */
+    .bf-product-card-content {
+        text-align: left;
+    }
+
+    .bf-product-card-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--bf-brown);
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+        line-height: 1.5;
+    }
+
+    .bf-product-card-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 14px;
+        color: var(--bf-text);
+        letter-spacing: 1px;
+    }
+
+    .bf-product-card-price-original {
+        font-size: 13px;
+        color: var(--bf-text-light);
+        text-decoration: line-through;
+        margin-right: 12px;
+    }
+
+    /* ===== Material Tags ===== */
+    .bf-product-card-materials {
+        margin-top: 16px;
+        display: flex;
+        gap: 16px;
+    }
+
+    .bf-product-card-material {
+        font-size: 11px;
+        color: var(--bf-text-light);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+</style>
+
+<!-- 單個產品卡片範例 -->
+<div class="bf-product-card">
+    <div class="bf-product-card-image">
+        <img src="https://via.placeholder.com/600x800/E6D9CC/8A6754?text=CHAIR" alt="Ar 系列餐椅">
+        <span class="bf-product-card-badge">New</span>
+        <div class="bf-product-card-overlay">
+            <button class="bf-product-card-quick">快速預覽</button>
+        </div>
+    </div>
+    <div class="bf-product-card-content">
+        <h3 class="bf-product-card-title">Ar 系列餐椅</h3>
+        <p class="bf-product-card-price">
+            <span class="bf-product-card-price-original">NT$18,000</span>
+            NT$15,800
+        </p>
+        <div class="bf-product-card-materials">
+            <span class="bf-product-card-material">柚木</span>
+            <span class="bf-product-card-material">手工製作</span>
+        </div>
+    </div>
+</div>
+
+<!-- 
+===== 愛馬仕設計特點 =====
+1. 3:4 比例圖片 (更優雅)
+2. 極簡文字資訊 (只有名稱、價格)
+3. 細字重 (400)
+4. 寬鬆 letter-spacing
+5. 半透明白 overlay 而非陰影
+6. 緩慢、優雅的動畫 (1s cubic-bezier)
+-->

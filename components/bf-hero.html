@@ -1,0 +1,237 @@
+<!-- ===== BF Hero Banner - Hermès Quality ===== -->
+<!-- 飛熊入夢 - 愛馬仕等級大圖橫幅 -->
+<!-- 直接複製整段 HTML 即可使用 -->
+
+<style>
+    /* ===== BF Hero - Hermès Quality ===== */
+    .bf-hero {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-text: #3D3D3D;
+        --bf-text-light: #7A7A7A;
+        --bf-white: #FFFFFF;
+        --bf-black: #1A1A1A;
+
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        min-height: 600px;
+        overflow: hidden;
+        font-family: 'Noto Sans TC', -apple-system, sans-serif;
+    }
+
+    .bf-hero * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ===== Background ===== */
+    .bf-hero-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+
+    .bf-hero-bg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* ===== Minimal Overlay ===== */
+    .bf-hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom,
+                rgba(0, 0, 0, 0.1) 0%,
+                transparent 30%,
+                transparent 70%,
+                rgba(0, 0, 0, 0.2) 100%);
+        z-index: 2;
+    }
+
+    /* ===== Content - Hermès Centered ===== */
+    .bf-hero-content {
+        position: relative;
+        z-index: 3;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 40px;
+    }
+
+    .bf-hero-kicker {
+        font-family: 'Playfair Display', serif;
+        font-size: 12px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--bf-white);
+        margin-bottom: 24px;
+        font-weight: 400;
+    }
+
+    .bf-hero-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 56px;
+        font-weight: 400;
+        line-height: 1.3;
+        color: var(--bf-white);
+        margin-bottom: 32px;
+        letter-spacing: 8px;
+        max-width: 800px;
+    }
+
+    .bf-hero-desc {
+        font-size: 15px;
+        font-weight: 300;
+        line-height: 2;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 60px;
+        max-width: 500px;
+        letter-spacing: 1px;
+    }
+
+    /* ===== CTA Button - Understated ===== */
+    .bf-hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 48px;
+        background: transparent;
+        color: var(--bf-white);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        transition: all 0.5s ease;
+    }
+
+    .bf-hero-btn:hover {
+        background: var(--bf-white);
+        color: var(--bf-brown);
+        border-color: var(--bf-white);
+    }
+
+    .bf-hero-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke-width: 1.5;
+        transition: transform 0.5s ease;
+    }
+
+    .bf-hero-btn:hover svg {
+        transform: translateX(6px);
+    }
+
+    /* ===== Scroll Indicator ===== */
+    .bf-hero-scroll {
+        position: absolute;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        text-align: center;
+        color: var(--bf-white);
+    }
+
+    .bf-hero-scroll-text {
+        font-family: 'Playfair Display', serif;
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        opacity: 0.7;
+    }
+
+    .bf-hero-scroll-line {
+        width: 1px;
+        height: 60px;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), transparent);
+        margin: 0 auto;
+        animation: bfScrollPulse 2s infinite;
+    }
+
+    @keyframes bfScrollPulse {
+
+        0%,
+        100% {
+            height: 60px;
+            opacity: 0.6;
+        }
+
+        50% {
+            height: 80px;
+            opacity: 1;
+        }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+        .bf-hero {
+            height: 90vh;
+        }
+
+        .bf-hero-title {
+            font-size: 32px;
+            letter-spacing: 4px;
+        }
+
+        .bf-hero-desc {
+            font-size: 14px;
+        }
+
+        .bf-hero-btn {
+            padding: 16px 36px;
+        }
+    }
+</style>
+
+<section class="bf-hero">
+    <!-- Background Image -->
+    <div class="bf-hero-bg">
+        <img src="https://via.placeholder.com/1920x1080/8A6754/FFFFFF?text=WOODWORKING" alt="飛熊入夢木作工藝">
+    </div>
+
+    <!-- Overlay -->
+    <div class="bf-hero-overlay"></div>
+
+    <!-- Content -->
+    <div class="bf-hero-content">
+        <p class="bf-hero-kicker">Handcrafted Excellence</p>
+        <h1 class="bf-hero-title">用雙手打造<br>屬於你的夢想</h1>
+        <p class="bf-hero-desc">
+            每一件作品都承載著木材的溫度與職人的心意<br>
+            在飛熊入夢，我們相信好的家具能陪伴一生
+        </p>
+        <a href="/furniture" class="bf-hero-btn">
+            探索系列
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+        </a>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="bf-hero-scroll">
+        <p class="bf-hero-scroll-text">Scroll</p>
+        <div class="bf-hero-scroll-line"></div>
+    </div>
+</section>
+
+<!-- 
+===== 愛馬仕設計特點 =====
+1. 100vh 全螢幕
+2. 置中對齊 (不是左側)
+3. 極細字重 (400, 300)
+4. 超大 letter-spacing (8px 標題, 4px 按鈕)
+5. 透明邊框按鈕
+6. 極簡 scroll indicator (線條而非圓圈)
+-->

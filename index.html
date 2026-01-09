@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飛熊入夢 UI Component Library | BEAR'S FANTASYLAND</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/bf-tokens.css">
+    <style>
+        /* ===== BF Library Index Styles ===== */
+        /* 使用 bf- 前綴避免 WordPress 衝突 */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--bf-font-body);
+            background-color: var(--bf-cream);
+            color: var(--bf-text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .bf-lib-header {
+            background: var(--bf-white);
+            border-bottom: 1px solid var(--bf-taupe);
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .bf-lib-logo {
+            font-family: var(--bf-font-display);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--bf-brown);
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .bf-lib-logo-en {
+            font-family: var(--bf-font-english);
+            font-size: 14px;
+            color: var(--bf-text-light);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .bf-lib-subtitle {
+            font-size: 14px;
+            color: var(--bf-text-light);
+            margin-top: 15px;
+        }
+
+        .bf-lib-subtitle a {
+            color: var(--bf-brown);
+            text-decoration: none;
+        }
+
+        /* Main Content */
+        .bf-lib-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* Section Title */
+        .bf-lib-section-title {
+            font-family: var(--bf-font-display);
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--bf-text);
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--bf-brown);
+            display: inline-block;
+        }
+
+        /* Component Grid */
+        .bf-lib-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+        }
+
+        /* Component Card */
+        .bf-lib-card {
+            background: var(--bf-white);
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: var(--bf-shadow-md);
+            transition: all var(--bf-transition-slow);
+        }
+
+        .bf-lib-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--bf-shadow-lg);
+        }
+
+        .bf-lib-card-preview {
+            height: 160px;
+            background: var(--bf-sand);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--bf-taupe);
+        }
+
+        .bf-lib-card-icon {
+            font-size: 48px;
+            opacity: 0.8;
+        }
+
+        .bf-lib-card-content {
+            padding: 25px;
+        }
+
+        .bf-lib-card-title {
+            font-family: var(--bf-font-body);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--bf-text);
+            margin-bottom: 8px;
+        }
+
+        .bf-lib-card-path {
+            display: block;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: var(--bf-text-light);
+            background: var(--bf-cream);
+            padding: 6px 10px;
+            margin-bottom: 12px;
+            border-radius: 2px;
+        }
+
+        .bf-lib-card-desc {
+            font-size: 14px;
+            color: var(--bf-text-light);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .bf-lib-card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .bf-lib-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            font-family: var(--bf-font-body);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 0;
+            transition: all var(--bf-transition-base);
+        }
+
+        .bf-lib-btn-primary {
+            background: var(--bf-brown);
+            color: var(--bf-white);
+        }
+
+        .bf-lib-btn-primary:hover {
+            background: var(--bf-brown-dark);
+        }
+
+        .bf-lib-btn-outline {
+            background: transparent;
+            color: var(--bf-brown);
+            border: 1px solid var(--bf-brown);
+        }
+
+        .bf-lib-btn-outline:hover {
+            background: var(--bf-brown);
+            color: var(--bf-white);
+        }
+
+        /* Status Badge */
+        .bf-lib-status {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 2px;
+            margin-left: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bf-lib-status-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .bf-lib-status-wip {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .bf-lib-status-planned {
+            background: var(--bf-sand);
+            color: var(--bf-text-light);
+        }
+
+        /* In Progress Section */
+        .bf-lib-wip-section {
+            background: var(--bf-sand);
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .bf-lib-wip-title {
+            font-family: var(--bf-font-display);
+            font-size: 20px;
+            color: var(--bf-text-light);
+            margin-bottom: 10px;
+        }
+
+        .bf-lib-wip-desc {
+            font-size: 14px;
+            color: var(--bf-text-light);
+        }
+
+        /* Footer */
+        .bf-lib-footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 13px;
+            color: var(--bf-text-light);
+            border-top: 1px solid var(--bf-taupe);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .bf-lib-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bf-lib-header {
+                padding: 30px 15px;
+            }
+
+            .bf-lib-logo {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="bf-lib-header">
+        <h1 class="bf-lib-logo">飛熊入夢</h1>
+        <p class="bf-lib-logo-en">BEAR'S FANTASYLAND</p>
+        <p class="bf-lib-subtitle">
+            UI Component Library |
+            <a href="https://a1.haotaimaker.com/" target="_blank">a1.haotaimaker.com</a>
+        </p>
+    </header>
+
+    <main class="bf-lib-main">
+
+        <!-- ===== 基礎元件 ===== -->
+        <h2 class="bf-lib-section-title">🎨 設計基礎 (Design Foundation)</h2>
+        <div class="bf-lib-grid">
+
+            <!-- Design Tokens -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">🎨</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        設計規範 (Design Spec)
+                        <span class="bf-lib-status bf-lib-status-ready">Ready</span>
+                    </h3>
+                    <code class="bf-lib-card-path">BEARSFANTASYLAND.MD</code>
+                    <p class="bf-lib-card-desc">色彩系統、字體規範、導覽結構、設計原則。</p>
+                    <div class="bf-lib-card-actions">
+                        <a href="BEARSFANTASYLAND.MD" class="bf-lib-btn bf-lib-btn-primary" target="_blank">查看文件</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSS Tokens -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">🔧</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        CSS Variables
+                        <span class="bf-lib-status bf-lib-status-ready">Ready</span>
+                    </h3>
+                    <code class="bf-lib-card-path">css/bf-tokens.css</code>
+                    <p class="bf-lib-card-desc">色彩、字體、間距、陰影等 CSS 變數。直接 import 使用。</p>
+                    <div class="bf-lib-card-actions">
+                        <a href="css/bf-tokens.css" class="bf-lib-btn bf-lib-btn-primary" target="_blank">查看 CSS</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== 導覽元件 ===== -->
+        <h2 class="bf-lib-section-title">🧭 導覽 (Navigation)</h2>
+        <div class="bf-lib-grid">
+
+            <!-- Header / Mega Menu -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">📌</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Header / Mega Menu
+                        <span class="bf-lib-status bf-lib-status-ready">Ready</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-header.html</code>
+                    <p class="bf-lib-card-desc">愛馬仕式極簡導覽列，含 Mega Menu 下拉選單。</p>
+                    <div class="bf-lib-card-actions">
+                        <a href="components/bf-header.html" class="bf-lib-btn bf-lib-btn-primary" target="_blank">預覽
+                            Preview</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">📍</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Footer
+                        <span class="bf-lib-status bf-lib-status-ready">Ready</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-footer.html</code>
+                    <p class="bf-lib-card-desc">頁尾區塊，含聯絡資訊、社群連結、版權宣告。</p>
+                    <div class="bf-lib-card-actions">
+                        <a href="components/bf-footer.html" class="bf-lib-btn bf-lib-btn-primary" target="_blank">預覽
+                            Preview</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== 內容元件 ===== -->
+        <h2 class="bf-lib-section-title">📦 內容區塊 (Content Sections)</h2>
+        <div class="bf-lib-grid">
+
+            <!-- Hero Banner -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">🖼️</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Hero Banner
+                        <span class="bf-lib-status bf-lib-status-ready">Ready</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-hero.html</code>
+                    <p class="bf-lib-card-desc">全幅大圖橫幅，愛馬仕風格極簡設計，含 Scroll 指示器。</p>
+                    <div class="bf-lib-card-actions">
+                        <a href="components/bf-hero.html" class="bf-lib-btn bf-lib-btn-primary" target="_blank">預覽
+                            Preview</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Card -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">🪑</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Product Card
+                        <span class="bf-lib-status bf-lib-status-ready">Ready</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-product-card.html</code>
+                    <p class="bf-lib-card-desc">產品卡片，極簡風格，hover 微動效，Quick View 按鈕。</p>
+                    <div class="bf-lib-card-actions">
+                        <a href="components/bf-product-card.html" class="bf-lib-btn bf-lib-btn-primary"
+                            target="_blank">預覽 Preview</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">📐</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Product Grid
+                        <span class="bf-lib-status bf-lib-status-planned">Planned</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-product-grid.html</code>
+                    <p class="bf-lib-card-desc">產品列表網格，響應式排列。</p>
+                    <div class="bf-lib-card-actions">
+                        <span class="bf-lib-btn bf-lib-btn-outline" style="opacity:0.5; cursor:default;">開發中</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== 電商元件 ===== -->
+        <h2 class="bf-lib-section-title">🛒 電商 (E-Commerce)</h2>
+        <div class="bf-lib-grid">
+
+            <!-- Cart Drawer -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">🛒</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Cart Drawer
+                        <span class="bf-lib-status bf-lib-status-planned">Planned</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-cart-drawer.html</code>
+                    <p class="bf-lib-card-desc">側邊滑出購物車，不跳頁結帳。</p>
+                    <div class="bf-lib-card-actions">
+                        <span class="bf-lib-btn bf-lib-btn-outline" style="opacity:0.5; cursor:default;">開發中</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick View -->
+            <div class="bf-lib-card">
+                <div class="bf-lib-card-preview">
+                    <span class="bf-lib-card-icon">👁️</span>
+                </div>
+                <div class="bf-lib-card-content">
+                    <h3 class="bf-lib-card-title">
+                        Quick View Modal
+                        <span class="bf-lib-status bf-lib-status-planned">Planned</span>
+                    </h3>
+                    <code class="bf-lib-card-path">components/bf-quick-view.html</code>
+                    <p class="bf-lib-card-desc">不離開列表預覽產品詳情。</p>
+                    <div class="bf-lib-card-actions">
+                        <span class="bf-lib-btn bf-lib-btn-outline" style="opacity:0.5; cursor:default;">開發中</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- In Progress -->
+        <div class="bf-lib-wip-section">
+            <h3 class="bf-lib-wip-title">🏗️ 更多組件開發中...</h3>
+            <p class="bf-lib-wip-desc">Header, Hero, Product Card, Cart Drawer...</p>
+        </div>
+
+    </main>
+
+    <footer class="bf-lib-footer">
+        <p>飛熊入夢 BEAR'S FANTASYLAND © 2026 | UI Component Library</p>
+    </footer>
+
+</body>
+
+</html>

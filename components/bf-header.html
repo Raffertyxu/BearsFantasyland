@@ -1,0 +1,710 @@
+<!-- ===== BF Header / Mega Menu - Hermès Quality ===== -->
+<!-- 飛熊入夢 - 愛馬仕等級導覽列 -->
+<!-- 直接複製整段 HTML 即可使用 -->
+
+<style>
+    /* ===== BF Header - Hermès Quality ===== */
+    .bf-header {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-brown-dark: #6d513f;
+        --bf-text: #3D3D3D;
+        --bf-text-light: #7A7A7A;
+        --bf-white: #FFFFFF;
+        --bf-black: #1A1A1A;
+
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: var(--bf-white);
+        font-family: 'Noto Sans TC', -apple-system, sans-serif;
+    }
+
+    .bf-header * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ===== Top Announcement Bar ===== */
+    .bf-header-announcement {
+        background: var(--bf-brown);
+        color: var(--bf-white);
+        text-align: center;
+        padding: 12px 20px;
+        font-size: 12px;
+        letter-spacing: 1px;
+        font-weight: 400;
+    }
+
+    /* ===== Main Header ===== */
+    .bf-header-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 60px;
+        height: 80px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    /* ===== Logo ===== */
+    .bf-header-logo {
+        text-decoration: none;
+        color: var(--bf-text);
+    }
+
+    .bf-header-logo-text {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 4px;
+        color: var(--bf-brown);
+    }
+
+    .bf-header-logo-en {
+        font-family: 'Playfair Display', serif;
+        font-size: 9px;
+        color: var(--bf-text-light);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        display: block;
+        margin-top: 4px;
+    }
+
+    /* ===== Navigation ===== */
+    .bf-header-nav {
+        display: flex;
+        align-items: center;
+        height: 100%;
+    }
+
+    .bf-header-nav-item {
+        position: relative;
+        height: 100%;
+        display: flex;
+        align-items: center;
+    }
+
+    .bf-header-nav-link {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        padding: 0 28px;
+        text-decoration: none;
+        color: var(--bf-text);
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 1px;
+        transition: color 0.3s ease;
+        position: relative;
+    }
+
+    .bf-header-nav-link:hover {
+        color: var(--bf-brown);
+    }
+
+    .bf-header-nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 28px;
+        right: 28px;
+        height: 2px;
+        background: var(--bf-brown);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .bf-header-nav-link:hover::after {
+        transform: scaleX(1);
+    }
+
+    /* ===== Mega Menu - Hermès Style ===== */
+    .bf-mega-menu {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 600px;
+        background: var(--bf-white);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
+        padding: 60px 80px;
+        z-index: 100;
+    }
+
+    .bf-header-nav-item:hover .bf-mega-menu {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .bf-mega-menu-inner {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 80px;
+    }
+
+    .bf-mega-menu-col {
+        /* Column styling */
+    }
+
+    .bf-mega-menu-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 11px;
+        color: var(--bf-text-light);
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 40px;
+        font-weight: 400;
+    }
+
+    .bf-mega-menu-list {
+        list-style: none;
+    }
+
+    .bf-mega-menu-list li {
+        margin-bottom: 24px;
+    }
+
+    .bf-mega-menu-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    .bf-mega-menu-link {
+        text-decoration: none;
+        color: var(--bf-text);
+        font-size: 14px;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        transition: color 0.3s ease;
+        display: inline-block;
+        position: relative;
+    }
+
+    .bf-mega-menu-link::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: var(--bf-brown);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+    }
+
+    .bf-mega-menu-link:hover {
+        color: var(--bf-brown);
+    }
+
+    .bf-mega-menu-link:hover::after {
+        transform: scaleX(1);
+    }
+
+    /* ===== Right Actions ===== */
+    .bf-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .bf-header-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--bf-text);
+        padding: 8px;
+        transition: color 0.3s ease;
+    }
+
+    .bf-header-action-btn:hover {
+        color: var(--bf-brown);
+    }
+
+    .bf-header-action-btn svg {
+        width: 22px;
+        height: 22px;
+        stroke-width: 1.5;
+    }
+
+    /* ===== Mobile Toggle ===== */
+    .bf-header-mobile-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .bf-header-mobile-toggle span {
+        display: block;
+        width: 28px;
+        height: 1px;
+        background: var(--bf-text);
+        transition: all 0.3s ease;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 1200px) {
+        .bf-header-main {
+            padding: 0 40px;
+        }
+
+        .bf-header-nav-link {
+            padding: 0 18px;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .bf-header-nav {
+            display: none;
+        }
+
+        .bf-header-mobile-toggle {
+            display: flex;
+        }
+
+        .bf-header-main {
+            padding: 0 20px;
+            height: 70px;
+        }
+    }
+</style>
+
+<header class="bf-header">
+    <!-- Announcement Bar -->
+    <div class="bf-header-announcement">
+        免運優惠進行中 — 全館滿 $3,000 享免運服務
+    </div>
+
+    <!-- Main Header -->
+    <div class="bf-header-main">
+        <!-- Logo -->
+        <a href="/" class="bf-header-logo">
+            <span class="bf-header-logo-text">飛熊入夢</span>
+            <span class="bf-header-logo-en">Bear's Fantasyland</span>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="bf-header-nav">
+            <!-- 最新消息 -->
+            <div class="bf-header-nav-item">
+                <a href="/news" class="bf-header-nav-link">最新消息</a>
+            </div>
+
+            <!-- 家具 -->
+            <div class="bf-header-nav-item">
+                <a href="/furniture" class="bf-header-nav-link">家具</a>
+                <div class="bf-mega-menu">
+                    <div class="bf-mega-menu-inner">
+                        <div class="bf-mega-menu-col">
+                            <span class="bf-mega-menu-title">Furniture Series</span>
+                            <ul class="bf-mega-menu-list">
+                                <li><a href="/furniture/ar" class="bf-mega-menu-link">Ar 系列</a></li>
+                                <li><a href="/furniture/be" class="bf-mega-menu-link">Be 系列</a></li>
+                                <li><a href="/furniture/ch" class="bf-mega-menu-link">Ch 系列</a></li>
+                                <li><a href="/furniture/classic" class="bf-mega-menu-link">經典系列</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 家居用品 -->
+            <div class="bf-header-nav-item">
+                <a href="/household" class="bf-header-nav-link">家居用品</a>
+                <div class="bf-mega-menu">
+                    <div class="bf-mega-menu-inner">
+                        <div class="bf-mega-menu-col">
+                            <span class="bf-mega-menu-title">Household Items</span>
+                            <ul class="bf-mega-menu-list">
+                                <li><a href="/household/chairs" class="bf-mega-menu-link">椅子</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 飛熊造夢所 -->
+            <div class="bf-header-nav-item">
+                <a href="/lab" class="bf-header-nav-link">飛熊造夢所</a>
+                <div class="bf-mega-menu">
+                    <div class="bf-mega-menu-inner">
+                        <div class="bf-mega-menu-col">
+                            <span class="bf-mega-menu-title">Woodmaking Lab</span>
+                            <ul class="bf-mega-menu-list">
+                                <li><a href="/lab/youtube" class="bf-mega-menu-link">飛熊入夢 YouTube 頻道</a></li>
+                                <li><a href="/lab/courses" class="bf-mega-menu-link">木工旅程 | 課程總覽</a></li>
+                                <li><a href="/lab/tools" class="bf-mega-menu-link">優質工具</a></li>
+                                <li><a href="/lab/school" class="bf-mega-menu-link">飛熊學堂</a></li>
+                            </ul>
+                        </div>
+                        <div class="bf-mega-menu-col">
+                            <span class="bf-mega-menu-title">More</span>
+                            <ul class="bf-mega-menu-list">
+                                <li><a href="/lab/masters" class="bf-mega-menu-link">木師介紹</a></li>
+                                <li><a href="/lab/news" class="bf-mega-menu-link">熊熊速報</a></li>
+                                <li><a href="/lab/faq" class="bf-mega-menu-link">常見問題</a></li>
+                                <li><a href="/lab/contact" class="bf-mega-menu-link">寫信給我們</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 關於我們 -->
+            <div class="bf-header-nav-item">
+                <a href="/about" class="bf-header-nav-link">關於我們</a>
+            </div>
+
+            <!-- 鑑賞 -->
+            <div class="bf-header-nav-item">
+                <a href="/gallery" class="bf-header-nav-link">鑑賞</a>
+            </div>
+
+            <!-- 空間租借 -->
+            <div class="bf-header-nav-item">
+                <a href="/space-rental" class="bf-header-nav-link">空間租借</a>
+            </div>
+
+            <!-- 訂製與運送 -->
+            <div class="bf-header-nav-item">
+                <a href="/custom-delivery" class="bf-header-nav-link">訂製與運送</a>
+            </div>
+        </nav>
+
+        <!-- Right Actions -->
+        <div class="bf-header-actions">
+            <!-- Search -->
+            <button class="bf-header-action-btn" aria-label="搜尋">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </button>
+
+            <!-- Account -->
+            <button class="bf-header-action-btn" aria-label="帳戶">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
+
+            <!-- Cart -->
+            <button class="bf-header-action-btn" aria-label="購物車">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </button>
+
+            <!-- Mobile Menu Toggle -->
+            <button class="bf-header-mobile-toggle" aria-label="選單">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Menu Panel -->
+<div class="bf-mobile-menu" id="bfMobileMenu">
+    <div class="bf-mobile-menu-header">
+        <span class="bf-mobile-menu-title">選單</span>
+        <button class="bf-mobile-menu-close" id="bfMobileClose" aria-label="關閉選單">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+    <nav class="bf-mobile-menu-nav">
+        <a href="/news" class="bf-mobile-menu-link">最新消息</a>
+
+        <div class="bf-mobile-menu-group">
+            <button class="bf-mobile-menu-toggle">
+                家具
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
+            <div class="bf-mobile-menu-sub">
+                <a href="/furniture/ar">Ar 系列</a>
+                <a href="/furniture/be">Be 系列</a>
+                <a href="/furniture/ch">Ch 系列</a>
+                <a href="/furniture/classic">經典系列</a>
+            </div>
+        </div>
+
+        <div class="bf-mobile-menu-group">
+            <button class="bf-mobile-menu-toggle">
+                家居用品
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
+            <div class="bf-mobile-menu-sub">
+                <a href="/household/chairs">椅子</a>
+            </div>
+        </div>
+
+        <div class="bf-mobile-menu-group">
+            <button class="bf-mobile-menu-toggle">
+                飛熊造夢所
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
+            </button>
+            <div class="bf-mobile-menu-sub">
+                <a href="/lab/youtube">飛熊入夢 YouTube 頻道</a>
+                <a href="/lab/courses">木工旅程 | 課程總覽</a>
+                <a href="/lab/tools">優質工具</a>
+                <a href="/lab/school">飛熊學堂</a>
+                <a href="/lab/masters">木師介紹</a>
+                <a href="/lab/news">熊熊速報</a>
+                <a href="/lab/faq">常見問題</a>
+                <a href="/lab/contact">寫信給我們</a>
+            </div>
+        </div>
+
+        <a href="/about" class="bf-mobile-menu-link">關於我們</a>
+        <a href="/gallery" class="bf-mobile-menu-link">鑑賞</a>
+        <a href="/space-rental" class="bf-mobile-menu-link">空間租借</a>
+        <a href="/custom-delivery" class="bf-mobile-menu-link">訂製與運送</a>
+    </nav>
+</div>
+
+<!-- Mobile Menu Overlay -->
+<div class="bf-mobile-overlay" id="bfMobileOverlay"></div>
+
+<style>
+    /* ===== Mobile Menu Styles ===== */
+    .bf-mobile-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 100%;
+        max-width: 400px;
+        height: 100vh;
+        background: var(--bf-white, #FFFFFF);
+        z-index: 2000;
+        transition: right 0.4s ease;
+        overflow-y: auto;
+    }
+
+    .bf-mobile-menu.active {
+        right: 0;
+    }
+
+    .bf-mobile-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
+    }
+
+    .bf-mobile-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .bf-mobile-menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 30px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .bf-mobile-menu-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        color: #8A6754;
+    }
+
+    .bf-mobile-menu-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        color: #3D3D3D;
+    }
+
+    .bf-mobile-menu-close svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .bf-mobile-menu-nav {
+        padding: 20px 0;
+    }
+
+    .bf-mobile-menu-link {
+        display: block;
+        padding: 20px 30px;
+        text-decoration: none;
+        color: #3D3D3D;
+        font-size: 15px;
+        font-weight: 400;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .bf-mobile-menu-link:hover {
+        background: #F5F1EB;
+        color: #8A6754;
+    }
+
+    .bf-mobile-menu-group {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .bf-mobile-menu-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 20px 30px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 15px;
+        font-weight: 400;
+        letter-spacing: 1px;
+        color: #3D3D3D;
+        text-align: left;
+        transition: all 0.3s ease;
+    }
+
+    .bf-mobile-menu-toggle:hover {
+        background: #F5F1EB;
+        color: #8A6754;
+    }
+
+    .bf-mobile-menu-toggle svg {
+        width: 18px;
+        height: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    .bf-mobile-menu-toggle.active svg {
+        transform: rotate(180deg);
+    }
+
+    .bf-mobile-menu-sub {
+        max-height: 0;
+        overflow: hidden;
+        background: #F5F1EB;
+        transition: max-height 0.4s ease;
+    }
+
+    .bf-mobile-menu-sub.active {
+        max-height: 500px;
+    }
+
+    .bf-mobile-menu-sub a {
+        display: block;
+        padding: 16px 30px 16px 50px;
+        text-decoration: none;
+        color: #7A7A7A;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .bf-mobile-menu-sub a:hover {
+        color: #8A6754;
+        padding-left: 56px;
+    }
+
+    /* Toggle Animation */
+    .bf-header-mobile-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .bf-header-mobile-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .bf-header-mobile-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+    }
+</style>
+
+<script>
+    (function () {
+        // Mobile Menu Toggle
+        const toggle = document.querySelector('.bf-header-mobile-toggle');
+        const menu = document.getElementById('bfMobileMenu');
+        const overlay = document.getElementById('bfMobileOverlay');
+        const closeBtn = document.getElementById('bfMobileClose');
+
+        function bfOpenMobileMenu() {
+            toggle.classList.add('active');
+            menu.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function bfCloseMobileMenu() {
+            toggle.classList.remove('active');
+            menu.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (toggle) toggle.addEventListener('click', bfOpenMobileMenu);
+        if (closeBtn) closeBtn.addEventListener('click', bfCloseMobileMenu);
+        if (overlay) overlay.addEventListener('click', bfCloseMobileMenu);
+
+        // Accordion Submenus
+        const accordionToggles = document.querySelectorAll('.bf-mobile-menu-toggle');
+        accordionToggles.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const sub = this.nextElementSibling;
+                const isActive = this.classList.contains('active');
+
+                // Close all others
+                accordionToggles.forEach(function (otherBtn) {
+                    otherBtn.classList.remove('active');
+                    otherBtn.nextElementSibling.classList.remove('active');
+                });
+
+                // Toggle current
+                if (!isActive) {
+                    this.classList.add('active');
+                    sub.classList.add('active');
+                }
+            });
+        });
+    })();
+</script>
+
+<!-- 
+===== 愛馬仕設計特點 =====
+1. 極大的 padding/margin (60px-80px)
+2. 細線條字重 (font-weight: 400)
+3. 超寬 letter-spacing (3px+)
+4. 極簡色彩 (木作色系)
+5. 微妙的下劃線 hover 效果
+6. 大量留白
+-->

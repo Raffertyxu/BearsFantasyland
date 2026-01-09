@@ -1,0 +1,165 @@
+/* ===== BEAR'S FANTASYLAND Design Tokens ===== */
+/* 飛熊入夢 - CSS Variables */
+
+:root {
+    /* === Colors === */
+    --bf-cream: #F5F1EB;          /* 主背景 */
+    --bf-sand: #E6D9CC;           /* 次要背景 */
+    --bf-taupe: #C4A995;          /* 邊框、分隔 */
+    --bf-brown: #8A6754;          /* 主強調色、CTA */
+    --bf-brown-dark: #6d513f;     /* Hover 深色 */
+    --bf-text: #3D3D3D;           /* 正文 */
+    --bf-text-light: #7A7A7A;     /* 次要文字 */
+    --bf-white: #FFFFFF;
+    --bf-black: #1A1A1A;
+
+    /* === Typography === */
+    --bf-font-display: 'Noto Serif TC', 'Playfair Display', 'Times New Roman', serif;
+    --bf-font-body: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --bf-font-english: 'Playfair Display', serif;
+
+    /* === Spacing === */
+    --bf-space-xs: 8px;
+    --bf-space-sm: 16px;
+    --bf-space-md: 24px;
+    --bf-space-lg: 40px;
+    --bf-space-xl: 60px;
+    --bf-space-2xl: 100px;
+
+    /* === Border Radius === */
+    --bf-radius-none: 0;
+    --bf-radius-sm: 4px;
+    --bf-radius-md: 8px;
+
+    /* === Shadows === */
+    --bf-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --bf-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --bf-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.10);
+
+    /* === Transitions === */
+    --bf-transition-fast: 0.2s ease;
+    --bf-transition-base: 0.3s ease;
+    --bf-transition-slow: 0.5s ease;
+
+    /* === Breakpoints (for reference) === */
+    /* Mobile: < 768px */
+    /* Tablet: 768px - 1024px */
+    /* Desktop: > 1024px */
+}
+
+/* === Base Styles === */
+.bf-body {
+    background-color: var(--bf-cream);
+    color: var(--bf-text);
+    font-family: var(--bf-font-body);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* === Typography Classes === */
+.bf-heading-1 {
+    font-family: var(--bf-font-display);
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--bf-text);
+}
+
+.bf-heading-2 {
+    font-family: var(--bf-font-display);
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--bf-text);
+}
+
+.bf-heading-3 {
+    font-family: var(--bf-font-body);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--bf-text);
+}
+
+.bf-body-text {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--bf-text);
+}
+
+.bf-small-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--bf-text-light);
+}
+
+/* === Button Styles === */
+.bf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 32px;
+    font-family: var(--bf-font-body);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all var(--bf-transition-base);
+}
+
+.bf-btn-primary {
+    background-color: var(--bf-brown);
+    color: var(--bf-white);
+}
+
+.bf-btn-primary:hover {
+    background-color: var(--bf-brown-dark);
+    transform: translateY(-2px);
+}
+
+.bf-btn-outline {
+    background-color: transparent;
+    color: var(--bf-brown);
+    border: 1px solid var(--bf-brown);
+}
+
+.bf-btn-outline:hover {
+    background-color: var(--bf-brown);
+    color: var(--bf-white);
+}
+
+/* === Card Styles === */
+.bf-card {
+    background: var(--bf-white);
+    box-shadow: var(--bf-shadow-md);
+    border-radius: var(--bf-radius-none);
+    overflow: hidden;
+    transition: all var(--bf-transition-slow);
+}
+
+.bf-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--bf-shadow-lg);
+}
+
+/* === Utility Classes === */
+.bf-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--bf-space-md);
+}
+
+.bf-section {
+    padding: var(--bf-space-xl) 0;
+}
+
+.bf-text-center { text-align: center; }
+.bf-text-brown { color: var(--bf-brown); }
+.bf-bg-cream { background-color: var(--bf-cream); }
+.bf-bg-sand { background-color: var(--bf-sand); }
+.bf-bg-white { background-color: var(--bf-white); }
