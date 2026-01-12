@@ -880,17 +880,24 @@ jQuery(document).ready(function($) {
     });
 
     function addToCart(productId) {
-        $.post('<?php echo esc_url(wc_ajax_url()); ?>.replace("%%endpoint%%", "add_to_cart")', {
-            product_id: productId,
-            quantity: 1
-        }, function() {
-            $(document.body).trigger('added_to_cart');
-            $('#bfs-modal, #bfs-modal-overlay').removeClass('active');
-            $('body').css('overflow', '');
+        // Use WooCommerce standard add-to-cart
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: {
+                action: 'woocommerce_ajax_add_to_cart',
+                product_id: productId,
+                quantity: 1
+            },
+            success: function() {
+                $(document.body).trigger('added_to_cart');
+                $('#bfs-modal, #bfs-modal-overlay').removeClass('active');
+                $('body').css('overflow', '');
+            }
         });
-        
-        // Fallback: trigger via WC standard method
-        $.get('<?php echo home_url(); ?>/?add-to-cart=' + productId, function() {
+
+        // Fallback: Use GET method
+        $.get('<?php echo esc_url(wc_get_cart_url()); ?>?add-to-cart=' + productId, function() {
             $(document.body).trigger('added_to_cart');
         });
     }
