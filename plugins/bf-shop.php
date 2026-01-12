@@ -786,7 +786,7 @@ class BF_Shop {
 </div>
 
 <script>
-(function($) {
+jQuery(document).ready(function($) {
     var ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
     var currentCategory = '';
     var currentOrderby = '<?php echo esc_js($atts['orderby']); ?>';
@@ -794,7 +794,8 @@ class BF_Shop {
     var currentProductId = 0;
 
     // Filter by category
-    $('.bfs-filter-btn').on('click', function() {
+    $(document).on('click', '.bfs-filter-btn', function(e) {
+        e.preventDefault();
         currentCategory = $(this).data('category');
         $('.bfs-filter-btn').removeClass('active');
         $(this).addClass('active');
@@ -802,7 +803,7 @@ class BF_Shop {
     });
 
     // Sort
-    $('#bfs-orderby').on('change', function() {
+    $(document).on('change', '#bfs-orderby', function() {
         currentOrderby = $(this).val();
         loadProducts();
     });
@@ -829,6 +830,7 @@ class BF_Shop {
     // Quick View
     $(document).on('click', '.bfs-quick-view-btn', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var productId = $(this).data('id');
         currentProductId = productId;
 
@@ -857,33 +859,39 @@ class BF_Shop {
     });
 
     // Close modal
-    $('#bfs-modal-close, #bfs-modal-overlay').on('click', function() {
+    $(document).on('click', '#bfs-modal-close, #bfs-modal-overlay', function() {
         $('#bfs-modal, #bfs-modal-overlay').removeClass('active');
         $('body').css('overflow', '');
     });
 
     // Add to cart from modal
-    $('#bfs-modal-cart').on('click', function() {
+    $(document).on('click', '#bfs-modal-cart', function(e) {
+        e.preventDefault();
         var productId = $(this).data('id');
-        addToCart(productId);
+        if (productId) addToCart(productId);
     });
 
     // Add to cart from grid
     $(document).on('click', '.bfs-add-cart-btn[data-id]', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var productId = $(this).data('id');
         addToCart(productId);
     });
 
     function addToCart(productId) {
-        $.post('<?php echo esc_url(wc_ajax_url()); ?>', {
-            'add-to-cart': productId
+        $.post('<?php echo esc_url(wc_ajax_url()); ?>.replace("%%endpoint%%", "add_to_cart")', {
+            product_id: productId,
+            quantity: 1
         }, function() {
-            // Trigger WooCommerce event
             $(document.body).trigger('added_to_cart');
-            // Close modal
             $('#bfs-modal, #bfs-modal-overlay').removeClass('active');
             $('body').css('overflow', '');
+        });
+        
+        // Fallback: trigger via WC standard method
+        $.get('<?php echo home_url(); ?>/?add-to-cart=' + productId, function() {
+            $(document.body).trigger('added_to_cart');
         });
     }
 
@@ -894,7 +902,9 @@ class BF_Shop {
             $('body').css('overflow', '');
         }
     });
-})(jQuery);
+
+    console.log('BF Shop JS Loaded');
+});
 </script>
         <?php
         return ob_get_clean();
