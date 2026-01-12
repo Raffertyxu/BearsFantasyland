@@ -1,0 +1,165 @@
+<!--
+    飛熊入夢 - 實驗室選單組件 (Woodmaking Lab)
+    適用於：WordPress Gutenberg「自訂 HTML」區塊
+    風格：極簡文字列表，自然置中，無裝飾遮罩
+-->
+
+<style>
+    /* ============================================= */
+    /* WOODMAKING LAB MENU COMPONENT                */
+    /* ============================================= */
+
+    .bf-lab-menu {
+        padding: 100px 0;
+        background-color: #fff;
+        width: 100%;
+        text-align: center;
+    }
+
+    .bf-lab-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* 頂部小標題 (Woodmaking Lab) */
+    .bf-lab-subtitle {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 14px;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 60px;
+        display: block;
+        font-weight: 500;
+    }
+
+    /* 選單列表 */
+    .bf-lab-list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100%;
+    }
+
+    .bf-lab-item {
+        margin-bottom: 30px;
+        opacity: 0;
+        animation: bfFadeUp 0.8s ease forwards;
+    }
+
+    /* 依序延遲動畫 */
+    .bf-lab-item:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .bf-lab-item:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .bf-lab-item:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .bf-lab-item:nth-child(4) {
+        animation-delay: 0.4s;
+    }
+
+    .bf-lab-item:nth-child(5) {
+        animation-delay: 0.5s;
+    }
+
+    .bf-lab-item:nth-child(6) {
+        animation-delay: 0.6s;
+    }
+
+    .bf-lab-link {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 18px;
+        font-weight: 400;
+        color: #333;
+        text-decoration: none;
+        letter-spacing: 0.05em;
+        padding: 10px 20px;
+        display: inline-block;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    /* Hover 效果：文字變色 + 下方底線展開 */
+    .bf-lab-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 1px;
+        background-color: #8A6754;
+        /* 品牌棕 */
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .bf-lab-link:hover {
+        color: #8A6754;
+        transform: translateY(-2px);
+    }
+
+    .bf-lab-link:hover::after {
+        width: 100%;
+    }
+
+    @keyframes bfFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .bf-lab-menu {
+            padding: 60px 0;
+        }
+
+        .bf-lab-link {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<section class="bf-lab-menu">
+    <div class="bf-lab-container">
+
+        <span class="bf-lab-subtitle">W O O D M A K I N G &nbsp; L A B</span>
+
+        <ul class="bf-lab-list">
+            <li class="bf-lab-item">
+                <a href="#" class="bf-lab-link">飛熊入夢 YouTube 頻道</a>
+            </li>
+            <li class="bf-lab-item">
+                <a href="#" class="bf-lab-link">木工旅程 | 課程總覽</a>
+            </li>
+            <li class="bf-lab-item">
+                <a href="#" class="bf-lab-link">優質工具</a>
+            </li>
+            <li class="bf-lab-item">
+                <a href="#" class="bf-lab-link">飛熊學堂</a>
+            </li>
+            <li class="bf-lab-item">
+                <a href="#" class="bf-lab-link">木師介紹</a>
+            </li>
+            <li class="bf-lab-item">
+                <a href="#" class="bf-lab-link">熊熊速報</a>
+            </li>
+        </ul>
+
+    </div>
+</section>

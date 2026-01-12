@@ -1,0 +1,365 @@
+<!--
+    飛熊造木所 - 課程介紹頁面
+    適用於：WordPress Gutenberg「自訂 HTML」區塊
+    已修正：Gutenberg 容器限制問題
+-->
+
+<style>
+    /* ============================================= */
+    /* COURSE COMPONENT - GUTENBERG COMPATIBLE      */
+    /* ============================================= */
+    /* Namespace: .bf-course */
+
+    .bf-course *,
+    .bf-course *::before,
+    .bf-course *::after {
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        font-size: 100% !important;
+        vertical-align: baseline !important;
+        text-decoration: none !important;
+        list-style: none !important;
+        outline: none !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .bf-course {
+        font-family: 'Noto Sans TC', sans-serif !important;
+        background: #F5F1EB !important;
+        color: #5A4A42 !important;
+        overflow: hidden !important;
+        position: relative !important;
+
+        /* === 關鍵：突破 Gutenberg 容器限制 === */
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin-left: calc(-50vw + 50%) !important;
+        margin-right: calc(-50vw + 50%) !important;
+    }
+
+    /* Gutenberg 相容：多層容器覆蓋 */
+    .wp-block-html .bf-course,
+    .entry-content .bf-course,
+    .wp-block-group .bf-course,
+    .alignwide .bf-course,
+    .alignfull .bf-course {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        margin-left: calc(-50vw + 50%) !important;
+        margin-right: calc(-50vw + 50%) !important;
+    }
+
+    .bf-course__container {
+        max-width: 1000px !important;
+        margin: 0 auto !important;
+        padding: 0 24px !important;
+        position: relative !important;
+        width: 100% !important;
+    }
+
+    /* === SECTION 1: HERO === */
+    .bf-course__hero {
+        min-height: 85vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding: 80px 0 !important;
+        position: relative !important;
+    }
+
+    /* Decorative Circle */
+    .bf-course__circle {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 500px !important;
+        height: 500px !important;
+        border: 1px solid rgba(138, 103, 84, 0.15) !important;
+        border-radius: 50% !important;
+        z-index: 0 !important;
+        pointer-events: none !important;
+    }
+
+    .bf-course__circle::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 85% !important;
+        height: 85% !important;
+        border: 1px solid rgba(138, 103, 84, 0.1) !important;
+        border-radius: 50% !important;
+    }
+
+    .bf-course__brand {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 18px !important;
+        letter-spacing: 0.3em !important;
+        color: #8A6754 !important;
+        margin-bottom: 24px !important;
+        position: relative !important;
+        z-index: 1 !important;
+        text-indent: 0.3em !important;
+    }
+
+    .bf-course__title {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 64px !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        margin-bottom: 40px !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    .bf-course__slogan-wrap {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 20px !important;
+        line-height: 2 !important;
+        color: #665 !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    .bf-course__slogan {
+        display: block !important;
+    }
+
+    /* === SECTION 2: PHILOSOPHY === */
+    .bf-course__philosophy {
+        padding: 100px 0 !important;
+        position: relative !important;
+        text-align: center !important;
+    }
+
+    .bf-course__philo-text {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 22px !important;
+        line-height: 2.2 !important;
+        max-width: 680px !important;
+        margin: 0 auto !important;
+        color: #4A3A32 !important;
+    }
+
+    .bf-course__philo-line {
+        display: inline-block !important;
+    }
+
+    .bf-course__divider {
+        width: 1px !important;
+        height: 80px !important;
+        background: #D4C5B5 !important;
+        margin: 60px auto !important;
+    }
+
+    /* === SECTION 3: FEATURES === */
+    .bf-course__features {
+        padding: 60px 0 120px !important;
+    }
+
+    .bf-course__grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+        gap: 30px !important;
+    }
+
+    .bf-course__card {
+        background: #fff !important;
+        padding: 40px 30px !important;
+        border-radius: 4px !important;
+        border: 1px solid transparent !important;
+        transition: all 0.4s ease !important;
+        cursor: default !important;
+        position: relative !important;
+    }
+
+    .bf-course__card:hover {
+        border-color: #E6D9CC !important;
+        transform: translateY(-5px) !important;
+        box-shadow: 0 15px 40px rgba(138, 103, 84, 0.08) !important;
+    }
+
+    .bf-course__card-icon {
+        font-size: 24px !important;
+        color: #8A6754 !important;
+        margin-bottom: 20px !important;
+        font-family: 'Noto Serif TC', serif !important;
+        opacity: 0.8 !important;
+    }
+
+    .bf-course__card-title {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 20px !important;
+        font-weight: 600 !important;
+        margin-bottom: 16px !important;
+        color: #5A4A42 !important;
+    }
+
+    .bf-course__card-desc {
+        font-size: 15px !important;
+        color: #887 !important;
+        line-height: 1.7 !important;
+    }
+
+    /* === SECTION 4: CTA === */
+    .bf-course__cta {
+        padding: 100px 0 !important;
+        text-align: center !important;
+        background: #5A4A42 !important;
+        color: #F5F1EB !important;
+    }
+
+    .bf-course__cta-text {
+        font-family: 'Noto Serif TC', serif !important;
+        font-size: 24px !important;
+        margin-bottom: 40px !important;
+        line-height: 1.6 !important;
+    }
+
+    .bf-course__btn {
+        display: inline-block !important;
+        padding: 16px 48px !important;
+        background: #F5F1EB !important;
+        color: #5A4A42 !important;
+        font-family: 'Noto Sans TC', sans-serif !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.1em !important;
+        border-radius: 50px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        border: 1px solid #F5F1EB !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    .bf-course__btn:hover {
+        background: transparent !important;
+        color: #F5F1EB !important;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+        .bf-course__title {
+            font-size: 42px !important;
+        }
+
+        .bf-course__slogan-wrap {
+            font-size: 16px !important;
+        }
+
+        .bf-course__circle {
+            width: 300px !important;
+            height: 300px !important;
+        }
+
+        .bf-course__philo-text {
+            font-size: 18px !important;
+            padding: 0 20px !important;
+        }
+
+        .bf-course__grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .bf-course__hero {
+            min-height: 70vh !important;
+            padding: 60px 0 !important;
+        }
+
+        .bf-course__cta-text {
+            font-size: 20px !important;
+        }
+    }
+</style>
+
+<div class="bf-course">
+
+    <!-- Hero -->
+    <div class="bf-course__hero">
+        <div class="bf-course__circle"></div>
+        <div class="bf-course__container">
+            <div class="bf-course__brand">BEARS FANTASYLAND</div>
+            <h1 class="bf-course__title">飛 熊 造 木 所</h1>
+            <div class="bf-course__slogan-wrap">
+                <span class="bf-course__slogan">讓木作成為你生活的創作語言</span>
+                <span class="bf-course__slogan">一所教你用雙手說故事的造木所</span>
+                <span class="bf-course__slogan">木頭的溫度，就是生活的溫度</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Philosophy -->
+    <div class="bf-course__philosophy">
+        <div class="bf-course__container">
+            <div class="bf-course__philo-text">
+                <span class="bf-course__philo-line">造木，是與自然的對話，</span><br>
+                <span class="bf-course__philo-line">也是對生活的重新編織。</span><br>
+                <br>
+                <span class="bf-course__philo-line">我們融合創造力與工藝精神，</span><br>
+                <span class="bf-course__philo-line">讓學習變得更輕鬆、更多元、更有溫度。</span><br>
+                <br>
+                <span class="bf-course__philo-line">如果你渴望在手作中找回生活節奏，</span><br>
+                <span class="bf-course__philo-line">這裡是一個讓你安心創作的造木場域。</span>
+            </div>
+            <div class="bf-course__divider"></div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="bf-course__features">
+        <div class="bf-course__container">
+            <div class="bf-course__grid">
+
+                <div class="bf-course__card">
+                    <div class="bf-course__card-icon">01.</div>
+                    <h3 class="bf-course__card-title">初學友善</h3>
+                    <p class="bf-course__card-desc">從零開始學會木作，無壓力入門。不需要任何基礎，只要有一顆想動手的心。</p>
+                </div>
+
+                <div class="bf-course__card">
+                    <div class="bf-course__card-icon">02.</div>
+                    <h3 class="bf-course__card-title">設計導向</h3>
+                    <p class="bf-course__card-desc">不只是做東西，更學習構圖、選材與風格設計，培養獨特的美學眼光。</p>
+                </div>
+
+                <div class="bf-course__card">
+                    <div class="bf-course__card-icon">03.</div>
+                    <h3 class="bf-course__card-title">工具操作</h3>
+                    <p class="bf-course__card-desc">了解常見手工具與安全操作技巧，在安全的環境下享受刨削木頭的樂趣。</p>
+                </div>
+
+                <div class="bf-course__card">
+                    <div class="bf-course__card-icon">04.</div>
+                    <h3 class="bf-course__card-title">成品製作</h3>
+                    <p class="bf-course__card-desc">親手打造實用美感兼具的木作作品，讓家裡的每一個角落都充滿手作溫度。</p>
+                </div>
+
+                <div class="bf-course__card">
+                    <div class="bf-course__card-icon">05.</div>
+                    <h3 class="bf-course__card-title">線上社群</h3>
+                    <p class="bf-course__card-desc">學員互動交流、作品回饋與導師指導，在創作的路上你並不孤單。</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="bf-course__cta">
+        <div class="bf-course__container">
+            <p class="bf-course__cta-text">
+                無論你是木工新手，或對設計充滿好奇。<br>
+                加入我們，一起從一片木頭開始，刻畫屬於你的創作語言。
+            </p>
+            <a href="#" class="bf-course__btn">立即報名課程</a>
+        </div>
+    </div>
+
+</div>

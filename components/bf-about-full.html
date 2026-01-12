@@ -1,0 +1,289 @@
+<!--
+    飛熊入夢 - 完整版「關於我們」頁面
+    適用於：WordPress Gutenberg「自訂 HTML」區塊
+    結構：品牌理念 -> 五大核心 -> 服務項目 (左右交錯佈局)
+    修正：手動控制圖片位置，確保圖片穩定顯示
+-->
+
+<style>
+    /* ============================================= */
+    /* ABOUT FULL PAGE - BEAR'S FANTASYLAND         */
+    /* ============================================= */
+
+    .bf-about-full {
+        background-color: #fff;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* 通用容器 */
+    .bf-about-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px;
+        display: flex;
+        align-items: center;
+        gap: 80px;
+    }
+
+    /* 全寬背景處理 (配合偶數段落) - 核心修正 */
+    .bf-about-full>.bf-section-wrapper:nth-child(even) {
+        background-color: #F9F7F5;
+        width: 100vw !important;
+        position: relative !important;
+        /* 使用 calc 動態計算，避免在已置中的父容器內位移過大 */
+        left: 50% !important;
+        margin-left: -50vw !important;
+        right: 50% !important;
+        margin-right: -50vw !important;
+        padding: 0;
+    }
+
+    .bf-about-full>.bf-section-wrapper:nth-child(even) .bf-about-section {
+        background-color: transparent;
+    }
+
+    /* 圖片區塊 */
+    .bf-about-img-wrap {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 0;
+        /* 防止 Flex 子元素溢出 */
+    }
+
+    .bf-mask-container {
+        width: 100%;
+        max-width: 500px;
+        aspect-ratio: 1.2 / 1;
+        position: relative;
+    }
+
+    .bf-about-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+
+        /* 預設: 經典尖頂 */
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M300 0 L600 120 V500 H0 V120 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M300 0 L600 120 V500 H0 V120 Z' fill='black'/%3E%3C/svg%3E");
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+    }
+
+    /* 文字區塊 */
+    .bf-about-text-wrap {
+        flex: 1.2;
+    }
+
+    .bf-about-category {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        color: #8A6754;
+        /* 品牌棕色 */
+        margin-bottom: 16px;
+        display: block;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .bf-about-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 30px;
+        line-height: 1.4;
+    }
+
+    .bf-about-desc {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 16px;
+        line-height: 2;
+        color: #666;
+        margin-bottom: 30px;
+        font-weight: 300;
+    }
+
+    .bf-about-desc p {
+        margin-bottom: 16px !important;
+    }
+
+    /* 列表樣式 */
+    .bf-about-list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .bf-about-list li {
+        position: relative;
+        padding-left: 24px;
+        margin-bottom: 12px;
+        font-size: 15px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .bf-about-list li::before {
+        content: "✦";
+        position: absolute;
+        left: 0;
+        color: #8A6754;
+        /* 品牌棕 */
+        font-size: 12px;
+        top: 4px;
+    }
+
+    /* ============================================= */
+    /* MASK VARIANTS (遮罩庫)                        */
+    /* ============================================= */
+    .mask-1-classic {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M300 0 L600 120 V500 H0 V120 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M300 0 L600 120 V500 H0 V120 Z' fill='black'/%3E%3C/svg%3E");
+    }
+
+    .mask-2-modern {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 L600 0 V500 H0 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 100 L600 0 V500 H0 Z' fill='black'/%3E%3C/svg%3E");
+    }
+
+    .mask-3-village {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M150 20 L300 100 L450 0 L600 100 V500 H0 V100 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M150 20 L300 100 L450 0 L600 100 V500 H0 V100 Z' fill='black'/%3E%3C/svg%3E");
+    }
+
+    .mask-4-chimney {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M450 40 V80 L600 140 V500 H0 V140 L300 20 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M450 40 V80 L600 140 V500 H0 V140 L300 20 Z' fill='black'/%3E%3C/svg%3E");
+    }
+
+    .mask-5-barn {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M150 0 L450 0 L600 120 V500 H0 V120 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M150 0 L450 0 L600 120 V500 H0 V120 Z' fill='black'/%3E%3C/svg%3E");
+    }
+
+    @media (max-width: 900px) {
+        .bf-about-section {
+            flex-direction: column !important;
+            /* 手機版一律垂直排列 */
+            gap: 40px;
+            text-align: left;
+        }
+
+        .bf-about-text-wrap {
+            padding: 0;
+            order: 2;
+            /* 手機版文字在下 */
+        }
+
+        .bf-about-img-wrap {
+            order: 1;
+            /* 手機版圖片在上 */
+        }
+
+        .bf-mask-container {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<div class="bf-about-full">
+
+    <!-- 1. 品牌理念 (圖片在右) -->
+    <div class="bf-section-wrapper">
+        <section class="bf-about-section">
+            <div class="bf-about-text-wrap">
+                <span class="bf-about-category">Brand Philosophy</span>
+                <h2 class="bf-about-title">匠心築家，<br>讓夢想落地為家的形狀</h2>
+                <div class="bf-about-desc">
+                    <p>飛熊入夢傢俱設計是一個以「Less is More」為核心精神的木作品牌，源自創辦人對德國建築大師 密斯·凡德羅 極簡哲學的深深著迷。</p>
+                    <p>品牌成立的初衷，是打造一個能聚集木作職人、設計師、工藝創作者的空間平台 —— 讓每一位充滿才華的人，都能在這裡發揮光芒、突破框架，創造專屬於自己的價值。</p>
+                </div>
+            </div>
+            <!-- 圖片在右 -->
+            <div class="bf-about-img-wrap">
+                <div class="bf-mask-container">
+                    <img src="https://a1.haotaimaker.com/wp-content/uploads/2026/01/bf-tech-cnc.jpg"
+                        class="bf-about-img mask-1-classic" alt="工坊環境">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 2. 五大核心 (圖片在左，背景微灰) -->
+    <div class="bf-section-wrapper">
+        <section class="bf-about-section">
+            <!-- 圖片改放到前面 (左邊) -->
+            <div class="bf-about-img-wrap">
+                <div class="bf-mask-container">
+                    <img src="https://a1.haotaimaker.com/wp-content/uploads/2026/01/ar_teak_chair.jpg"
+                        class="bf-about-img mask-3-village" alt="核心價值">
+                </div>
+            </div>
+            <div class="bf-about-text-wrap">
+                <span class="bf-about-category">Core Values</span>
+                <h2 class="bf-about-title">五大核心哲思</h2>
+                <ul class="bf-about-list">
+                    <li><strong>Less is More 的生活態度</strong>：化繁為簡、回到本質，讓家具融入生活，不喧嘩、不取代，而是陪伴。</li>
+                    <li><strong>工藝傳承 × 科技整合</strong>：結合百年木作工藝與 CNC/雷射 科技，追求手作溫度與現代精準度。</li>
+                    <li><strong>以人為核心的設計</strong>：從使用者需求出發，陪伴生活細節，提升家的幸福度。</li>
+                    <li><strong>材質誠實，質感誠懇</strong>：堅持選用胡桃木、白橡等穩定實木與天然塗裝。</li>
+                    <li><strong>SDGs 永續精神</strong>：提倡耐用這修復，推動「修復、再利用」計畫。</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- 3. 實木家具 & 空間規劃 (圖片在右) -->
+    <div class="bf-section-wrapper">
+        <section class="bf-about-section">
+            <div class="bf-about-text-wrap">
+                <span class="bf-about-category">Services I & II</span>
+                <h2 class="bf-about-title">實木家具訂製與<br>空間整體規劃</h2>
+                <div class="bf-about-desc">
+                    <p><strong>一、實木家具</strong><br>
+                        從餐桌椅、系統實木混搭、到豪宅家具整體規劃。每件作品皆依需求打造，從草圖 → 3D → 打樣 → 成品一條龍製作。</p>
+                    <p><strong>二、空間規劃｜室內裝修</strong><br>
+                        提供住家空間設計、店鋪展示規劃以及台中地區的現場丈量服務，打造充滿木質感的室內空間。</p>
+                </div>
+            </div>
+            <!-- 圖片在右 -->
+            <div class="bf-about-img-wrap">
+                <div class="bf-mask-container">
+                    <img src="https://a1.haotaimaker.com/wp-content/uploads/2026/01/bf-hero-workshop.jpg"
+                        class="bf-about-img mask-2-modern" alt="實木家具">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 4. 加工服務 & 課程 (圖片在左，背景微灰) -->
+    <div class="bf-section-wrapper">
+        <section class="bf-about-section">
+            <!-- 圖片改放到前面 (左邊) -->
+            <div class="bf-about-img-wrap">
+                <div class="bf-mask-container">
+                    <img src="https://a1.haotaimaker.com/wp-content/uploads/2026/01/bf-tech-cnc.jpg"
+                        class="bf-about-img mask-4-chimney" alt="加工與教學">
+                </div>
+            </div>
+            <div class="bf-about-text-wrap">
+                <span class="bf-about-category">Services III & IV</span>
+                <h2 class="bf-about-title">專業代工與教育傳承</h2>
+                <ul class="bf-about-list">
+                    <li><strong>木作加工服務</strong>：CNC 雕刻、雷射切割、大型板材整加工、小批量代工與設計打樣。適合設計師與品牌合作。</li>
+                    <li><strong>木工課程</strong>：從兒童手作到成人家具班，不僅教導製作，更讓工藝向下扎根。</li>
+                    <li><strong>企業合作 / 聯名計畫</strong>：公家單位木作課程、學校工藝教學、藝術家聯名製作。</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+</div>

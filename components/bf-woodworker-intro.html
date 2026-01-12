@@ -1,0 +1,179 @@
+<!--
+    飛熊入夢 - 木師介紹專欄組件
+    適用於：WordPress Gutenberg「自訂 HTML」區塊
+    風格：極簡置中，強調職人形象 (單人版)
+-->
+
+<style>
+    /* ============================================= */
+    /* WOODWORKER PROFILE COMPONENT                 */
+    /* ============================================= */
+
+    .bf-woodworker-section {
+        padding: 100px 0;
+        background-color: #fff;
+        width: 100%;
+        text-align: center;
+    }
+
+    .bf-woodworker-container {
+        max-width: 800px;
+        /* 縮減寬度以配合單人展示 */
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* 區塊標題 */
+    .bf-woodworker-header {
+        margin-bottom: 60px;
+    }
+
+    .bf-woodworker-subtitle {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 13px;
+        letter-spacing: 0.25em;
+        color: #8A6754;
+        /* 品牌棕 */
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+
+    .bf-woodworker-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 32px;
+        color: #333;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+    }
+
+    /* 木師佈局 (單人版 - 置中) */
+    .bf-woodworker-grid {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    /* 單個木師卡片 */
+    .bf-profile-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.4s ease;
+        max-width: 500px;
+        /* 限制內容寬度，提升閱讀感 */
+    }
+
+    .bf-profile-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* 圓形大頭照容器 */
+    .bf-profile-img-wrap {
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        /* 圓形 */
+        overflow: hidden;
+        margin-bottom: 32px;
+        border: 1px solid #eee;
+        position: relative;
+    }
+
+    /* 內圈裝飾線 (高級感) */
+    .bf-profile-img-wrap::after {
+        content: '';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .bf-profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+        filter: grayscale(20%);
+        /* 預設微降飽和度，質感加分 */
+    }
+
+    .bf-profile-card:hover .bf-profile-img {
+        transform: scale(1.05);
+        filter: grayscale(0%);
+    }
+
+    /* 文字內容 */
+    .bf-profile-role {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 13px;
+        letter-spacing: 0.15em;
+        color: #999;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    .bf-profile-name {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 28px;
+        /* 單人標題稍微加大 */
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 24px;
+        letter-spacing: 0.1em;
+    }
+
+    .bf-profile-divider {
+        width: 40px;
+        /* 稍微加長 */
+        height: 2px;
+        background-color: #8A6754;
+        margin-bottom: 24px;
+    }
+
+    .bf-profile-desc {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 16px;
+        /* 字體微調 */
+        line-height: 2;
+        color: #666;
+        font-weight: 300;
+    }
+</style>
+
+<section class="bf-woodworker-section">
+    <div class="bf-woodworker-container">
+
+        <div class="bf-woodworker-header">
+            <span class="bf-woodworker-subtitle">OUR MASTER CRAFTSMAN</span>
+            <h2 class="bf-woodworker-title">木師介紹</h2>
+        </div>
+
+        <div class="bf-woodworker-grid">
+
+            <!-- 木師 1 (保留左側) -->
+            <div class="bf-profile-card">
+                <div class="bf-profile-img-wrap">
+                    <!-- 圖片連結更新 -->
+                    <img src="https://a1.haotaimaker.com/wp-content/uploads/2026/01/imgi_19_mgxclr3yhmgjcdzwfhysstizzkyoth1symrtba-ow5guzltkljctb7m5ohukp7d-lt-0ctzfews176-c-k-c0x00ffffff-no-rj-mo.jpg"
+                        class="bf-profile-img" alt="張師傅">
+                </div>
+                <span class="bf-profile-role">Founder / Master Craftsman</span>
+                <h3 class="bf-profile-name">張 師傅</h3>
+                <div class="bf-profile-divider"></div>
+                <p class="bf-profile-desc">
+                    從事木作工藝超過三十年，堅持傳統榫接技法。<br>
+                    「手的記憶比腦更深刻，木頭的溫度騙不了人。」<br>
+                    專注於將時間的痕跡，刻畫在每一件作品之中。
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+</section>

@@ -1,0 +1,294 @@
+<!--
+    飛熊入夢 - 訂製洽詢組件
+    適用於：WordPress Gutenberg「自訂 HTML」區塊
+    風格：品牌金/棕色系 + 房屋形狀遮罩滑軌
+-->
+
+<style>
+    /* ============================================= */
+    /* INQUIRY SECTION - BEAR'S FANTASYLAND         */
+    /* ============================================= */
+
+    .bf-inquiry-section {
+        padding: 80px 0;
+        background-color: #fff;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .bf-inquiry-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        gap: 60px;
+    }
+
+    /* Left Content */
+    .bf-inquiry-content {
+        flex: 1;
+        padding-right: 20px;
+    }
+
+    .bf-inquiry-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 24px;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+    }
+
+    .bf-inquiry-title::before {
+        content: "【";
+        margin-right: 4px;
+    }
+
+    .bf-inquiry-title::after {
+        content: "】";
+        margin-left: 4px;
+    }
+
+    .bf-inquiry-intro {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 16px;
+        line-height: 1.8;
+        color: #666;
+        margin-bottom: 24px;
+    }
+
+    .bf-inquiry-intro p {
+        margin-bottom: 12px !important;
+    }
+
+    .bf-inquiry-cta {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 30px;
+        display: inline-block;
+    }
+
+    .bf-inquiry-cta span {
+        color: #8A6754;
+        /* 統一品牌棕色 */
+    }
+
+    .bf-inquiry-list-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #585858;
+        margin-bottom: 16px;
+    }
+
+    .bf-inquiry-list {
+        list-style: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .bf-inquiry-list li {
+        position: relative;
+        padding-left: 20px !important;
+        margin-bottom: 12px !important;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+        color: #777;
+        list-style: none !important;
+    }
+
+    .bf-inquiry-list li::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: #8A6754;
+        font-size: 18px;
+        line-height: 1.5;
+    }
+
+    /* Right Image Wrapper */
+    .bf-inquiry-image-wrapper {
+        flex: 1;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        aspect-ratio: 3/2;
+    }
+
+    .bf-image-slider-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        max-width: 600px;
+    }
+
+    .bf-inquiry-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        /* Opacity Transition */
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+
+        /* House Shape Mask */
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M300 0 L600 100 V400 H0 V100 Z' fill='black'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 600 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M300 0 L600 100 V400 H0 V100 Z' fill='black'/%3E%3C/svg%3E");
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .bf-inquiry-image.active {
+        opacity: 1;
+        z-index: 1;
+    }
+
+    .bf-inquiry-image.next {
+        z-index: 2;
+    }
+
+    /* Arrows styling */
+    .bf-arrow-prev,
+    .bf-arrow-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+    }
+
+    .bf-arrow-prev:hover,
+    .bf-arrow-next:hover {
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .bf-arrow-prev {
+        left: 10px;
+    }
+
+    .bf-arrow-next {
+        right: 10px;
+    }
+
+
+    @media (max-width: 900px) {
+        .bf-inquiry-container {
+            flex-direction: column-reverse;
+            gap: 40px;
+        }
+
+        .bf-inquiry-content {
+            padding-right: 0;
+        }
+    }
+</style>
+
+<section class="bf-inquiry-section">
+    <div class="bf-inquiry-container">
+        <!-- Text Content -->
+        <div class="bf-inquiry-content">
+            <h2 class="bf-inquiry-title">訂製洽詢</h2>
+
+            <div class="bf-inquiry-intro">
+                <p>飛熊入夢皆可依您家中的空間需求客製，</p>
+                <p>若您對家具有自己的想法希望實現，</p>
+                <p>歡迎提供草圖等相關資料，與我們討論製作的可行性。</p>
+                <p>我們樂意參與您想像家的過程，並提供專業的建議與協助!</p>
+            </div>
+
+            <div class="bf-inquiry-cta">
+                請加 ➤<span>LINE洽詢!</span>
+            </div>
+
+            <div class="bf-inquiry-list-section">
+                <h3 class="bf-inquiry-list-title">訂製注意事項</h3>
+                <ul class="bf-inquiry-list">
+                    <li>僅提供「家具類」客製服務</li>
+                    <li>訂製家具工期需依照訂購順序排隊，約1.5至3個月</li>
+                    <li>不接受仿製其他品牌之產品</li>
+                    <li>訂製大型家具需確認家中電梯、樓梯等搬運空間充足</li>
+                    <li>家具皆於工廠製作，非現場施工，除配合設計師整體規劃外，無現場丈量服務</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Image Content -->
+        <div class="bf-inquiry-image-wrapper">
+            <div class="bf-image-slider-container">
+                <img id="bf-inquiry-img-1"
+                    src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&amp;w=1740&amp;auto=format&amp;fit=crop"
+                    class="bf-inquiry-image active" alt="家具展示1">
+                <img id="bf-inquiry-img-2" src="" class="bf-inquiry-image next" alt="家具展示2">
+            </div>
+
+            <div class="bf-arrow-prev" onclick="bfInquiryChangeSlide(-1)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6"></path>
+                </svg>
+            </div>
+            <div class="bf-arrow-next" onclick="bfInquiryChangeSlide(1)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 18l6-6-6-6"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const bfInquiryImages = [
+            "https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?q=80&w=1740&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2000&auto=format&fit=crop"
+        ];
+
+        let bfCurrentIndex = 0;
+        let bfActiveId = 1;
+
+        window.bfInquiryChangeSlide = function (direction) {
+            bfCurrentIndex += direction;
+            if (bfCurrentIndex >= bfInquiryImages.length) bfCurrentIndex = 0;
+            if (bfCurrentIndex < 0) bfCurrentIndex = bfInquiryImages.length - 1;
+
+            const currentImg = document.getElementById(`bf-inquiry-img-${bfActiveId}`);
+            const nextId = bfActiveId === 1 ? 2 : 1;
+            const nextImg = document.getElementById(`bf-inquiry-img-${nextId}`);
+
+            nextImg.src = bfInquiryImages[bfCurrentIndex];
+            nextImg.onload = function () {
+                nextImg.classList.add('active');
+                nextImg.classList.remove('next');
+                currentImg.classList.remove('active');
+                currentImg.classList.add('next');
+                bfActiveId = nextId;
+            };
+        };
+    })();
+</script>

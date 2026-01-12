@@ -1,0 +1,281 @@
+<!-- ===== BF Quick View Modal - Hermès Elegance ===== -->
+<!-- 飛熊入夢 - 產品快速預覽彈窗 -->
+
+<style>
+    :root {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-brown-dark: #6d513f;
+        --bf-text: #3D3D3D;
+        --bf-text-light: #7A7A7A;
+        --bf-white: #FFFFFF;
+        /* Transitions */
+        --bf-transition-base: 0.3s ease;
+        --bf-transition-slow: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Modal Overlay */
+    .bf-qv-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--bf-transition-base);
+    }
+
+    .bf-qv-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Modal Container */
+    .bf-qv-container {
+        background: var(--bf-white);
+        width: 100%;
+        max-width: 1000px;
+        max-height: 90vh;
+        display: flex;
+        position: relative;
+        transform: scale(0.95) translateY(20px);
+        transition: all var(--bf-transition-slow);
+        overflow: hidden;
+    }
+
+    .bf-qv-overlay.active .bf-qv-container {
+        transform: scale(1) translateY(0);
+    }
+
+    /* Product Layout */
+    .bf-qv-gallery {
+        flex: 1.2;
+        background: var(--bf-cream);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bf-qv-gallery img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .bf-qv-details {
+        flex: 1;
+        padding: 60px 50px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Details Header */
+    .bf-qv-close {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 10px;
+        z-index: 10;
+        transition: opacity var(--bf-transition-base);
+    }
+
+    .bf-qv-close:hover {
+        opacity: 0.5;
+    }
+
+    .bf-qv-brand {
+        font-family: 'Playfair Display', serif;
+        font-size: 13px;
+        color: var(--bf-text-light);
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+
+    .bf-qv-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 28px;
+        color: var(--bf-brown);
+        font-weight: 600;
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+
+    .bf-qv-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 20px;
+        color: var(--bf-text);
+        margin-bottom: 35px;
+        border-bottom: 1px solid var(--bf-taupe);
+        padding-bottom: 25px;
+    }
+
+    /* Info Sections */
+    .bf-qv-info-group {
+        margin-bottom: 30px;
+    }
+
+    .bf-qv-label {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 11px;
+        color: var(--bf-text-light);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .bf-qv-desc {
+        font-size: 14px;
+        color: var(--bf-text);
+        line-height: 1.8;
+    }
+
+    .bf-qv-specs {
+        list-style: none;
+        padding: 0;
+    }
+
+    .bf-qv-specs li {
+        font-size: 13px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .bf-qv-specs li span:last-child {
+        color: var(--bf-text-light);
+    }
+
+    /* Actions */
+    .bf-qv-actions {
+        margin-top: auto;
+        display: flex;
+        gap: 15px;
+        padding-top: 40px;
+    }
+
+    .bf-qv-btn {
+        flex: 1;
+        background: var(--bf-brown);
+        color: var(--bf-white);
+        border: none;
+        padding: 18px;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background var(--bf-transition-base);
+    }
+
+    .bf-qv-btn:hover {
+        background: var(--bf-brown-dark);
+    }
+
+    .bf-qv-btn-outline {
+        background: transparent;
+        color: var(--bf-brown);
+        border: 1px solid var(--bf-brown);
+        flex: 0 0 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bf-qv-btn-outline:hover {
+        background: var(--bf-brown);
+        color: var(--bf-white);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+        .bf-qv-container {
+            flex-direction: column;
+            max-width: 500px;
+            height: 90vh;
+        }
+
+        .bf-qv-gallery {
+            flex: 0 0 40%;
+        }
+
+        .bf-qv-details {
+            padding: 40px;
+        }
+    }
+</style>
+
+<!-- 用於預覽的按鈕 -->
+<button onclick="document.getElementById('bfQuickView').classList.add('active')"
+    style="margin: 20px; padding: 10px 20px; cursor: pointer;">
+    Open Quick View Modal
+</button>
+
+<div class="bf-qv-overlay" id="bfQuickView" onclick="if(event.target === this) this.classList.remove('active')">
+    <div class="bf-qv-container">
+
+        <button class="bf-qv-close" onclick="document.getElementById('bfQuickView').classList.remove('active')">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 1L1 19" stroke="#3D3D3D" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M1 1L19 19" stroke="#3D3D3D" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+        </button>
+
+        <!-- Gallery -->
+        <div class="bf-qv-gallery">
+            <img src="../images/be_walnut_table.png" alt="Be 系列胡桃木長餐桌">
+        </div>
+
+        <!-- Details -->
+        <div class="bf-qv-details">
+            <span class="bf-qv-brand">Bear's Woodmaking Lab</span>
+            <h2 class="bf-qv-title">Be 系列 - 胡桃木長餐桌</h2>
+            <p class="bf-qv-price">NT$ 48,000</p>
+
+            <!-- Description -->
+            <div class="bf-qv-info-group">
+                <span class="bf-qv-label">產品描述</span>
+                <p class="bf-qv-desc">
+                    選用北美頂級胡桃木，由匠人手工打磨至溫潤絲滑。極簡的結構設計完美展現了天然木紋的延伸感，是餐廳空間中最引人注目的靈魂家具。
+                </p>
+            </div>
+
+            <!-- Specs -->
+            <div class="bf-qv-info-group">
+                <span class="bf-qv-label">規格參數</span>
+                <ul class="bf-qv-specs">
+                    <li><span>尺寸</span> <span>W220 x D90 x H75 cm</span></li>
+                    <li><span>材質</span> <span>北美黑胡桃木</span></li>
+                    <li><span>塗裝</span> <span>Osmo 天然木蠟油</span></li>
+                    <li><span>交期</span> <span>下單後 45-60 個工作日</span></li>
+                </ul>
+            </div>
+
+            <!-- Actions -->
+            <div class="bf-qv-actions">
+                <button class="bf-qv-btn">加入購物袋</button>
+                <button class="bf-qv-btn-outline" title="加入收藏">
+                    <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M10 17.5L8.55 16.18C3.4 11.5 0 8.42 0 4.5C0 1.98 1.98 0 4.5 0C5.92 0 7.28 0.66 8.16 1.7C9.04 0.66 10.4 0 11.82 0C14.34 0 16.32 1.98 16.32 4.5C16.32 8.42 12.92 11.5 7.77 16.18L10 17.5Z"
+                            stroke="#8A6754" stroke-width="1.5" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

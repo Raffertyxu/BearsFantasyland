@@ -1,0 +1,652 @@
+<!--
+    飛熊入夢 - 品牌形象頁面
+    適用於：WordPress Gutenberg「自訂 HTML」區塊
+    策略：Hero 全寬 + 其他區塊自然置中
+-->
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap');
+
+    /* ============================================= */
+    /* BASE RESET                                   */
+    /* ============================================= */
+    .bf-brand,
+    .bf-brand * {
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .bf-brand {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-brown-dark: #5A4A42;
+        --bf-text: #3D3D3D;
+        --bf-font-display: 'Noto Serif TC', serif;
+        --bf-font-body: 'Noto Sans TC', sans-serif;
+
+        font-family: var(--bf-font-body) !important;
+        color: var(--bf-text) !important;
+        line-height: 1.6 !important;
+        overflow-x: hidden !important;
+    }
+
+    /* 通用容器 - 自然置中 */
+    .bf-brand__container {
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        padding: 0 24px !important;
+    }
+
+    /* ============================================= */
+    /* HERO - 全寬突破                              */
+    /* ============================================= */
+    .bf-brand__hero {
+        position: relative !important;
+        width: 100vw !important;
+        left: 50% !important;
+        margin-left: -50vw !important;
+        height: 85vh !important;
+        min-height: 600px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        overflow: hidden !important;
+    }
+
+    .bf-brand__hero-bg {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 0 !important;
+    }
+
+    .bf-brand__hero-bg img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block !important;
+    }
+
+    .bf-brand__hero-overlay {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)) !important;
+    }
+
+    .bf-brand__hero-content {
+        position: relative !important;
+        z-index: 1 !important;
+        text-align: center !important;
+        color: #fff !important;
+        padding: 40px !important;
+    }
+
+    .bf-brand__hero-subtitle {
+        font-size: 14px !important;
+        letter-spacing: 0.4em !important;
+        text-transform: uppercase !important;
+        opacity: 0.8 !important;
+        margin-bottom: 24px !important;
+        font-weight: 500 !important;
+    }
+
+    .bf-brand__hero-title {
+        font-family: var(--bf-font-display) !important;
+        font-size: clamp(36px, 8vw, 80px) !important;
+        font-weight: 300 !important;
+        letter-spacing: 0.1em !important;
+        line-height: 1.3 !important;
+        margin-bottom: 40px !important;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .bf-brand__hero-line {
+        width: 1px !important;
+        height: 60px !important;
+        background: rgba(255, 255, 255, 0.5) !important;
+        margin: 0 auto !important;
+        animation: bf-pulse 2s ease-in-out infinite !important;
+    }
+
+    @keyframes bf-pulse {
+
+        0%,
+        100% {
+            height: 40px;
+            opacity: 0.5;
+        }
+
+        50% {
+            height: 60px;
+            opacity: 1;
+        }
+    }
+
+    /* ============================================= */
+    /* STORY - 自然置中                             */
+    /* ============================================= */
+    .bf-brand__story {
+        padding: 100px 24px !important;
+        background: #fff !important;
+    }
+
+    .bf-brand__story-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 2fr !important;
+        gap: 60px !important;
+        max-width: 1000px !important;
+        margin: 0 auto !important;
+        align-items: start !important;
+    }
+
+    .bf-brand__story-label {
+        font-family: var(--bf-font-display) !important;
+        font-size: 22px !important;
+        font-weight: 600 !important;
+        border-left: 3px solid var(--bf-brown) !important;
+        padding-left: 20px !important;
+        color: var(--bf-brown-dark) !important;
+    }
+
+    .bf-brand__story-text {
+        font-size: 17px !important;
+        line-height: 2.2 !important;
+        color: #666 !important;
+        font-weight: 300 !important;
+    }
+
+    .bf-brand__story-text p {
+        margin-bottom: 24px !important;
+    }
+
+    /* ============================================= */
+    /* PHILOSOPHY - 全寬背景 + 內容置中             */
+    /* ============================================= */
+    .bf-brand__philosophy {
+        position: relative !important;
+        width: 100vw !important;
+        left: 50% !important;
+        margin-left: -50vw !important;
+        padding: 100px 24px !important;
+        background: var(--bf-cream) !important;
+    }
+
+    .bf-brand__section-header {
+        text-align: center !important;
+        margin-bottom: 60px !important;
+    }
+
+    .bf-brand__section-tag {
+        font-size: 12px !important;
+        letter-spacing: 0.3em !important;
+        text-transform: uppercase !important;
+        color: var(--bf-brown) !important;
+        font-weight: 700 !important;
+        margin-bottom: 16px !important;
+        display: block !important;
+    }
+
+    .bf-brand__section-title {
+        font-family: var(--bf-font-display) !important;
+        font-size: clamp(28px, 4vw, 40px) !important;
+        font-weight: 300 !important;
+        letter-spacing: 0.15em !important;
+        color: var(--bf-brown-dark) !important;
+    }
+
+    .bf-brand__philosophy-grid {
+        display: grid !important;
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 24px !important;
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+    }
+
+    .bf-brand__philosophy-card {
+        background: rgba(255, 255, 255, 0.5) !important;
+        padding: 32px 24px !important;
+        border-radius: 4px !important;
+        transition: all 0.4s ease !important;
+        border: 1px solid transparent !important;
+        text-align: center !important;
+    }
+
+    .bf-brand__philosophy-card:hover {
+        background: #fff !important;
+        border-color: var(--bf-sand) !important;
+        transform: translateY(-5px) !important;
+        box-shadow: 0 15px 40px rgba(138, 103, 84, 0.1) !important;
+    }
+
+    .bf-brand__philosophy-icon {
+        font-size: 28px !important;
+        margin-bottom: 20px !important;
+        display: block !important;
+    }
+
+    .bf-brand__philosophy-title {
+        font-family: var(--bf-font-display) !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+        margin-bottom: 12px !important;
+        color: var(--bf-brown-dark) !important;
+    }
+
+    .bf-brand__philosophy-desc {
+        font-size: 14px !important;
+        color: #888 !important;
+        line-height: 1.8 !important;
+        font-weight: 300 !important;
+    }
+
+    /* ============================================= */
+    /* SERVICES - 自然置中                          */
+    /* ============================================= */
+    .bf-brand__services {
+        padding: 100px 24px !important;
+        background: #fff !important;
+    }
+
+    .bf-brand__services-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-end !important;
+        margin-bottom: 50px !important;
+        max-width: 1200px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding-bottom: 0 !important;
+        gap: 30px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .bf-brand__services-desc {
+        font-size: 14px !important;
+        color: #aaa !important;
+        max-width: 350px !important;
+    }
+
+    .bf-brand__services-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 24px !important;
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+    }
+
+    .bf-brand__service-card {
+        position: relative !important;
+        aspect-ratio: 16/10 !important;
+        overflow: hidden !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+        display: block !important;
+    }
+
+    .bf-brand__service-card img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        transition: transform 0.7s ease !important;
+        display: block !important;
+    }
+
+    .bf-brand__service-card:hover img {
+        transform: scale(1.08) !important;
+    }
+
+    .bf-brand__service-overlay {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 60%, transparent 100%) !important;
+    }
+
+    .bf-brand__service-content {
+        position: absolute !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        padding: 30px !important;
+        color: #fff !important;
+    }
+
+    .bf-brand__service-tag {
+        font-size: 11px !important;
+        letter-spacing: 0.2em !important;
+        text-transform: uppercase !important;
+        color: var(--bf-taupe) !important;
+        margin-bottom: 8px !important;
+        font-weight: 500 !important;
+        display: block !important;
+    }
+
+    .bf-brand__service-title {
+        font-family: var(--bf-font-display) !important;
+        font-size: clamp(20px, 3vw, 28px) !important;
+        font-weight: 400 !important;
+        letter-spacing: 0.05em !important;
+        margin-bottom: 16px !important;
+    }
+
+    .bf-brand__service-list {
+        font-size: 13px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        transition: all 0.5s ease !important;
+    }
+
+    .bf-brand__service-card:hover .bf-brand__service-list {
+        max-height: 100px !important;
+        opacity: 1 !important;
+    }
+
+    .bf-brand__service-list li {
+        margin-bottom: 6px !important;
+        list-style: none !important;
+    }
+
+    /* ============================================= */
+    /* TECH - 全寬背景 + 內容置中                   */
+    /* ============================================= */
+    .bf-brand__tech {
+        position: relative !important;
+        width: 100vw !important;
+        left: 50% !important;
+        margin-left: -50vw !important;
+        padding: 100px 24px !important;
+        background: var(--bf-cream) !important;
+    }
+
+    .bf-brand__tech-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 80px !important;
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        align-items: center !important;
+    }
+
+    .bf-brand__tech-content h3 {
+        font-family: var(--bf-font-display) !important;
+        font-size: 26px !important;
+        font-weight: 300 !important;
+        line-height: 1.8 !important;
+        margin-bottom: 30px !important;
+        color: var(--bf-brown-dark) !important;
+    }
+
+    .bf-brand__tech-content h3 strong {
+        font-weight: 600 !important;
+        border-bottom: 2px solid var(--bf-brown) !important;
+        padding-bottom: 2px !important;
+    }
+
+    .bf-brand__tech-content p {
+        font-size: 15px !important;
+        color: #777 !important;
+        line-height: 1.9 !important;
+        margin-bottom: 30px !important;
+        font-style: italic !important;
+        font-weight: 300 !important;
+    }
+
+    .bf-brand__tech-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.1em !important;
+        color: var(--bf-brown) !important;
+        text-decoration: none !important;
+        transition: transform 0.3s ease !important;
+    }
+
+    .bf-brand__tech-btn:hover {
+        transform: translateX(8px) !important;
+    }
+
+    .bf-brand__tech-images {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+    }
+
+    .bf-brand__tech-img {
+        border-radius: 4px !important;
+        overflow: hidden !important;
+        background: #f0f0f0 !important;
+    }
+
+    .bf-brand__tech-img:first-child {
+        margin-top: 50px !important;
+    }
+
+    .bf-brand__tech-img img {
+        width: 100% !important;
+        aspect-ratio: 1/1 !important;
+        object-fit: cover !important;
+        filter: grayscale(100%) !important;
+        transition: filter 0.5s ease !important;
+        display: block !important;
+    }
+
+    .bf-brand__tech-img:hover img {
+        filter: grayscale(0%) !important;
+    }
+
+    /* ============================================= */
+    /* RESPONSIVE                                   */
+    /* ============================================= */
+    @media (max-width: 1024px) {
+        .bf-brand__philosophy-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .bf-brand__story-grid {
+            grid-template-columns: 1fr !important;
+            gap: 30px !important;
+        }
+
+        .bf-brand__philosophy-grid {
+            grid-template-columns: 1fr 1fr !important;
+        }
+
+        .bf-brand__services-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .bf-brand__tech-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+        }
+
+        .bf-brand__tech-images {
+            order: -1 !important;
+        }
+
+        .bf-brand__hero {
+            height: 70vh !important;
+            min-height: 500px !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .bf-brand__philosophy-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+
+<div class="bf-brand">
+
+    <!-- Hero - 全寬 -->
+    <section class="bf-brand__hero">
+        <div class="bf-brand__hero-bg">
+            <img src="/wp-content/uploads/bf-hero-workshop.png" alt="飛熊入夢工作室">
+            <div class="bf-brand__hero-overlay"></div>
+        </div>
+        <div class="bf-brand__hero-content">
+            <p class="bf-brand__hero-subtitle">Bear's Fantasyland</p>
+            <h1 class="bf-brand__hero-title">匠心築家，<br>讓夢想落地。</h1>
+            <div class="bf-brand__hero-line"></div>
+        </div>
+    </section>
+
+    <!-- Story - 自然置中 -->
+    <section class="bf-brand__story">
+        <div class="bf-brand__story-grid">
+            <div>
+                <h3 class="bf-brand__story-label">品牌起源</h3>
+            </div>
+            <div class="bf-brand__story-text">
+                <p>飛熊入夢源自創辦人對密斯・凡德羅「Less is More」極簡哲學的著迷。我們相信家是回歸本質的地方，而家具則是生活的情感載體。</p>
+                <p>這裡不僅生產家具，更是一個聚集木作職人、設計師與藝術家的平台。讓每一位才華橫溢的創作者，都能在木香中發揮光芒，突破工藝框架。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy - 全寬背景 -->
+    <section class="bf-brand__philosophy">
+        <div class="bf-brand__section-header">
+            <span class="bf-brand__section-tag">Our Philosophy</span>
+            <h2 class="bf-brand__section-title">五大核心哲思</h2>
+        </div>
+        <div class="bf-brand__philosophy-grid">
+            <div class="bf-brand__philosophy-card">
+                <span class="bf-brand__philosophy-icon">🍃</span>
+                <h4 class="bf-brand__philosophy-title">Less is More</h4>
+                <p class="bf-brand__philosophy-desc">化繁為簡，讓家具融入生活，成為溫柔的陪伴。</p>
+            </div>
+            <div class="bf-brand__philosophy-card">
+                <span class="bf-brand__philosophy-icon">⚙️</span>
+                <h4 class="bf-brand__philosophy-title">工藝與科技</h4>
+                <p class="bf-brand__philosophy-desc">東方百年榫接與 CNC 數位加工的精準結合。</p>
+            </div>
+            <div class="bf-brand__philosophy-card">
+                <span class="bf-brand__philosophy-icon">👥</span>
+                <h4 class="bf-brand__philosophy-title">以人為核心</h4>
+                <p class="bf-brand__philosophy-desc">從使用者需求出發，提升每一天的居住幸福度。</p>
+            </div>
+            <div class="bf-brand__philosophy-card">
+                <span class="bf-brand__philosophy-icon">🌲</span>
+                <h4 class="bf-brand__philosophy-title">材質誠實</h4>
+                <p class="bf-brand__philosophy-desc">堅持選用穩定實木與天然塗裝，呈現木材感動。</p>
+            </div>
+            <div class="bf-brand__philosophy-card">
+                <span class="bf-brand__philosophy-icon">🔧</span>
+                <h4 class="bf-brand__philosophy-title">SDGs 永續</h4>
+                <p class="bf-brand__philosophy-desc">選用 FSC 合法木材與環保塗裝，推動修復計畫。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services - 自然置中 -->
+    <section class="bf-brand__services">
+        <div class="bf-brand__services-header">
+            <div>
+                <span class="bf-brand__section-tag">Capabilities</span>
+                <h2 class="bf-brand__section-title">專業服務與代工</h2>
+            </div>
+            <p class="bf-brand__services-desc">從草圖到成品，提供一條龍的木作整合服務，滿足屋主與專業創作者的需求。</p>
+        </div>
+        <div class="bf-brand__services-grid">
+            <div class="bf-brand__service-card">
+                <img src="/wp-content/uploads/bf-service-furniture.png" alt="實木家具訂製">
+                <div class="bf-brand__service-overlay"></div>
+                <div class="bf-brand__service-content">
+                    <span class="bf-brand__service-tag">Bespoke Furniture</span>
+                    <h4 class="bf-brand__service-title">實木家具訂製</h4>
+                    <ul class="bf-brand__service-list">
+                        <li>• 胡桃木餐桌椅設計</li>
+                        <li>• 系統實木混搭</li>
+                        <li>• 豪宅家具整體規劃</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bf-brand__service-card">
+                <img src="/wp-content/uploads/bf-service-space.png" alt="空間規劃設計">
+                <div class="bf-brand__service-overlay"></div>
+                <div class="bf-brand__service-content">
+                    <span class="bf-brand__service-tag">Space Design</span>
+                    <h4 class="bf-brand__service-title">空間規劃設計</h4>
+                    <ul class="bf-brand__service-list">
+                        <li>• 住家室內裝修</li>
+                        <li>• 店鋪展示空間規劃</li>
+                        <li>• 台中地區現場丈量</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bf-brand__service-card">
+                <img src="/wp-content/uploads/bf-service-cnc.png" alt="木作加工服務">
+                <div class="bf-brand__service-overlay"></div>
+                <div class="bf-brand__service-content">
+                    <span class="bf-brand__service-tag">Digital Fabrication</span>
+                    <h4 class="bf-brand__service-title">木作加工服務</h4>
+                    <ul class="bf-brand__service-list">
+                        <li>• CNC 造型切割</li>
+                        <li>• 雷射雕刻服務</li>
+                        <li>• 3D 建模加工整合</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="bf-brand__service-card">
+                <img src="/wp-content/uploads/bf-service-education.png" alt="木工教學課程">
+                <div class="bf-brand__service-overlay"></div>
+                <div class="bf-brand__service-content">
+                    <span class="bf-brand__service-tag">Education</span>
+                    <h4 class="bf-brand__service-title">木工教學課程</h4>
+                    <ul class="bf-brand__service-list">
+                        <li>• 成人家具入門班</li>
+                        <li>• 兒童木工手作</li>
+                        <li>• 企業團建活動</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech - 全寬背景 -->
+    <section class="bf-brand__tech">
+        <div class="bf-brand__tech-grid">
+            <div class="bf-brand__tech-content">
+                <h3>「在溫潤的手感背後，<br>是 <strong>數位工藝</strong> 的精準支援。」</h3>
+                <p>我們不只做傳統木工。我們導入先進 CNC 雕刻、雷射切割與 3D 建模服務，為建築師、設計師與品牌提供強大的技術支撐。</p>
+                <a href="#" class="bf-brand__tech-btn">了解專業代工流程 →</a>
+            </div>
+            <div class="bf-brand__tech-images">
+                <div class="bf-brand__tech-img">
+                    <img src="/wp-content/uploads/bf-tech-cnc.png" alt="CNC 加工">
+                </div>
+                <div class="bf-brand__tech-img">
+                    <img src="/wp-content/uploads/bf-tech-design.png" alt="設計">
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!--
+=====================================
+圖片上傳說明
+=====================================
+請將 images 資料夾內的圖片上傳到 WordPress 媒體庫：
+位置：C:\Users\user\浩太程式\BEARSFANTASYLAND\images\
+=====================================
+-->

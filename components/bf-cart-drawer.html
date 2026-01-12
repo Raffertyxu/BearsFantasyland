@@ -1,0 +1,372 @@
+<!-- ===== BF Cart Drawer - Minimalist Luxury ===== -->
+<!-- 飛熊入夢 - 側邊滑出購物車 -->
+
+<style>
+    :root {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-brown-dark: #6d513f;
+        --bf-text: #3D3D3D;
+        --bf-text-light: #7A7A7A;
+        --bf-white: #FFFFFF;
+        /* Transitions */
+        --bf-transition-base: 0.3s ease;
+        --bf-transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Overlay */
+    .bf-cart-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--bf-transition-base);
+    }
+
+    .bf-cart-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Drawer */
+    .bf-cart-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 480px;
+        background: var(--bf-white);
+        z-index: 1001;
+        transform: translateX(100%);
+        transition: transform var(--bf-transition-slow);
+        display: flex;
+        flex-direction: column;
+        box-shadow: -10px 0 50px rgba(0, 0, 0, 0.1);
+    }
+
+    .bf-cart-overlay.active .bf-cart-drawer {
+        transform: translateX(0);
+    }
+
+    /* Header */
+    .bf-cart-header {
+        padding: 30px 40px;
+        border-bottom: 1px solid var(--bf-taupe);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .bf-cart-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 20px;
+        color: var(--bf-text);
+        letter-spacing: 1px;
+    }
+
+    .bf-cart-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        transition: opacity var(--bf-transition-base);
+    }
+
+    .bf-cart-close:hover {
+        opacity: 0.6;
+    }
+
+    /* Content */
+    .bf-cart-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 40px;
+    }
+
+    /* Empty State */
+    .bf-cart-empty {
+        text-align: center;
+        padding-top: 60px;
+        display: none;
+        /* Toggle as needed */
+    }
+
+    .bf-cart-empty-text {
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 14px;
+        color: var(--bf-text-light);
+        margin-bottom: 30px;
+    }
+
+    /* Cart Items */
+    .bf-cart-items {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .bf-cart-item {
+        display: flex;
+        gap: 20px;
+    }
+
+    .bf-cart-item-image {
+        width: 100px;
+        aspect-ratio: 3 / 4;
+        background: var(--bf-cream);
+        overflow: hidden;
+    }
+
+    .bf-cart-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .bf-cart-item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .bf-cart-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .bf-cart-item-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 15px;
+        color: var(--bf-brown);
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    .bf-cart-item-specs {
+        font-size: 12px;
+        color: var(--bf-text-light);
+    }
+
+    .bf-cart-item-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 14px;
+        color: var(--bf-text);
+    }
+
+    .bf-cart-item-remove {
+        background: none;
+        border: none;
+        font-size: 11px;
+        color: var(--bf-text-light);
+        text-decoration: underline;
+        cursor: pointer;
+        transition: color var(--bf-transition-base);
+    }
+
+    .bf-cart-item-remove:hover {
+        color: var(--bf-brown);
+    }
+
+    .bf-cart-item-qty {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .bf-qty-btn {
+        width: 24px;
+        height: 24px;
+        border: 1px solid var(--bf-taupe);
+        background: none;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--bf-text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--bf-transition-base);
+    }
+
+    .bf-qty-btn:hover {
+        border-color: var(--bf-brown);
+        color: var(--bf-brown);
+    }
+
+    .bf-qty-val {
+        font-size: 13px;
+        font-family: 'Playfair Display', serif;
+    }
+
+    /* Footer */
+    .bf-cart-footer {
+        padding: 40px;
+        border-top: 1px solid var(--bf-taupe);
+        background: var(--bf-cream);
+    }
+
+    .bf-cart-summary {
+        margin-bottom: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .bf-summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+    }
+
+    .bf-summary-total {
+        margin-top: 10px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        font-family: 'Noto Serif TC', serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--bf-text);
+    }
+
+    .bf-cart-btn {
+        display: block;
+        width: 100%;
+        background: var(--bf-brown);
+        color: var(--bf-white);
+        border: none;
+        padding: 18px;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background var(--bf-transition-base);
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .bf-cart-btn:hover {
+        background: var(--bf-brown-dark);
+    }
+
+    .bf-cart-btn-secondary {
+        background: none;
+        color: var(--bf-brown);
+        border: 1px solid var(--bf-brown);
+        margin-top: 12px;
+    }
+
+    .bf-cart-btn-secondary:hover {
+        background: var(--bf-brown);
+        color: var(--bf-white);
+    }
+</style>
+
+<!-- 用於預覽的按鈕 (實際使用時由 JS 觸發) -->
+<button onclick="document.getElementById('bfCartOverlay').classList.add('active')"
+    style="margin: 20px; padding: 10px 20px; cursor: pointer;">
+    Open Cart Drawer
+</button>
+
+<div class="bf-cart-overlay" id="bfCartOverlay" onclick="if(event.target === this) this.classList.remove('active')">
+    <div class="bf-cart-drawer">
+        <header class="bf-cart-header">
+            <h2 class="bf-cart-title">購物袋 (3)</h2>
+            <button class="bf-cart-close" onclick="document.getElementById('bfCartOverlay').classList.remove('active')">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 1L1 13" stroke="#3D3D3D" stroke-width="1.2" stroke-linecap="round" />
+                    <path d="M1 1L13 13" stroke="#3D3D3D" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+            </button>
+        </header>
+
+        <div class="bf-cart-content">
+            <!-- Empty State (Hidden) -->
+            <div class="bf-cart-empty">
+                <p class="bf-cart-empty-text">您的購物袋目前是空的。</p>
+                <a href="#" class="bf-cart-btn">去逛逛</a>
+            </div>
+
+            <!-- Cart Items -->
+            <div class="bf-cart-items">
+
+                <!-- Item 1 -->
+                <div class="bf-cart-item">
+                    <div class="bf-cart-item-image">
+                        <img src="../images/ar_teak_chair.png" alt="Ar 系列餐椅">
+                    </div>
+                    <div class="bf-cart-item-info">
+                        <div class="bf-cart-item-header">
+                            <div>
+                                <h3 class="bf-cart-item-title">Ar 系列餐椅</h3>
+                                <p class="bf-cart-item-specs">材質: 頂級柚木 / 飾面: 自然油裝</p>
+                            </div>
+                            <button class="bf-cart-item-remove">移除</button>
+                        </div>
+                        <div class="bf-cart-item-qty">
+                            <span class="bf-cart-item-price">NT$ 15,800</span>
+                            <div style="flex: 1;"></div>
+                            <button class="bf-qty-btn">-</button>
+                            <span class="bf-qty-val">1</span>
+                            <button class="bf-qty-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Item 2 -->
+                <div class="bf-cart-item">
+                    <div class="bf-cart-item-image">
+                        <img src="../images/ch_oak_cabinet.png" alt="Ch 系列收納櫃">
+                    </div>
+                    <div class="bf-cart-item-info">
+                        <div class="bf-cart-item-header">
+                            <div>
+                                <h3 class="bf-cart-item-title">Ch 系列橡木邊櫃</h3>
+                                <p class="bf-cart-item-specs">材質: 白橡木 / 配件: 黃銅</p>
+                            </div>
+                            <button class="bf-cart-item-remove">移除</button>
+                        </div>
+                        <div class="bf-cart-item-qty">
+                            <span class="bf-cart-item-price">NT$ 32,500</span>
+                            <div style="flex: 1;"></div>
+                            <button class="bf-qty-btn">-</button>
+                            <span class="bf-qty-val">1</span>
+                            <button class="bf-qty-btn">+</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="bf-cart-footer">
+            <div class="bf-cart-summary">
+                <div class="bf-summary-row">
+                    <span>商品小計</span>
+                    <span>NT$ 48,300</span>
+                </div>
+                <div class="bf-summary-row">
+                    <span>運送費用</span>
+                    <span>免運費</span>
+                </div>
+                <div class="bf-summary-row bf-summary-total">
+                    <span>總計 (含稅)</span>
+                    <span>NT$ 48,300</span>
+                </div>
+            </div>
+
+            <a href="#" class="bf-cart-btn">前往結帳</a>
+            <a href="#" class="bf-cart-btn bf-cart-btn-secondary"
+                onclick="document.getElementById('bfCartOverlay').classList.remove('active')">繼續購物</a>
+        </footer>
+    </div>
+</div>

@@ -1,0 +1,335 @@
+<!-- ===== BF Product Grid - Hermès Gallery Layout ===== -->
+<!-- 飛熊入夢 - 產品展示網格 -->
+
+<style>
+    :root {
+        --bf-cream: #F5F1EB;
+        --bf-sand: #E6D9CC;
+        --bf-taupe: #C4A995;
+        --bf-brown: #8A6754;
+        --bf-text: #3D3D3D;
+        --bf-text-light: #7A7A7A;
+        --bf-white: #FFFFFF;
+        /* Transitions */
+        --bf-transition-base: 0.3s ease;
+        --bf-transition-slow: 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .bf-product-grid-section {
+        padding: 80px 0;
+        background-color: var(--bf-cream);
+    }
+
+    .bf-grid-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 40px;
+    }
+
+    .bf-grid-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 60px;
+        border-bottom: 1px solid var(--bf-taupe);
+        padding-bottom: 20px;
+    }
+
+    .bf-grid-title-group {
+        text-align: left;
+    }
+
+    .bf-grid-subtitle {
+        font-family: 'Playfair Display', serif;
+        font-size: 14px;
+        color: var(--bf-text-light);
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .bf-grid-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 32px;
+        color: var(--bf-text);
+        font-weight: 600;
+        letter-spacing: 1px;
+    }
+
+    .bf-grid-filter {
+        display: flex;
+        gap: 30px;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 13px;
+        color: var(--bf-text-light);
+    }
+
+    .bf-grid-filter-item {
+        cursor: pointer;
+        position: relative;
+        padding-bottom: 5px;
+        transition: color var(--bf-transition-base);
+    }
+
+    .bf-grid-filter-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background: var(--bf-brown);
+        transition: width var(--bf-transition-base);
+    }
+
+    .bf-grid-filter-item:hover,
+    .bf-grid-filter-item.active {
+        color: var(--bf-brown);
+    }
+
+    .bf-grid-filter-item.active::after {
+        width: 100%;
+    }
+
+    /* Grid Layout */
+    .bf-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 40px 30px;
+    }
+
+    /* Responsive Grid */
+    @media (max-width: 1200px) {
+        .bf-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 900px) {
+        .bf-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .bf-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .bf-grid-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .bf-grid-filter {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+    }
+
+    /* Inline Card Styles (Redundant but safe for snippet usage) */
+    .bf-product-card {
+        background: transparent;
+        cursor: pointer;
+        transition: transform var(--bf-transition-base);
+    }
+
+    .bf-product-card-image {
+        position: relative;
+        aspect-ratio: 3 / 4;
+        overflow: hidden;
+        background: var(--bf-sand);
+        margin-bottom: 24px;
+    }
+
+    .bf-product-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--bf-transition-slow);
+    }
+
+    .bf-product-card:hover .bf-product-card-image img {
+        transform: scale(1.05);
+    }
+
+    .bf-product-card-badge {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: var(--bf-white);
+        color: var(--bf-brown);
+        font-size: 10px;
+        padding: 6px 12px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        z-index: 2;
+    }
+
+    .bf-product-card-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--bf-transition-base);
+        z-index: 1;
+    }
+
+    .bf-product-card:hover .bf-product-card-overlay {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .bf-product-card-quick {
+        background: var(--bf-white);
+        color: var(--bf-brown);
+        border: none;
+        padding: 14px 28px;
+        font-size: 12px;
+        letter-spacing: 2px;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(15px);
+        transition: all 0.4s ease;
+    }
+
+    .bf-product-card:hover .bf-product-card-quick {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .bf-product-card-content {
+        text-align: left;
+    }
+
+    .bf-product-card-title {
+        font-family: 'Noto Serif TC', serif;
+        font-size: 16px;
+        color: var(--bf-brown);
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .bf-product-card-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 14px;
+        color: var(--bf-text);
+        letter-spacing: 1px;
+    }
+
+    .bf-product-card-tags {
+        margin-top: 12px;
+        display: flex;
+        gap: 12px;
+    }
+
+    .bf-product-card-tag {
+        font-size: 10px;
+        color: var(--bf-text-light);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+</style>
+
+<section class="bf-product-grid-section">
+    <div class="bf-grid-container">
+
+        <!-- Header -->
+        <header class="bf-grid-header">
+            <div class="bf-grid-title-group">
+                <span class="bf-grid-subtitle">Collection</span>
+                <h2 class="bf-grid-title">經典木作系列</h2>
+            </div>
+
+            <nav class="bf-grid-filter">
+                <span class="bf-grid-filter-item active">全部項目</span>
+                <span class="bf-grid-filter-item">單人椅</span>
+                <span class="bf-grid-filter-item">餐桌</span>
+                <span class="bf-grid-filter-item">收納櫃</span>
+            </nav>
+        </header>
+
+        <!-- Grid -->
+        <div class="bf-grid">
+
+            <!-- Card 1: Teak Chair -->
+            <div class="bf-product-card">
+                <div class="bf-product-card-image">
+                    <img src="../images/ar_teak_chair.png" alt="Ar 系列餐椅">
+                    <span class="bf-product-card-badge">New Arrival</span>
+                    <div class="bf-product-card-overlay">
+                        <button class="bf-product-card-quick">Quick View</button>
+                    </div>
+                </div>
+                <div class="bf-product-card-content">
+                    <h3 class="bf-product-card-title">Ar 系列 - 頂級柚木餐椅</h3>
+                    <p class="bf-product-card-price">NT$ 15,800</p>
+                    <div class="bf-product-card-tags">
+                        <span class="bf-product-card-tag">柚木</span>
+                        <span class="bf-product-card-tag">手工編織</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Walnut Table -->
+            <div class="bf-product-card">
+                <div class="bf-product-card-image">
+                    <img src="../images/be_walnut_table.png" alt="Be 系列餐桌">
+                    <div class="bf-product-card-overlay">
+                        <button class="bf-product-card-quick">Quick View</button>
+                    </div>
+                </div>
+                <div class="bf-product-card-content">
+                    <h3 class="bf-product-card-title">Be 系列 - 胡桃木長餐桌</h3>
+                    <p class="bf-product-card-price">NT$ 48,000</p>
+                    <div class="bf-product-card-tags">
+                        <span class="bf-product-card-tag">胡桃木</span>
+                        <span class="bf-product-card-tag">極簡主義</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Oak Cabinet -->
+            <div class="bf-product-card">
+                <div class="bf-product-card-image">
+                    <img src="../images/ch_oak_cabinet.png" alt="Ch 系列收納櫃">
+                    <span class="bf-product-card-badge">Featured</span>
+                    <div class="bf-product-card-overlay">
+                        <button class="bf-product-card-quick">Quick View</button>
+                    </div>
+                </div>
+                <div class="bf-product-card-content">
+                    <h3 class="bf-product-card-title">Ch 系列 - 橡木邊櫃</h3>
+                    <p class="bf-product-card-price">NT$ 32,500</p>
+                    <div class="bf-product-card-tags">
+                        <span class="bf-product-card-tag">橡木</span>
+                        <span class="bf-product-card-tag">黃銅件</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Lounge Chair -->
+            <div class="bf-product-card">
+                <div class="bf-product-card-image">
+                    <img src="../images/classic_lounge_chair.png" alt="Classic 休閒椅">
+                    <div class="bf-product-card-overlay">
+                        <button class="bf-product-card-quick">Quick View</button>
+                    </div>
+                </div>
+                <div class="bf-product-card-content">
+                    <h3 class="bf-product-card-title">Classic - 真皮休閒單椅</h3>
+                    <p class="bf-product-card-price">NT$ 28,000</p>
+                    <div class="bf-product-card-tags">
+                        <span class="bf-product-card-tag">白蠟木</span>
+                        <span class="bf-product-card-tag">義大利皮革</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

@@ -15,7 +15,7 @@
 ## 色彩系統 (Color Palette)
 
 | Token | Hex | 用途 |
-|-------|-----|------|
+| --- | --- | --- |
 | `--bf-cream` | `#F5F1EB` | 主背景、留白 |
 | `--bf-sand` | `#E6D9CC` | 次要背景、卡片 |
 | `--bf-taupe` | `#C4A995` | 邊框、分隔線 |
@@ -36,7 +36,7 @@
 ```
 
 | 層級 | 字型 | 字重 | 大小 | 用途 |
-|------|------|------|------|------|
+| --- | --- | --- | --- | --- |
 | H1 | Display | 700 | 48px | 頁面主標題 |
 | H2 | Display | 600 | 32px | 區塊標題 |
 | H3 | Body | 600 | 24px | 卡片標題 |
@@ -50,7 +50,7 @@
 ### 第一層 (Primary Navigation)
 
 | 項目 | 英文 | 類型 |
-|------|------|------|
+| --- | --- | --- |
 | 最新消息 | NEWS | 連結 |
 | 家具 | FURNITURE | Mega Menu |
 | 家居用品 | HOUSEHOLD ITEMS | Mega Menu |
@@ -62,19 +62,19 @@
 
 ### 第二層 (Dropdown Structure)
 
-**家具 / FURNITURE**
+#### 家具 / FURNITURE
 
 - Ar 系列
 - Be 系列  
 - Ch 系列
 - 經典系列
 
-**家居用品 / HOUSEHOLD ITEMS**
+#### 家居用品 / HOUSEHOLD ITEMS
 
 - 椅子
 - _(可擴充)_
 
-**飛熊造夢所 / Bear's Woodmaking Lab**
+#### 飛熊造夢所 / Bear's Woodmaking Lab
 
 - 飛熊入夢 YouTube 頻道
 - 木工旅程 | 課程總覽
@@ -144,7 +144,7 @@
 
 > 目標：**3 步內完成結帳**
 
-```
+```text
 [1] 瀏覽產品 → [2] 加入購物車 → [3] 結帳
 ```
 
@@ -160,7 +160,7 @@
 ## RWD 斷點 (Breakpoints)
 
 | 名稱 | 寬度 | 用途 |
-|------|------|------|
+| --- | --- | --- |
 | Mobile | < 768px | 單欄、漢堡選單 |
 | Tablet | 768px - 1024px | 兩欄 |
 | Desktop | > 1024px | 多欄、Mega Menu |
@@ -169,7 +169,7 @@
 
 ## 檔案結構 (建議)
 
-```
+```text
 BEARSFANTASYLAND/
 ├── components/           # UI 組件
 │   ├── header.html
@@ -188,10 +188,10 @@ BEARSFANTASYLAND/
 
 ## 待開發組件 (To-Do)
 
-- [ ] Header / Mega Menu
-- [ ] Hero Banner (大圖輪播)
-- [ ] Product Grid (產品列表)
-- [ ] Product Detail (產品詳情)
-- [ ] Cart Drawer (側邊購物車)
-- [ ] Footer
-- [ ] Quick View Modal
+- [x] Header / Mega Menu
+- [x] Hero Banner (大圖輪播)
+- [x] Product Grid (產品列表)
+- [x] Product Detail (產品詳情)
+- [x] Cart Drawer (側邊購物車)
+- [x] Footer
+- [x] Quick View Modal
