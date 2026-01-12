@@ -39,19 +39,29 @@ class BF_Shop {
     }
 
     /**
-     * 轉址 WooCommerce 商店頁面到自訂購物中心
+     * 轉址 WooCommerce 商店頁面和分類頁面到自訂購物中心
      */
     public function redirect_shop_page() {
         $options = $this->get_options();
         if (empty($options['redirect_to_page'])) return;
         
-        // 只在 WooCommerce 商店頁面時生效
+        $redirect_url = get_permalink($options['redirect_to_page']);
+        if (!$redirect_url) return;
+
+        // 商店頁面轉址
         if (function_exists('is_shop') && is_shop()) {
-            $redirect_url = get_permalink($options['redirect_to_page']);
-            if ($redirect_url) {
-                wp_redirect($redirect_url, 301);
-                exit;
+            wp_redirect($redirect_url, 301);
+            exit;
+        }
+
+        // 分類頁面轉址（帶上分類參數）
+        if (function_exists('is_product_category') && is_product_category()) {
+            $category = get_queried_object();
+            if ($category && isset($category->slug)) {
+                $redirect_url = add_query_arg('category', $category->slug, $redirect_url);
             }
+            wp_redirect($redirect_url, 301);
+            exit;
         }
     }
 
@@ -302,8 +312,12 @@ class BF_Shop {
         }
 
         $o = $this->get_options();
+        
+        // 支援從 URL 參數讀取分類（用於轉址）
+        $url_category = isset($_GET['category']) ? sanitize_text_field($_GET['category']) : '';
+        
         $atts = shortcode_atts(array(
-            'category' => '',
+            'category' => $url_category,
             'limit' => $o['products_per_page'],
             'columns' => $o['columns'],
             'orderby' => $o['default_orderby'],
@@ -825,10 +839,16 @@ class BF_Shop {
 <script>
 jQuery(document).ready(function($) {
     var ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
-    var currentCategory = '';
+    var currentCategory = '<?php echo esc_js($atts['category']); ?>';
     var currentOrderby = '<?php echo esc_js($atts['orderby']); ?>';
     var limit = <?php echo intval($atts['limit']); ?>;
     var currentProductId = 0;
+
+    // 如果有預設分類，高亮對應按鈕
+    if (currentCategory) {
+        $('.bfs-filter-btn').removeClass('active');
+        $('.bfs-filter-btn[data-category="' + currentCategory + '"]').addClass('active');
+    }
 
     // Filter by category
     $(document).on('click', '.bfs-filter-btn', function(e) {
