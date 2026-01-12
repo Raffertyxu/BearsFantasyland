@@ -33,6 +33,26 @@ class BF_Shop {
         add_action('wp_ajax_nopriv_bf_shop_filter', array($this, 'ajax_filter'));
         add_action('wp_ajax_bf_quick_view', array($this, 'ajax_quick_view'));
         add_action('wp_ajax_nopriv_bf_quick_view', array($this, 'ajax_quick_view'));
+
+        // Shop page redirect
+        add_action('template_redirect', array($this, 'redirect_shop_page'));
+    }
+
+    /**
+     * 轉址 WooCommerce 商店頁面到自訂購物中心
+     */
+    public function redirect_shop_page() {
+        $options = $this->get_options();
+        if (empty($options['redirect_to_page'])) return;
+        
+        // 只在 WooCommerce 商店頁面時生效
+        if (function_exists('is_shop') && is_shop()) {
+            $redirect_url = get_permalink($options['redirect_to_page']);
+            if ($redirect_url) {
+                wp_redirect($redirect_url, 301);
+                exit;
+            }
+        }
     }
 
     public function get_defaults() {
@@ -44,6 +64,7 @@ class BF_Shop {
             'show_sorting' => true,
             'show_quick_view' => true,
             'default_orderby' => 'date',
+            'redirect_to_page' => 0,
         );
     }
 
@@ -106,6 +127,19 @@ class BF_Shop {
                             <option value="price-desc" <?php selected($o['default_orderby'], 'price-desc'); ?>>價格高到低</option>
                             <option value="popularity" <?php selected($o['default_orderby'], 'popularity'); ?>>熱銷商品</option>
                         </select>
+                    </label>
+                </div>
+                <div class="card">
+                    <label><span>🔄 商店頁面轉址</span>
+                        <small style="display:block;color:#777;margin-bottom:8px;">當訪客進入 WooCommerce 商店頁面時，自動轉址到您選擇的頁面</small>
+                        <?php
+                        wp_dropdown_pages(array(
+                            'name' => $this->option_name . '[redirect_to_page]',
+                            'selected' => $o['redirect_to_page'] ?? 0,
+                            'show_option_none' => '— 不轉址 —',
+                            'option_none_value' => 0,
+                        ));
+                        ?>
                     </label>
                 </div>
                 <div class="card">
