@@ -323,7 +323,7 @@ class BF_Shop {
         ?>
 <style>
 /* ========== BF Shop Styles ========== */
-.bf-shop-wrap {
+:root {
     --bfs-brown: #8A6754;
     --bfs-brown-light: #A88B7A;
     --bfs-cream: #F9F7F5;
@@ -331,6 +331,9 @@ class BF_Shop {
     --bfs-text-light: #777777;
     --bfs-border: #E8E4E0;
     --bfs-white: #FFFFFF;
+}
+
+.bf-shop-wrap {
     font-family: 'Noto Sans TC', -apple-system, sans-serif;
     max-width: 1400px;
     margin: 0 auto;
