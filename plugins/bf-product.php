@@ -229,21 +229,20 @@ class BF_Product {
 }
 
 .woocommerce div.product div.images .woocommerce-product-gallery__wrapper {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
+    /* Don't override Flexslider display */
 }
 
-.woocommerce div.product div.images .woocommerce-product-gallery__image:first-child {
+.woocommerce div.product div.images .woocommerce-product-gallery__image {
     border-radius: 16px !important;
     overflow: hidden !important;
     background: var(--bfp-cream) !important;
 }
 
-.woocommerce div.product div.images .woocommerce-product-gallery__image:first-child img {
+.woocommerce div.product div.images .woocommerce-product-gallery__image img {
     width: 100% !important;
     height: auto !important;
     object-fit: cover !important;
+    border-radius: 16px !important;
 }
 
 .woocommerce div.product div.images .flex-control-thumbs {
