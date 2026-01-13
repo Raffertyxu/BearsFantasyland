@@ -60,6 +60,7 @@ function bf_hero_sanitize_banners($items) {
         if (!empty($item['image'])) {
             $sanitized[] = [
                 'image' => esc_url_raw($item['image']),
+                'image_mobile' => esc_url_raw($item['image_mobile'] ?? ''),
                 'url' => esc_url_raw($item['url'] ?? ''),
                 'title' => sanitize_text_field($item['title'] ?? ''),
                 'subtitle' => sanitize_text_field($item['subtitle'] ?? ''),
@@ -148,8 +149,10 @@ function bf_hero_settings_page() {
             width: 200px; height: 80px; background: #fff; border: 2px dashed #ccc;
             display: flex; align-items: center; justify-content: center; border-radius: 4px;
             overflow: hidden; flex-shrink: 0;
+            flex-direction: column; gap: 5px;
         }
         .bf-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .bf-preview-label { font-size: 10px; color: #999; width: 100%; text-align: center; background: #eee; padding: 2px 0; }
         .bf-preview-square { width: 80px; height: 80px; }
         .bf-fields { flex: 1; }
         .bf-field { margin-bottom: 12px; }
@@ -201,11 +204,14 @@ function bf_hero_settings_page() {
                 <?php settings_fields('bf_hero_options'); ?>
                 
                 <h2 class="bf-section-title">🖼️ Hero Banner 輪播</h2>
-                <p class="description">建議尺寸：<strong>1920 x 700 像素</strong>。每張 Banner 可設定文字位置（左下/右下/置中）</p>
+                <p class="description">
+                    電腦建議尺寸：<strong>1920 x 745 像素</strong> (約 2.58:1)<br>
+                    手機建議尺寸：<strong>1080 x 1080 像素</strong> (1:1 正方形)
+                </p>
                 
                 <div id="bf-banner-items">
                     <?php if (empty($banners)): ?>
-                    <?php $banners = [['image' => '', 'title' => '', 'subtitle' => '', 'btn_text' => '', 'url' => '', 'text_position' => 'center']]; ?>
+                    <?php $banners = [['image' => '', 'image_mobile' => '', 'title' => '', 'subtitle' => '', 'btn_text' => '', 'url' => '', 'text_position' => 'center']]; ?>
                     <?php endif; ?>
                     
                     <?php foreach ($banners as $index => $item): ?>
@@ -217,17 +223,29 @@ function bf_hero_settings_page() {
                         </div>
                         <div class="bf-item-content">
                             <div class="bf-preview bf-banner-preview">
+                                <div class="bf-preview-label">電腦版</div>
                                 <?php if (!empty($item['image'])): ?>
-                                    <img src="<?php echo esc_url($item['image']); ?>">
+                                    <img src="<?php echo esc_url($item['image']); ?>" style="height:60px;">
                                 <?php else: ?>
-                                    <span style="color:#999;">尚未選擇圖片</span>
+                                    <span style="color:#999;font-size:12px;">無圖片</span>
+                                <?php endif; ?>
+                                <div class="bf-preview-label" style="margin-top:5px;">手機版</div>
+                                <?php if (!empty($item['image_mobile'])): ?>
+                                    <img src="<?php echo esc_url($item['image_mobile']); ?>" style="height:60px;object-fit:contain;">
+                                <?php else: ?>
+                                    <span style="color:#999;font-size:12px;">同電腦版</span>
                                 <?php endif; ?>
                             </div>
                             <div class="bf-fields">
                                 <div class="bf-field">
-                                    <label>圖片網址</label>
+                                    <label>🖥️ 電腦版圖片 (1920 x 745)</label>
                                     <input type="url" name="bf_hero_banners[<?php echo $index; ?>][image]" value="<?php echo esc_attr($item['image'] ?? ''); ?>" class="bf-banner-image" placeholder="https://...">
-                                    <button type="button" class="button bf-upload-btn bf-upload-banner">📁 從媒體庫選擇</button>
+                                    <button type="button" class="button bf-upload-btn bf-upload-banner">📁 上傳電腦版圖片</button>
+                                </div>
+                                <div class="bf-field">
+                                    <label>📱 手機版圖片 (1080 x 1080)</label>
+                                    <input type="url" name="bf_hero_banners[<?php echo $index; ?>][image_mobile]" value="<?php echo esc_attr($item['image_mobile'] ?? ''); ?>" class="bf-banner-image-mobile" placeholder="https://... (留空則使用電腦版圖片)">
+                                    <button type="button" class="button bf-upload-btn bf-upload-banner-mobile">📁 上傳手機版圖片</button>
                                 </div>
                                 <div class="bf-field-row">
                                     <div class="bf-field">
@@ -358,6 +376,7 @@ function bf_hero_settings_page() {
                 $box.attr('data-index', i);
                 $box.find('.bf-banner-title').text('Banner #' + (i + 1));
                 $box.find('.bf-banner-image').attr('name', 'bf_hero_banners[' + i + '][image]');
+                $box.find('.bf-banner-image-mobile').attr('name', 'bf_hero_banners[' + i + '][image_mobile]');
                 $box.find('.bf-banner-url').attr('name', 'bf_hero_banners[' + i + '][url]');
                 $box.find('.bf-banner-field-title').attr('name', 'bf_hero_banners[' + i + '][title]');
                 $box.find('.bf-banner-field-subtitle').attr('name', 'bf_hero_banners[' + i + '][subtitle]');
@@ -387,12 +406,22 @@ function bf_hero_settings_page() {
                     <button type="button" class="bf-remove-btn bf-remove-banner">移除</button>
                 </div>
                 <div class="bf-item-content">
-                    <div class="bf-preview bf-banner-preview"><span style="color:#999;">尚未選擇圖片</span></div>
+                    <div class="bf-preview bf-banner-preview">
+                        <div class="bf-preview-label">電腦版</div>
+                        <span style="color:#999;font-size:12px;">無圖片</span>
+                        <div class="bf-preview-label" style="margin-top:5px;">手機版</div>
+                        <span style="color:#999;font-size:12px;">同電腦版</span>
+                    </div>
                     <div class="bf-fields">
                         <div class="bf-field">
-                            <label>圖片網址</label>
+                            <label>🖥️ 電腦版圖片 (1920 x 745)</label>
                             <input type="url" name="bf_hero_banners[${bannerIndex}][image]" class="bf-banner-image" placeholder="https://...">
-                            <button type="button" class="button bf-upload-btn bf-upload-banner">📁 從媒體庫選擇</button>
+                            <button type="button" class="button bf-upload-btn bf-upload-banner">📁 上傳電腦版圖片</button>
+                        </div>
+                        <div class="bf-field">
+                            <label>📱 手機版圖片 (1080 x 1080)</label>
+                            <input type="url" name="bf_hero_banners[${bannerIndex}][image_mobile]" class="bf-banner-image-mobile" placeholder="https://... (留空則使用電腦版圖片)">
+                            <button type="button" class="button bf-upload-btn bf-upload-banner-mobile">📁 上傳手機版圖片</button>
                         </div>
                         <div class="bf-field-row">
                             <div class="bf-field">
@@ -474,15 +503,32 @@ function bf_hero_settings_page() {
         });
         
         function bindUploadButtons() {
+            // Desktop Banner Upload
             $('.bf-upload-banner').off('click').on('click', function(e) {
                 e.preventDefault();
                 var $btn = $(this), $input = $btn.siblings('.bf-banner-image');
-                var $preview = $btn.closest('.bf-item-content').find('.bf-banner-preview');
-                var frame = wp.media({ title: '選擇 Banner 圖片', button: { text: '使用此圖片' }, multiple: false });
+                var $previewImg = $btn.closest('.bf-item-content').find('.bf-banner-preview img').first();
+                // Check if img exists, if not create placeholder if logic needed, but simpler to just reload page or use simple replace
+                // Let's use flexible selector
+                var frame = wp.media({ title: '選擇電腦版圖片', button: { text: '使用此圖片' }, multiple: false });
                 frame.on('select', function() {
                     var url = frame.state().get('selection').first().toJSON().url;
                     $input.val(url);
-                    $preview.html('<img src="' + url + '">');
+                    // Preview update logic is a bit complex with two images, simpler to just trigger change
+                    $input.trigger('change');
+                });
+                frame.open();
+            });
+
+            // Mobile Banner Upload
+            $('.bf-upload-banner-mobile').off('click').on('click', function(e) {
+                e.preventDefault();
+                var $btn = $(this), $input = $btn.siblings('.bf-banner-image-mobile');
+                var frame = wp.media({ title: '選擇手機版圖片', button: { text: '使用此圖片' }, multiple: false });
+                frame.on('select', function() {
+                    var url = frame.state().get('selection').first().toJSON().url;
+                    $input.val(url);
+                    $input.trigger('change');
                 });
                 frame.open();
             });
@@ -501,9 +547,18 @@ function bf_hero_settings_page() {
             });
         }
         
-        $(document).on('change', '.bf-banner-image', function() {
-            var url = $(this).val();
-            $(this).closest('.bf-item-content').find('.bf-banner-preview').html(url ? '<img src="' + url + '">' : '<span style="color:#999;">尚未選擇圖片</span>');
+        // Update Preview
+        $(document).on('change', '.bf-banner-image, .bf-banner-image-mobile', function() {
+            var $box = $(this).closest('.bf-item-content');
+            var deskUrl = $box.find('.bf-banner-image').val();
+            var mobUrl = $box.find('.bf-banner-image-mobile').val();
+            
+            var html = '<div class="bf-preview-label">電腦版</div>';
+            html += deskUrl ? '<img src="' + deskUrl + '" style="height:60px;">' : '<span style="color:#999;font-size:12px;">無圖片</span>';
+            html += '<div class="bf-preview-label" style="margin-top:5px;">手機版</div>';
+            html += mobUrl ? '<img src="' + mobUrl + '" style="height:60px;object-fit:contain;">' : '<span style="color:#999;font-size:12px;">同電腦版</span>';
+            
+            $box.find('.bf-banner-preview').html(html);
         });
         
         $(document).on('change', '.bf-cat-image', function() {
@@ -533,7 +588,7 @@ function bf_hero_frontend_css() {
         font-family: var(--bf-font-body);
     }
     
-    .bf-banner-slider { position: relative; width: 100%; overflow: hidden; aspect-ratio: 1920 / 700; }
+    .bf-banner-slider { position: relative; width: 100%; overflow: hidden; aspect-ratio: 1920 / 745; }
     .bf-banner-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); height: 100%; }
     .bf-banner-slide { min-width: 100%; height: 100%; position: relative; }
     .bf-banner-slide img { width: 100%; height: 100%; object-fit: cover; }
@@ -547,7 +602,9 @@ function bf_hero_frontend_css() {
         padding: 40px 60px;
         color: #fff;
         text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        pointer-events: none; /* 讓點擊穿透到圖片連結 */
     }
+    .bf-banner-overlay a { pointer-events: auto; } /* 按鈕恢復點擊 */
     
     /* Position Variants */
     .bf-banner-overlay--center {
@@ -636,12 +693,172 @@ function bf_hero_frontend_css() {
     .bf-category-thumb img { width: 100%; height: 100%; object-fit: cover; }
     .bf-category-name { font-size: 13px; font-weight: 500; white-space: nowrap; }
     
+    /* ========== TABLET ========== */
+    @media (max-width: 1024px) {
+        .bf-banner-overlay { padding: 40px; }
+        .bf-banner-overlay--left, .bf-banner-overlay--right { padding-bottom: 70px; }
+        .bf-banner-arrow { width: 40px; font-size: 28px; }
+    }
+    
+    /* ========== MOBILE ========== */
     @media (max-width: 768px) {
-        .bf-banner-slider { aspect-ratio: 16/9; }
-        .bf-banner-overlay { padding: 30px; }
-        .bf-banner-overlay--left, .bf-banner-overlay--right { padding-bottom: 60px; }
-        .bf-banner-arrow { width: 35px; font-size: 24px; }
-        .bf-category-grid { justify-content: flex-start; padding: 0 10px; }
+        /* Mobile: 1:1 Square Ratio */
+        .bf-banner-slider { 
+            aspect-ratio: 1 / 1 !important;
+            height: auto !important;
+            min-height: unset !important;
+            max-height: unset !important;
+        }
+        
+        .bf-banner-slide img {
+            object-position: center;
+        }
+        
+        /* 文字覆蓋層 - 確保在底部 */
+        .bf-banner-overlay { 
+            position: absolute !important;
+            top: auto !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: auto !important;
+            padding: 20px 20px 40px !important;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: flex-end !important;
+        }
+        
+        /* 保留左/中/右位置設定 */
+        .bf-banner-overlay--center { 
+            align-items: center !important;
+            text-align: center !important;
+        }
+        
+        .bf-banner-overlay--left { 
+            align-items: flex-start !important;
+            text-align: left !important;
+            padding-left: 20px !important;
+        }
+        
+        .bf-banner-overlay--right { 
+            align-items: flex-end !important;
+            text-align: right !important;
+            padding-right: 20px !important;
+        }
+        
+        .bf-banner-overlay-title {
+            font-size: 22px !important;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .bf-banner-overlay-subtitle {
+            font-size: 14px !important;
+            margin-bottom: 16px;
+            opacity: 0.95;
+        }
+        
+        .bf-banner-overlay-subtitle::before {
+            display: none !important;
+        }
+        
+        .bf-banner-overlay-btn {
+            padding: 12px 28px;
+            font-size: 13px;
+        }
+        
+        /* 箭頭 */
+        .bf-banner-arrow { 
+            width: 36px; 
+            height: 60px;
+            font-size: 22px; 
+            opacity: 0.7;
+        }
+        .bf-banner-prev { left: 5px; }
+        .bf-banner-next { right: 5px; }
+        
+        /* 圓點 */
+        .bf-banner-dots { 
+            bottom: 12px; 
+            gap: 10px; 
+        }
+        .bf-banner-dot { 
+            width: 10px; 
+            height: 10px; 
+        }
+        
+        /* 類別列表 */
+        .bf-category-bar { 
+            padding: 20px 12px; 
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .bf-category-grid { 
+            justify-content: flex-start; 
+            gap: 20px;
+            padding: 0 8px;
+            flex-wrap: nowrap;
+        }
+        
+        .bf-category-item {
+            flex: 0 0 auto;
+        }
+        
+        .bf-category-thumb { 
+            width: 65px; 
+            height: 65px; 
+            margin-bottom: 8px;
+        }
+        
+        .bf-category-name { 
+            font-size: 12px; 
+        }
+    }
+    
+    /* ========== SMALL MOBILE ========== */
+    @media (max-width: 480px) {
+        .bf-banner-slider { 
+            height: 55vh;
+            min-height: 280px;
+            max-height: 400px;
+        }
+        
+        .bf-banner-overlay {
+            padding: 50px 16px 25px !important;
+        }
+        
+        .bf-banner-overlay-title {
+            font-size: 20px !important;
+        }
+        
+        .bf-banner-overlay-subtitle {
+            font-size: 13px !important;
+        }
+        
+        .bf-banner-overlay-btn {
+            padding: 10px 24px;
+            font-size: 12px;
+        }
+        
+        .bf-banner-arrow {
+            display: none;
+        }
+        
+        .bf-category-grid { 
+            gap: 16px;
+        }
+        
+        .bf-category-thumb { 
+            width: 55px; 
+            height: 55px; 
+        }
+        
+        .bf-category-name { 
+            font-size: 11px; 
+        }
     }
     ';
 }
@@ -696,7 +913,12 @@ function bf_render_banner() {
                     <a href="<?php echo esc_url($banner['url']); ?>">
                 <?php endif; ?>
                 
-                <img src="<?php echo esc_url($banner['image']); ?>" alt="<?php echo esc_attr($banner['title'] ?? ''); ?>">
+                <picture>
+                    <?php if (!empty($banner['image_mobile'])): ?>
+                        <source media="(max-width: 768px)" srcset="<?php echo esc_url($banner['image_mobile']); ?>">
+                    <?php endif; ?>
+                    <img src="<?php echo esc_url($banner['image']); ?>" alt="<?php echo esc_attr($banner['title'] ?? ''); ?>">
+                </picture>
                 
                 <?php if ($has_overlay): ?>
                 <div class="bf-banner-overlay bf-banner-overlay--<?php echo esc_attr($position); ?>">
@@ -762,6 +984,23 @@ function bf_render_banner() {
         dots.forEach(function(d) { d.addEventListener('click', function() { go(parseInt(this.dataset.index)); reset(); }); });
         c.addEventListener('mouseenter', function() { clearInterval(timer); });
         c.addEventListener('mouseleave', start);
+        
+        // Touch swipe support
+        var touchStartX = 0, touchEndX = 0;
+        track.addEventListener('touchstart', function(e) { 
+            touchStartX = e.changedTouches[0].screenX; 
+            clearInterval(timer);
+        }, { passive: true });
+        track.addEventListener('touchend', function(e) { 
+            touchEndX = e.changedTouches[0].screenX;
+            var diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) { // Min swipe distance
+                if (diff > 0) go(current + 1); // Swipe left
+                else go(current - 1); // Swipe right
+            }
+            reset();
+        }, { passive: true });
+        
         start();
     })();
     </script>
