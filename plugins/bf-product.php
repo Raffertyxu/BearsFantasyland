@@ -222,14 +222,7 @@ class BF_Product {
         padding: 20px 16px !important;
     }
     
-    .woocommerce div.product div.images {
-        max-width: 100% !important;
-    }
-    
-    .woocommerce div.product div.images img {
-        max-width: 100% !important;
-        height: auto !important;
-    }
+    /* 圖片使用 WooCommerce 原生處理 */
     
     .woocommerce div.product .product_title {
         font-size: 24px !important;
@@ -268,35 +261,9 @@ class BF_Product {
     }
 }
 
-/* Gallery Styles */
+/* Gallery Styles - 使用 WooCommerce 原生圖片處理 */
 .woocommerce div.product div.images {
     position: relative !important;
-    max-width: 600px !important;
-    margin: 0 auto !important;
-}
-
-.woocommerce div.product div.images .woocommerce-product-gallery {
-    max-width: 100% !important;
-}
-
-.woocommerce div.product div.images .woocommerce-product-gallery__wrapper {
-    /* Don't override Flexslider display */
-}
-
-.woocommerce div.product div.images .woocommerce-product-gallery__image {
-    border-radius: 16px !important;
-    overflow: hidden !important;
-    background: var(--bfp-cream) !important;
-    max-width: 100% !important;
-}
-
-.woocommerce div.product div.images .woocommerce-product-gallery__image img {
-    width: 100% !important;
-    max-width: 600px !important;
-    height: auto !important;
-    object-fit: cover !important;
-    border-radius: 16px !important;
-}
 }
 
 .woocommerce div.product div.images .flex-control-thumbs {
