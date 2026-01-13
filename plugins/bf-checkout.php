@@ -123,9 +123,14 @@ class BF_Checkout {
     border: none;
     border-left: 4px solid var(--bfck-brown);
     border-radius: 12px;
-    padding: 18px 24px;
+    padding: 18px 24px 18px 32px;
     margin-bottom: 24px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+/* 隱藏原生 icon */
+.woocommerce-checkout .woocommerce-info::before {
+    display: none !important;
 }
 
 .woocommerce-checkout .woocommerce-info a {
