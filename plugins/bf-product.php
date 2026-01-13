@@ -218,8 +218,53 @@ class BF_Product {
 @media (max-width: 900px) {
     .woocommerce div.product {
         grid-template-columns: 1fr !important;
-        gap: 40px !important;
-        padding: 30px 20px !important;
+        gap: 30px !important;
+        padding: 20px 16px !important;
+    }
+    
+    .woocommerce div.product div.images {
+        max-width: 100% !important;
+    }
+    
+    .woocommerce div.product div.images img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    .woocommerce div.product .product_title {
+        font-size: 24px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .woocommerce div.product p.price,
+    .woocommerce div.product span.price {
+        font-size: 22px !important;
+        margin-bottom: 16px !important;
+    }
+    
+    .woocommerce div.product form.cart {
+        flex-direction: column !important;
+        gap: 12px !important;
+    }
+    
+    .woocommerce div.product form.cart .quantity {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+    
+    .woocommerce div.product form.cart button.single_add_to_cart_button {
+        width: 100% !important;
+        padding: 16px !important;
+    }
+    
+    .woocommerce div.product div.images .flex-control-thumbs li {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .woocommerce div.product .woocommerce-tabs ul.tabs li a {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
     }
 }
 
