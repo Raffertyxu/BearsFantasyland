@@ -139,6 +139,16 @@ class BF_Checkout {
     border-radius: 20px;
     padding: 40px;
     box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+    display: block !important;
+}
+
+/* 強制單欄佈局 */
+.woocommerce-checkout #customer_details,
+.woocommerce-checkout #order_review_heading,
+.woocommerce-checkout #order_review {
+    width: 100% !important;
+    float: none !important;
+    clear: both !important;
 }
 
 /* 區塊標題 */
@@ -224,9 +234,16 @@ class BF_Checkout {
 
 .woocommerce-checkout .select2-container--default .select2-selection--single {
     height: auto !important;
-    padding: 10px 14px !important;
+    padding: 12px 40px 12px 16px !important;
     border: 2px solid var(--bfck-border) !important;
     border-radius: 10px !important;
+    overflow: visible !important;
+}
+
+.woocommerce-checkout .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100% !important;
+    right: 12px !important;
+    top: 0 !important;
 }
 
 /* Checkbox/Radio */
