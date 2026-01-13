@@ -200,9 +200,29 @@ class BF_Product {
     max-width: 1400px !important;
     margin: 0 auto !important;
     padding: 40px 20px !important;
+    overflow: hidden !important;
 }
 
-/* 不干預圖片區和佈局 - 使用 WooCommerce 原生 */
+/* 強制圖片容器和圖片不超出螢幕寬度 */
+.woocommerce div.product div.images,
+.woocommerce div.product div.images *,
+.woocommerce-product-gallery,
+.woocommerce-product-gallery *,
+.flex-viewport,
+.woocommerce-product-gallery__wrapper,
+.woocommerce-product-gallery__image {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+.woocommerce div.product div.images img,
+.woocommerce-product-gallery__image img {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* 不干預佈局 - 使用 WooCommerce 原生 */
 
 @media (max-width: 768px) {
     .woocommerce div.product {
