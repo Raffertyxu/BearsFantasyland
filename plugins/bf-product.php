@@ -197,28 +197,15 @@ class BF_Product {
 /* Reset WooCommerce defaults */
 .woocommerce div.product {
     font-family: 'Noto Sans TC', -apple-system, sans-serif !important;
-}
-
-/* Product Container */
-.woocommerce div.product div.images,
-.woocommerce div.product div.summary {
-    float: none !important;
-    width: 100% !important;
-}
-
-.woocommerce div.product {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 60px !important;
     max-width: 1400px !important;
     margin: 0 auto !important;
-    padding: 60px 40px !important;
+    padding: 40px 20px !important;
 }
 
-@media (max-width: 900px) {
+/* 不干預圖片區和佈局 - 使用 WooCommerce 原生 */
+
+@media (max-width: 768px) {
     .woocommerce div.product {
-        grid-template-columns: 1fr !important;
-        gap: 30px !important;
         padding: 20px 16px !important;
     }
     
