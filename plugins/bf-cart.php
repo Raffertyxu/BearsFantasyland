@@ -589,15 +589,28 @@ class BF_Cart {
 jQuery(document).ready(function($) {
     var ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
-    // 數量按鈕
-    $('.woocommerce-cart .quantity').each(function() {
-        var $qty = $(this);
-        var $input = $qty.find('.qty');
-        
-        if (!$qty.find('.bfc-qty-btn').length) {
+    // 添加數量按鈕的函數
+    function addQtyButtons() {
+        $('.woocommerce-cart .quantity').each(function() {
+            var $qty = $(this);
+            var $input = $qty.find('.qty');
+            
+            // 移除舊的按鈕避免重複
+            $qty.find('.bfc-qty-btn').remove();
+            
+            // 添加新按鈕
             $qty.prepend('<button type="button" class="bfc-qty-btn bfc-qty-minus">−</button>');
             $qty.append('<button type="button" class="bfc-qty-btn bfc-qty-plus">+</button>');
-        }
+        });
+    }
+
+    // 頁面載入時添加
+    addQtyButtons();
+
+    // WooCommerce 更新購物車後重新添加
+    $(document.body).on('updated_cart_totals', function() {
+        addQtyButtons();
+        console.log('Cart updated, buttons re-added');
     });
 
     // 數量增減
