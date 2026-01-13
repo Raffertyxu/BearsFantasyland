@@ -30,6 +30,49 @@ class BF_Product {
         // 覆蓋商品頁模板
         add_filter('woocommerce_locate_template', array($this, 'override_template'), 10, 3);
         add_action('wp_enqueue_scripts', array($this, 'enqueue_styles'));
+
+        // AJAX 加入購物車
+        add_action('wp_ajax_bf_product_add_to_cart', array($this, 'ajax_add_to_cart'));
+        add_action('wp_ajax_nopriv_bf_product_add_to_cart', array($this, 'ajax_add_to_cart'));
+    }
+
+    /**
+     * AJAX 加入購物車
+     */
+    public function ajax_add_to_cart() {
+        $product_id = intval($_POST['product_id'] ?? 0);
+        $quantity = intval($_POST['quantity'] ?? 1);
+        $variation_id = intval($_POST['variation_id'] ?? 0);
+
+        if (!$product_id) {
+            wp_send_json_error(array('message' => 'Invalid product'));
+        }
+
+        // 加入購物車
+        if ($variation_id) {
+            $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id);
+        } else {
+            $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity);
+        }
+
+        if ($cart_item_key) {
+            // 取得更新後的 fragments
+            ob_start();
+            woocommerce_mini_cart();
+            $mini_cart = ob_get_clean();
+
+            $fragments = apply_filters('woocommerce_add_to_cart_fragments', array(
+                'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
+            ));
+
+            wp_send_json_success(array(
+                'fragments' => $fragments,
+                'cart_hash' => WC()->cart->get_cart_hash(),
+                'cart_count' => WC()->cart->get_cart_contents_count(),
+            ));
+        } else {
+            wp_send_json_error(array('message' => 'Could not add to cart'));
+        }
     }
 
     public function get_defaults() {
@@ -620,15 +663,57 @@ class BF_Product {
         ?>
 <script>
 jQuery(document).ready(function($) {
-    // 加入購物車後開啟 Fly Cart
+    // AJAX 加入購物車（防止頁面跳轉）
     $('form.cart').on('submit', function(e) {
-        // 讓 WooCommerce 正常處理 AJAX
-        setTimeout(function() {
-            // 觸發 Fly Cart 開啟
-            if (typeof bfOpenFlyCart === 'function') {
-                bfOpenFlyCart();
+        e.preventDefault();
+        
+        var $form = $(this);
+        var $button = $form.find('button[type="submit"]');
+        var originalText = $button.text();
+        
+        // 禁用按鈕，顯示載入中
+        $button.prop('disabled', true).text('加入中...');
+        
+        // 取得表單資料
+        var formData = new FormData($form[0]);
+        formData.append('action', 'woocommerce_ajax_add_to_cart');
+        
+        // 取得商品 ID
+        var productId = $form.find('input[name="product_id"]').val() || $form.find('button[name="add-to-cart"]').val();
+        var quantity = $form.find('input[name="quantity"]').val() || 1;
+        var variationId = $form.find('input[name="variation_id"]').val() || 0;
+        
+        // 發送 AJAX 請求
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: {
+                action: 'bf_product_add_to_cart',
+                product_id: productId,
+                quantity: quantity,
+                variation_id: variationId
+            },
+            success: function(response) {
+                // 恢復按鈕
+                $button.prop('disabled', false).text('已加入！');
+                
+                setTimeout(function() {
+                    $button.text(originalText);
+                }, 1500);
+                
+                // 觸發 WooCommerce 事件
+                $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash]);
+                
+                // 開啟 Fly Cart
+                if (typeof bfOpenFlyCart === 'function') {
+                    bfOpenFlyCart();
+                }
+            },
+            error: function() {
+                // 如果 AJAX 失敗，使用傳統方式
+                $form.off('submit').submit();
             }
-        }, 500);
+        });
     });
 
     // 數量按鈕增強
