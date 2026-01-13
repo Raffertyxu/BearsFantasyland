@@ -762,9 +762,102 @@ jQuery(document).ready(function($) {
         });
     }
 
+    // ========== Sticky Add to Cart Bar ==========
+    var $originalForm = $('form.cart');
+    var $stickyBar = $('#bfp-sticky-cart');
+    var stickyQty = 1;
+
+    if ($originalForm.length && $stickyBar.length) {
+        // 監聽滾動
+        $(window).on('scroll', function() {
+            var formBottom = $originalForm.offset().top + $originalForm.outerHeight();
+            var scrollTop = $(window).scrollTop();
+            var windowHeight = $(window).height();
+            
+            // 當表單底部超出視窗上方時顯示
+            if (scrollTop + 100 > formBottom) {
+                $stickyBar.addClass('active');
+            } else {
+                $stickyBar.removeClass('active');
+            }
+        });
+
+        // Sticky bar 數量按鈕
+        $stickyBar.on('click', '.bfp-sticky-minus', function() {
+            if (stickyQty > 1) stickyQty--;
+            $stickyBar.find('.bfp-sticky-qty-val').text(stickyQty);
+        });
+
+        $stickyBar.on('click', '.bfp-sticky-plus', function() {
+            stickyQty++;
+            $stickyBar.find('.bfp-sticky-qty-val').text(stickyQty);
+        });
+
+        // Sticky bar 加入購物車
+        $stickyBar.on('click', '.bfp-sticky-add-btn', function() {
+            var $btn = $(this);
+            var productId = $btn.data('id');
+            var originalText = $btn.text();
+            
+            $btn.prop('disabled', true).text('加入中...');
+            
+            $.ajax({
+                url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                type: 'POST',
+                data: {
+                    action: 'bf_product_add_to_cart',
+                    product_id: productId,
+                    quantity: stickyQty,
+                    variation_id: 0
+                },
+                success: function(response) {
+                    $btn.prop('disabled', false).text('已加入！');
+                    setTimeout(function() {
+                        $btn.text(originalText);
+                    }, 1500);
+                    $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash]);
+                    if (typeof bfOpenFlyCart === 'function') {
+                        bfOpenFlyCart();
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
+    }
+
     console.log('BF Product JS Loaded');
 });
 </script>
+
+<!-- Sticky Add to Cart Bar -->
+<?php
+global $product;
+if ($product) {
+    $thumb = wp_get_attachment_image_url($product->get_image_id(), 'thumbnail');
+?>
+<div class="bfp-sticky-cart" id="bfp-sticky-cart">
+    <div class="bfp-sticky-inner">
+        <div class="bfp-sticky-product">
+            <img src="<?php echo esc_url($thumb); ?>" alt="" class="bfp-sticky-img">
+            <div class="bfp-sticky-info">
+                <div class="bfp-sticky-name"><?php echo esc_html($product->get_name()); ?></div>
+                <div class="bfp-sticky-price"><?php echo $product->get_price_html(); ?></div>
+            </div>
+        </div>
+        <div class="bfp-sticky-actions">
+            <div class="bfp-sticky-qty">
+                <button type="button" class="bfp-sticky-minus">−</button>
+                <span class="bfp-sticky-qty-val">1</span>
+                <button type="button" class="bfp-sticky-plus">+</button>
+            </div>
+            <button type="button" class="bfp-sticky-add-btn" data-id="<?php echo $product->get_id(); ?>">加入購物車</button>
+        </div>
+    </div>
+</div>
+<?php } ?>
+
 <style>
 .bfp-qty-btn {
     width: 44px;
@@ -782,6 +875,144 @@ jQuery(document).ready(function($) {
 .bfp-qty-btn:hover {
     background: var(--bfp-brown, #8A6754);
     color: #fff;
+}
+
+/* Sticky Add to Cart Bar */
+.bfp-sticky-cart {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    z-index: 9999;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+.bfp-sticky-cart.active {
+    transform: translateY(0);
+}
+.bfp-sticky-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+.bfp-sticky-product {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+.bfp-sticky-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+.bfp-sticky-info {
+    min-width: 0;
+}
+.bfp-sticky-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+.bfp-sticky-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--bfp-brown, #8A6754);
+}
+.bfp-sticky-price del {
+    color: #999;
+    font-size: 13px;
+    font-weight: 400;
+}
+.bfp-sticky-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+.bfp-sticky-qty {
+    display: flex;
+    align-items: center;
+    border: 1px solid #E8E4E0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.bfp-sticky-qty button {
+    width: 36px;
+    height: 36px;
+    background: #F9F7F5;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.bfp-sticky-qty button:hover {
+    background: var(--bfp-brown, #8A6754);
+    color: #fff;
+}
+.bfp-sticky-qty-val {
+    width: 40px;
+    text-align: center;
+    font-weight: 600;
+}
+.bfp-sticky-add-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--bfp-brown, #8A6754), #6B4F3F);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+.bfp-sticky-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(138,103,84,0.4);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .bfp-sticky-inner {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    .bfp-sticky-name {
+        max-width: 100px;
+        font-size: 12px;
+    }
+    .bfp-sticky-price {
+        font-size: 14px;
+    }
+    .bfp-sticky-img {
+        width: 40px;
+        height: 40px;
+    }
+    .bfp-sticky-add-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    .bfp-sticky-qty button {
+        width: 30px;
+        height: 30px;
+    }
+    .bfp-sticky-qty-val {
+        width: 30px;
+    }
 }
 </style>
         <?php
