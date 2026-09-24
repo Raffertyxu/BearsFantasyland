@@ -1,0 +1,6 @@
+.editor-styles-wrapper .bfnd-editor-fields{max-width:900px;margin:32px auto;padding:28px;background:#f7f4ef;border:1px solid #e1d8cd}
+.editor-styles-wrapper .bfnd-editor-fields>.wp-block-group{padding:22px;background:#fff;border:1px solid #e6ded4;margin-bottom:20px}
+.editor-styles-wrapper .bfnd-editor-fields .bfnd-editor-section-title{font-size:24px;color:#493426;margin:0 0 22px}
+.editor-styles-wrapper .bfnd-editor-fields .bfnd-editor-label{font-size:12px;font-weight:700;color:#886b56;margin:18px 0 5px;border-top:1px solid #eee7df;padding-top:11px}
+.editor-styles-wrapper .bfnd-editor-fields .wp-block-image img{max-width:440px;height:auto;object-fit:contain}
+.editor-styles-wrapper .bfnd-editor-fields .block-editor-block-list__block[data-type="core/paragraph"]{min-height:22px}

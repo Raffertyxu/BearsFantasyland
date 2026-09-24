@@ -1,0 +1,436 @@
+{
+  "works": [
+    {
+      "slug": "ridge-table",
+      "series": "自然地景系列 LANDSCAPE Collection",
+      "title": "稜 RIDGE",
+      "english": "RIDGE",
+      "type": "桌／餐桌",
+      "material": "栓木實木",
+      "size": "約 W200 × D75 × H75 cm",
+      "tagline": "山的稜線・木的呼吸",
+      "story": "從山脈延伸的線條取得靈感，保留木材如地景般自然的輪廓與紋理，讓桌面成為空間中的一道風景。",
+      "craft": "選料、實木加工、細部修整、手工研磨、表面處理",
+      "custom": "可依空間需求調整尺寸、木種與表面處理",
+      "note": "推估尺寸，非原作實測",
+      "category": "tables",
+      "image": "/assets/works/ridge-table/01.webp",
+      "gallery": [
+        "/assets/works/ridge-table/01.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/自然地景系列 _ LANDSCAPE Collection/1稜 RIDGE"
+    },
+    {
+      "slug": "landscape-table",
+      "series": "自然地景系列 LANDSCAPE Collection",
+      "title": "原木景觀桌",
+      "english": "LANDSCAPE TABLE",
+      "type": "桌／餐桌",
+      "material": "實木（木種待確認）",
+      "size": "約 W220 × D90 × H75 cm",
+      "tagline": "把自然的邊界留在生活裡",
+      "story": "以大尺度自然邊桌面呈現木材原始起伏，厚實桌面與量體感桌腳形成沉穩而安靜的地景。",
+      "craft": "選料、自然邊修整、實木加工、手工研磨、表面處理",
+      "custom": "尺寸、木種、桌腳形式可訂製",
+      "note": "推估尺寸；木種待確認",
+      "category": "tables",
+      "image": "/assets/works/landscape-table/01.webp",
+      "gallery": [
+        "/assets/works/landscape-table/01.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/自然地景系列 _ LANDSCAPE Collection/2嶼 ISLE"
+    },
+    {
+      "slug": "muju",
+      "series": "MU 木生活系列 MU Collection",
+      "title": "木聚 MUJU",
+      "english": "MUJU",
+      "type": "桌／餐桌",
+      "material": "栓木",
+      "size": "約 W160 × D80 × H75 cm",
+      "tagline": "讓一家人的日常，在木桌旁聚在一起",
+      "story": "簡潔桌框與柔和轉折構成耐看的生活餐桌，將木紋、光線與日常使用留作設計主角。",
+      "craft": "實木選料、桌板拼接、結構加工、圓角修整、研磨、表面處理",
+      "custom": "可調整桌長、桌寬與搭配長凳",
+      "note": "推估尺寸",
+      "category": "tables",
+      "image": "/assets/works/muju/01.webp",
+      "gallery": [
+        "/assets/works/muju/01.webp",
+        "/assets/works/muju/02.webp",
+        "/assets/works/muju/03.webp",
+        "/assets/works/muju/04.webp",
+        "/assets/works/muju/05.webp",
+        "/assets/works/muju/06.webp",
+        "/assets/works/muju/07.webp",
+        "/assets/works/muju/08.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/MU 木生活系列/1栓木桌 _木聚 MUJU （Mu-Ju）"
+    },
+    {
+      "slug": "musu",
+      "series": "MU 木生活系列 MU Collection",
+      "title": "木序 MUSU",
+      "english": "MUSU",
+      "type": "長桌／餐桌",
+      "material": "硬楓木",
+      "size": "約 W200 × D85 × H75 cm",
+      "tagline": "在秩序裡，留下木頭的溫度",
+      "story": "以修長比例與清楚結構建立安定秩序，硬楓木明亮色澤讓大型桌體仍保持輕盈。",
+      "craft": "硬楓木選料、拼板、結構加工、細部修整、研磨、表面處理",
+      "custom": "可依座位人數調整長度",
+      "note": "推估尺寸",
+      "category": "tables",
+      "image": "/assets/works/musu/01.webp",
+      "gallery": [
+        "/assets/works/musu/01.webp",
+        "/assets/works/musu/02.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/MU 木生活系列/2硬楓木長桌｜木序 MUSU（Mu-Su）"
+    },
+    {
+      "slug": "muyo",
+      "series": "MU 木生活系列 MU Collection",
+      "title": "木韻 MUYO",
+      "english": "MUYO",
+      "type": "餐桌椅組",
+      "material": "胡桃木",
+      "size": "約 W180 × D85 × H75 cm",
+      "tagline": "木紋有節奏，生活也有自己的韻律",
+      "story": "以胡桃木深淺變化與自然紋理形成桌面的節奏，搭配曲線椅背，呈現溫潤而成熟的餐敘氛圍。",
+      "craft": "胡桃木選料、拼板、曲面修整、結構加工、研磨、表面處理",
+      "custom": "桌體與椅款可分別依需求訂製",
+      "note": "推估尺寸",
+      "category": "tables",
+      "image": "/assets/works/muyo/01.webp",
+      "gallery": [
+        "/assets/works/muyo/01.webp",
+        "/assets/works/muyo/02.webp",
+        "/assets/works/muyo/03.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/MU 木生活系列/3胡桃木餐桌椅_木韻 MUYO"
+    },
+    {
+      "slug": "muwi",
+      "series": "MU 木生活系列 MU Collection",
+      "title": "木翼 MUWI",
+      "english": "MUWI",
+      "type": "長桌／餐桌",
+      "material": "胡桃木",
+      "size": "約 W200 × D85 × H75 cm",
+      "tagline": "像展開的木翼，讓結構變得輕盈",
+      "story": "修長桌面搭配向外舒展的曲線桌腳，以胡桃木沉穩色澤承載具有動勢的結構語彙。",
+      "craft": "胡桃木選料、曲線構件加工、桌板製作、手工修整、研磨、表面處理",
+      "custom": "可調整桌長、桌寬與木種",
+      "note": "推估尺寸",
+      "category": "tables",
+      "image": "/assets/works/muwi/01.webp",
+      "gallery": [
+        "/assets/works/muwi/01.webp",
+        "/assets/works/muwi/02.webp",
+        "/assets/works/muwi/03.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/MU 木生活系列/4胡桃曲木桌_木翼 MUWI（Mu-Wee）"
+    },
+    {
+      "slug": "muki",
+      "series": "MU 木生活系列 MU Collection",
+      "title": "木境 MUKI",
+      "english": "MUKI",
+      "type": "日式風格桌",
+      "material": "實木（木種待確認）",
+      "size": "約 W180 × D80 × H75 cm",
+      "tagline": "把安靜的木質感，放進日常空間",
+      "story": "以克制線條與溫潤比例回應日式生活美學，讓家具不搶空間，而是慢慢成為生活背景。",
+      "craft": "實木選料、結構加工、圓角修整、研磨、表面處理",
+      "custom": "尺寸與木種可依空間訂製",
+      "note": "推估尺寸；木種待確認",
+      "category": "tables",
+      "image": "/assets/works/muki/01.webp",
+      "gallery": [
+        "/assets/works/muki/01.webp",
+        "/assets/works/muki/02.webp",
+        "/assets/works/muki/03.webp",
+        "/assets/works/muki/04.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/MU 木生活系列/5日式風格桌_木境 MUKI（(Mu-Key)）"
+    },
+    {
+      "slug": "muni",
+      "series": "MU 木生活系列 MU Collection",
+      "title": "木日 MUNI",
+      "english": "MUNI",
+      "type": "居家生活桌／餐桌",
+      "material": "實木（木種待確認）",
+      "size": "約 W180 × D80 × H75 cm",
+      "tagline": "一張桌，承接每天發生的小事",
+      "story": "以簡單耐用的比例回到家具本質，適合餐敘、工作與共處，讓木頭自然融入每日生活。",
+      "craft": "實木選料、拼板、結構加工、手工研磨、表面處理",
+      "custom": "可依使用情境調整尺寸與搭配長凳",
+      "note": "推估尺寸；木種待確認",
+      "category": "tables",
+      "image": "/assets/works/muni/01.webp",
+      "gallery": [
+        "/assets/works/muni/01.webp"
+      ],
+      "source_folder": "照片/家具/桌子系列/MU 木生活系列/6 木日 MUNI居家生活"
+    },
+    {
+      "slug": "ripple",
+      "series": "椅凳系列",
+      "title": "漾 RIPPLE｜拼木圓椅",
+      "english": "RIPPLE",
+      "type": "圓椅／高腳椅",
+      "material": "多樹種拼木",
+      "size": "圓椅約 Ø40 × H45 cm；高腳版約 H65–70 cm",
+      "tagline": "像水面波紋，把不同木色連成一道風景",
+      "story": "以多種木材拼接形成流動曲線，讓木色差異成為圖案，每張椅面都保有獨特表情。",
+      "craft": "異材拼接、曲線加工、椅面成形、椅腳加工、研磨、表面處理",
+      "custom": "可選圓凳或高腳版本；拼木配置依材料而異",
+      "note": "推估尺寸",
+      "category": "seating",
+      "image": "/assets/works/ripple/01.webp",
+      "gallery": [
+        "/assets/works/ripple/01.webp",
+        "/assets/works/ripple/02.webp",
+        "/assets/works/ripple/03.webp",
+        "/assets/works/ripple/04.webp"
+      ],
+      "source_folder": "照片/家具/椅子系列/漾 RIPPLE｜拼木圓椅"
+    },
+    {
+      "slug": "warm",
+      "series": "椅凳系列",
+      "title": "暖 WARM｜實木圓凳",
+      "english": "WARM",
+      "type": "圓凳",
+      "material": "實木",
+      "size": "約 Ø32 × H45 cm",
+      "tagline": "簡單的一張凳子，也能留下木的溫度",
+      "story": "以圓潤椅面與外張椅腳形成輕巧輪廓，適合作為餐凳、穿鞋凳或生活中的臨時座位。",
+      "craft": "實木選料、圓形加工、椅腳成形、結構組裝、研磨、表面處理",
+      "custom": "高度與木種可依需求調整",
+      "note": "推估尺寸",
+      "category": "seating",
+      "image": "/assets/works/warm/01.webp",
+      "gallery": [
+        "/assets/works/warm/01.webp",
+        "/assets/works/warm/02.webp",
+        "/assets/works/warm/03.webp",
+        "/assets/works/warm/04.webp",
+        "/assets/works/warm/05.webp"
+      ],
+      "source_folder": "照片/家具/椅子系列/暖 WARM｜實木圓凳"
+    },
+    {
+      "slug": "walnut-island-bar",
+      "series": "中島・生活機能系列",
+      "title": "胡桃木中島酒櫃",
+      "english": "WALNUT ISLAND BAR",
+      "type": "中島／酒櫃",
+      "material": "胡桃木＋礦物／石材檯面（待確認）",
+      "size": "約 W180 × D60 × H90 cm",
+      "tagline": "把收納、備餐與收藏整合成生活核心",
+      "story": "以胡桃木深色量體結合中島機能，整合抽屜、櫃體與酒杯收納，讓家具同時回應使用與展示。",
+      "craft": "櫃體製作、抽屜加工、五金安裝、實木門板、檯面整合、表面處理",
+      "custom": "可依廚房尺寸、收納需求與設備配置訂製",
+      "note": "推估尺寸；檯面材質待確認",
+      "category": "islands",
+      "image": "/assets/works/walnut-island-bar/01.webp",
+      "gallery": [
+        "/assets/works/walnut-island-bar/01.webp",
+        "/assets/works/walnut-island-bar/02.webp"
+      ],
+      "source_folder": "照片/家具/廚房中島系列/胡桃木中島酒櫃"
+    },
+    {
+      "slug": "cherry-island-table",
+      "series": "中島・生活機能系列",
+      "title": "櫻桃木中島桌",
+      "english": "CHERRY ISLAND TABLE",
+      "type": "中島桌／階梯桌",
+      "material": "櫻桃木",
+      "size": "整體約 W240 × D60–70 cm；高段 H90 cm／低段 H75 cm",
+      "tagline": "用高低差，重新安排空間裡的使用節奏",
+      "story": "以兩段高度形成自然的階梯關係，高段可作備餐或站立使用，低段則回到坐姿工作與用餐，讓一件家具承接不同生活情境。",
+      "craft": "櫻桃木選料、板材拼接、轉折加工、結構組裝、研磨、表面處理",
+      "custom": "總長、兩段比例與高度皆可依空間調整",
+      "note": "依照片推估；新增照片已補",
+      "category": "islands",
+      "image": "/assets/works/cherry-island-table/01.webp",
+      "gallery": [
+        "/assets/works/cherry-island-table/01.webp",
+        "/assets/works/cherry-island-table/02.webp",
+        "/assets/works/cherry-island-table/03.webp",
+        "/assets/works/cherry-island-table/04.webp"
+      ],
+      "source_folder": "照片/家具/廚房中島系列/櫻桃木中島桌"
+    },
+    {
+      "slug": "grid",
+      "series": "櫃子・書架系列",
+      "title": "格 GRID",
+      "english": "GRID",
+      "type": "收納櫃",
+      "material": "實木（木種待確認）",
+      "size": "約 W100 × D40 × H120 cm",
+      "tagline": "以格為序，收進生活的大小物件",
+      "story": "門片、抽屜與框體以清楚比例排列，讓不同收納機能在同一立面中保持安定秩序。",
+      "craft": "框體製作、門框門板、抽屜製作、五金安裝、研磨、表面處理",
+      "custom": "內部分格與尺寸可訂製",
+      "note": "推估尺寸；木種待確認",
+      "category": "storage",
+      "image": "/assets/works/grid/01.webp",
+      "gallery": [
+        "/assets/works/grid/01.webp",
+        "/assets/works/grid/02.webp",
+        "/assets/works/grid/03.webp"
+      ],
+      "source_folder": "照片/家具/櫃子書架系列/格櫃｜GRID"
+    },
+    {
+      "slug": "ridge-shelf",
+      "series": "櫃子・書架系列",
+      "title": "嶺 RIDGE｜實木層架",
+      "english": "RIDGE SHELF",
+      "type": "層架",
+      "material": "實木（木種待確認）",
+      "size": "約 W80 × D35 × H180 cm",
+      "tagline": "向上延伸的線條，像一道安靜的山嶺",
+      "story": "側板以微斜輪廓建立向上的視覺動勢，層板穿插其間，在輕盈與穩定之間取得平衡。",
+      "craft": "側板成形、層板加工、結構接合、手工修整、研磨、表面處理",
+      "custom": "高度、寬度與層板數量可調整",
+      "note": "推估尺寸；木種待確認",
+      "category": "storage",
+      "image": "/assets/works/ridge-shelf/01.webp",
+      "gallery": [
+        "/assets/works/ridge-shelf/01.webp",
+        "/assets/works/ridge-shelf/02.webp",
+        "/assets/works/ridge-shelf/03.webp",
+        "/assets/works/ridge-shelf/04.webp"
+      ],
+      "source_folder": "照片/家具/櫃子書架系列/嶺 RIDGE｜實木層架"
+    },
+    {
+      "slug": "arch",
+      "series": "櫃子・書架系列",
+      "title": "築 ARCH｜檜木櫃",
+      "english": "ARCH",
+      "type": "大型收納櫃／展示櫃",
+      "material": "檜木",
+      "size": "約 W200 × D40 × H220 cm",
+      "tagline": "像建築一樣，把收納變成空間的一部分",
+      "story": "以模組般的格架組成大尺度立面，透過開放與封閉收納交錯，讓櫃體成為室內空間的木質建築。",
+      "craft": "櫃體模組製作、層板加工、門片製作、現場組裝、研磨、表面處理",
+      "custom": "可依牆面尺寸與收納物件重新配置",
+      "note": "推估尺寸",
+      "category": "storage",
+      "image": "/assets/works/arch/01.webp",
+      "gallery": [
+        "/assets/works/arch/01.webp",
+        "/assets/works/arch/02.webp",
+        "/assets/works/arch/03.webp"
+      ],
+      "source_folder": "照片/家具/櫃子書架系列/築｜ARCH 檜木櫃"
+    },
+    {
+      "slug": "plain",
+      "series": "櫃子・書架系列",
+      "title": "原 PLAIN｜實木層架",
+      "english": "PLAIN",
+      "type": "書架／層架",
+      "material": "實木（木種待確認）",
+      "size": "約 W120 × D35 × H150 cm",
+      "tagline": "回到最單純的比例，讓木紋自己說話",
+      "story": "減少多餘裝飾，以寬厚層板與清楚水平線構成實用書架，保留實木紋理作為主要視覺。",
+      "craft": "實木選料、層板製作、側板加工、結構接合、研磨、表面處理",
+      "custom": "寬度、高度與層距可訂製",
+      "note": "推估尺寸；木種待確認",
+      "category": "storage",
+      "image": "/assets/works/plain/01.webp",
+      "gallery": [
+        "/assets/works/plain/01.webp",
+        "/assets/works/plain/02.webp"
+      ],
+      "source_folder": "照片/家具/櫃子書架系列/原 PLAIN｜實木層架"
+    },
+    {
+      "slug": "breeze",
+      "series": "櫃子・書架系列",
+      "title": "風 BREEZE｜實木百葉收納櫃",
+      "english": "BREEZE",
+      "type": "百葉收納櫃",
+      "material": "實木（木種待確認）",
+      "size": "約 W90 × D45 × H150 cm",
+      "tagline": "讓收納櫃也保有呼吸感",
+      "story": "以連續百葉形成光影與通風層次，降低大型櫃體的厚重感，讓收納與空間氣息自然共存。",
+      "craft": "櫃體製作、百葉片加工、門框組裝、五金安裝、研磨、表面處理",
+      "custom": "內部層板、尺寸與木種可依需求訂製",
+      "note": "推估尺寸；木種待確認",
+      "category": "storage",
+      "image": "/assets/works/breeze/01.webp",
+      "gallery": [
+        "/assets/works/breeze/01.webp"
+      ],
+      "source_folder": "照片/家具/櫃子書架系列/風 BREEZE｜實木百葉收納櫃"
+    }
+  ],
+  "lifestyle": {
+    "title": "晨露圓境托盤",
+    "english": "Alba Canvas",
+    "gallery": [
+      "/assets/lifestyle/tray-01.webp",
+      "/assets/lifestyle/tray-02.webp",
+      "/assets/lifestyle/tray-03.webp",
+      "/assets/lifestyle/tray-04.webp",
+      "/assets/lifestyle/tray-05.webp",
+      "/assets/lifestyle/tray-06.webp",
+      "/assets/lifestyle/tray-07.webp",
+      "/assets/lifestyle/tray-08.webp",
+      "/assets/lifestyle/tray-09.webp",
+      "/assets/lifestyle/tray-10.webp",
+      "/assets/lifestyle/tray-11.webp",
+      "/assets/lifestyle/tray-12.webp",
+      "/assets/lifestyle/tray-13.webp"
+    ]
+  },
+  "courses": [
+    {
+      "slug": "beginner",
+      "title": "木工基礎入門班",
+      "duration": "6 小時",
+      "price": "3680",
+      "level": "初學者適合",
+      "mode": "onsite",
+      "image": "/assets/courses/beginner.webp"
+    },
+    {
+      "slug": "cnc",
+      "title": "CNC 數位木工",
+      "duration": "6 小時",
+      "price": "8800",
+      "level": "有基礎佳",
+      "mode": "onsite",
+      "image": "/assets/courses/cnc.webp"
+    },
+    {
+      "slug": "sharpening",
+      "title": "磨刀實戰班",
+      "duration": "6 小時",
+      "price": "3680",
+      "level": "工具保養",
+      "mode": "onsite",
+      "image": "/assets/courses/sharpening.webp"
+    },
+    {
+      "slug": "open-studio",
+      "title": "自由創作會員",
+      "duration": "彈性時段",
+      "price": "1800",
+      "level": "進階創作",
+      "mode": "onsite",
+      "image": "/assets/courses/open-studio.webp"
+    }
+  ],
+  "source": "NEWDESIGN customer Excel and original photos"
+}

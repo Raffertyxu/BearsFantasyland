@@ -1,0 +1,4 @@
+NEWDESIGN/**/*.zip filter=lfs diff=lfs merge=lfs -text
+NEWDESIGN/theme/dist/*.zip filter=lfs diff=lfs merge=lfs -text
+NEWDESIGN/website/dist/*.zip filter=lfs diff=lfs merge=lfs -text
+NEWDESIGN/website/dist/archive/*.zip filter=lfs diff=lfs merge=lfs -text
