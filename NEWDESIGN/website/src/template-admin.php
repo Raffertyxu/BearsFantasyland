@@ -34,6 +34,11 @@ function bfnd_template_menu() {
     }
 }
 
+function bfnd_template_shared_layout_notice() {
+    $story_url = admin_url('admin.php?page=bfnd-layout-story');
+    echo '<div class="notice notice-info inline"><p><strong>共用頁首與頁尾不屬於單頁 CRUD 欄位。</strong>頁首的 Maker 連結已依設計圖稿移除；頁尾 Maker 資訊保留。品牌故事內文的 Maker 基地段落仍可在 <a href="' . esc_url($story_url) . '">品牌故事版面管理</a> 編輯或隱藏。</p></div>';
+}
+
 function bfnd_template_content_links($key) {
     $lists = array(
         'home' => array('bf_work' => '家具作品', 'bf_lifestyle' => '生活木作', 'bf_course' => '木作課程', 'post' => '飛熊日誌'),
@@ -55,6 +60,7 @@ function bfnd_template_content_links($key) {
 function bfnd_template_dashboard() {
     if (!current_user_can('edit_pages')) { wp_die('權限不足'); }
     echo '<div class="wrap bfnd-template-admin"><h1>網站版面</h1><p>從下方選擇頁面，直接修改固定版型的文字、圖片和顯示區塊。公開頁面只載入一行短代碼。家具作品、生活木作、課程及飛熊日誌的新增與刪除，請使用左側各自的內容列表。</p>';
+    bfnd_template_shared_layout_notice();
     if (isset($_GET['bfnd_migrated'])) {
         echo '<div class="notice notice-success"><p>已轉換 ' . absint($_GET['bfnd_migrated']) . ' 個頁面。</p></div>';
     }
@@ -103,6 +109,7 @@ function bfnd_template_editor($key) {
         echo '<div class="notice notice-warning"><p>此頁尚未改為單行短代碼。請先到「網站版面」執行內容轉換。</p></div>';
     }
     echo '<p>在這裡修改手稿固定版型的文字與圖片。圖片使用 WordPress 媒體庫；恢復預設會使用原始版型內容。家具作品、生活木作作品、課程與飛熊日誌的內容請在各自的 WordPress 清單新增、編輯或移到回收桶。</p>';
+    bfnd_template_shared_layout_notice();
     bfnd_template_content_links($key);
     echo '<p><a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-overview')) . '">← 返回網站版面</a>　<a href="' . esc_url(get_permalink($page)) . '" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></p>';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_save_template"><input type="hidden" name="page_key" value="' . esc_attr($key) . '">';
@@ -222,8 +229,8 @@ function bfnd_install_template_pages_action() {
 function bfnd_template_admin_assets($hook) {
     if (strpos($hook, 'bfnd-layout-') === false) { return; }
     wp_enqueue_media();
-    wp_enqueue_style('bfnd-page-design', bfnd_asset('public/page-design.css'), array(), '0.5.1');
-    wp_enqueue_script('bfnd-page-design', bfnd_asset('public/page-design.js'), array('jquery'), '0.5.1', true);
+    wp_enqueue_style('bfnd-page-design', bfnd_asset('public/page-design.css'), array(), '0.5.2');
+    wp_enqueue_script('bfnd-page-design', bfnd_asset('public/page-design.js'), array('jquery'), '0.5.2', true);
 }
 
 function bfnd_template_admin_bar($bar) {
