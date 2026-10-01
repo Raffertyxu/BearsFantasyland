@@ -15,15 +15,22 @@ foreach ($preview_data['works'] as $item) {
 $preview_posts[$id] = (object) array('ID' => $id, 'post_type' => 'bf_lifestyle', 'post_title' => '晨露圓境托盤', 'post_content' => '當晨曦化為曲線，自然紋理凝聚成器。竹的細緻清雅、木的溫潤厚實，各自保留獨有的生命紋理。', 'post_excerpt' => '一器承日常，一圓納天地。', 'data' => array('slug' => 'alba-canvas', 'english' => 'Alba Canvas', 'image' => $preview_data['lifestyle']['gallery'][0], 'gallery' => $preview_data['lifestyle']['gallery']));
 $id++;
 foreach ($preview_data['courses'] as $item) {
-    $preview_posts[$id] = (object) array('ID' => $id, 'post_type' => 'bf_course', 'post_title' => $item['title'], 'post_content' => '課程內容、開課日期與報名方式請以品牌公告為準。', 'post_excerpt' => '從一堂課開始，親手理解木作。', 'data' => $item);
+    $content = match ($item['slug']) {
+        'cnc' => '最新課程時數、內容、費用與開課資訊，請聯絡我們確認。',
+        'open-studio' => '會員方案與費用將另行公告，請聯絡我們確認最新資訊。',
+        default => '課程內容、開課日期與報名方式請以品牌公告為準。',
+    };
+    $preview_posts[$id] = (object) array('ID' => $id, 'post_type' => 'bf_course', 'post_title' => $item['title'], 'post_content' => $content, 'post_excerpt' => '從一堂課開始，親手理解木作。', 'data' => $item);
     $id++;
 }
 function esc_html($s) { return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8'); }
 function esc_attr($s) { return esc_html($s); }
 function esc_url($s) { return esc_html($s); }
 function esc_textarea($s) { return esc_html($s); }
+function absint($value) { return abs((int) $value); }
 function bfnd_asset($s) { return '/' . ltrim($s, '/'); }
 function bfnd_page_url($s) { return '/preview.php?page=' . rawurlencode($s); }
+function bfnd_shop_url() { return bfnd_page_url('shop'); }
 function get_post_meta($id, $key, $single = true) { global $preview_posts; $p = $preview_posts[$id] ?? null; if (!$p) return ''; $k = substr($key, 6); return $p->data[$k] ?? ''; }
 function get_post_type($id) { global $preview_posts; return $preview_posts[$id]->post_type ?? ''; }
 function get_the_title($post) { global $preview_posts; return is_object($post) ? $post->post_title : ($preview_posts[$post]->post_title ?? ''); }

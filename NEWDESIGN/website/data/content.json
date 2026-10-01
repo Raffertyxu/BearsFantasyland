@@ -407,8 +407,8 @@
     {
       "slug": "cnc",
       "title": "CNC 數位木工",
-      "duration": "6 小時",
-      "price": "8800",
+      "duration": "依最新公告",
+      "price": "",
       "level": "有基礎佳",
       "mode": "onsite",
       "image": "/assets/courses/cnc.webp"
@@ -426,7 +426,7 @@
       "slug": "open-studio",
       "title": "自由創作會員",
       "duration": "彈性時段",
-      "price": "1800",
+      "price": "",
       "level": "進階創作",
       "mode": "onsite",
       "image": "/assets/courses/open-studio.webp"

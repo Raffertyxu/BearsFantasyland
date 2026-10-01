@@ -94,9 +94,9 @@ web_copy(workshop, ASSET_ROOT / "brand" / "real-lecture.webp")
 poster_root = ROOT / "網頁分層圖示及文字" / "木作學堂頁面" / "課程簡章_海報"
 course_sources = [
     ("beginner", "木工基礎入門班", "1初階木工精華班.png", "6 小時", "3680", "初學者適合"),
-    ("cnc", "CNC 數位木工", "3ＣＮＣ數位木工.png", "6 小時", "8800", "有基礎佳"),
+    ("cnc", "CNC 數位木工", "3ＣＮＣ數位木工.png", "依最新公告", "", "有基礎佳"),
     ("sharpening", "磨刀實戰班", "2木工磨刀實戰班.png", "6 小時", "3680", "工具保養"),
-    ("open-studio", "自由創作會員", "4.會員自由創作.png", "彈性時段", "1800", "進階創作"),
+    ("open-studio", "自由創作會員", "4.會員自由創作.png", "彈性時段", "", "進階創作"),
 ]
 courses = []
 for slug, title, source_name, duration, price, level in course_sources:

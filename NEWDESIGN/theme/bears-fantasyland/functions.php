@@ -12,7 +12,7 @@ add_action('after_setup_theme', function () {
 });
 
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.2.9');
+    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.0');
     wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.2.3', true);
 }, 100);
 
