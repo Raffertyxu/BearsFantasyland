@@ -88,7 +88,7 @@ body.bfnd-body .bf-craft-content h3{font-size:21px}body.bfnd-body .bf-craft-cons
 .bf-footer-main .bf-footer-links a{padding-inline:clamp(5px,.65vw,10px);font-size:clamp(10px,.76vw,12px);border-right:1px solid #d8cec4}
 .bf-footer-main .bf-footer-links a:last-child{border-right:0}
 .bf-footer-main .bf-footer-social{display:flex;align-items:center;gap:clamp(10px,1vw,15px);margin-left:clamp(0px,.6vw,10px);flex:none;color:#4b3528}
-.bf-footer-social span{display:inline-flex;width:15px;height:15px;color:inherit}
+.bf-footer-social a{display:inline-flex;width:15px;height:15px;align-items:center;justify-content:center;color:inherit;transition:color .2s}.bf-footer-social a:hover{color:#8a654b}.bf-footer-social a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
 .bf-footer-social svg{display:block;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .bf-footer-main .bf-footer-maker{display:flex;flex:none;border-left:1px solid #d8cec4;padding-left:clamp(10px,1vw,16px)}
 .bf-footer-main .bf-footer-maker strong{font-size:11px;letter-spacing:.05em}
@@ -106,7 +106,7 @@ body.bfnd-body .bf-craft-content h3{font-size:21px}body.bfnd-body .bf-craft-cons
  .bf-footer-main .bf-footer-motto{font-size:10px}
  .bf-footer-main .bf-footer-links a{padding-inline:4px;font-size:10px}
  .bf-footer-main .bf-footer-social{gap:9px;margin-left:0}
- .bf-footer-social span{width:13px;height:13px}
+.bf-footer-social a{width:13px;height:13px}
  .bf-footer-main .bf-footer-maker{padding-left:8px}
  .bf-footer-main .bf-footer-maker strong{font-size:10px}
  .bf-footer-main .bf-footer-maker small{font-size:8px}
@@ -118,7 +118,7 @@ body.bfnd-body .bf-craft-content h3{font-size:21px}body.bfnd-body .bf-craft-cons
  .bf-footer-main .bf-footer-links{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 0;margin:0}
  .bf-footer-main .bf-footer-links a{padding:8px 3px;border:0;text-align:center;font-size:11px}
  .bf-footer-main .bf-footer-social{grid-column:1;grid-row:3;justify-content:flex-start;gap:13px;margin:0}
- .bf-footer-social span{width:15px;height:15px}
+ .bf-footer-social a{width:15px;height:15px}
  .bf-footer-main .bf-footer-maker{grid-column:2;grid-row:3;justify-self:end;border:0;padding:0;text-align:right}
  .bf-footer-main .bf-footer-maker strong{font-size:10px}
  .bf-footer-main .bf-footer-maker small{font-size:8px}
@@ -130,12 +130,45 @@ body.bfnd-body .bf-craft-content h3{font-size:21px}body.bfnd-body .bf-craft-cons
  .bf-footer-bottom nav>*+*{margin-left:10px;padding-left:10px!important}
 }
 
-/* Match artwork footer brand-row height. */
-.bf-footer-main{min-height:82px}
-
-/* Keep the brand motto visible at compact desktop and mobile widths. */
-@media(min-width:761px) and (max-width:1100px){.bf-footer-main .bf-footer-motto{display:block}}
-@media(max-width:760px){.bf-footer-main .bf-footer-motto{display:block}}
+/* Compact footer system aligned with the supplied artwork and header breakpoints. */
+.bf-footer{background:var(--bf-paper)}
+.bf-footer-main{min-height:76px;padding-block:8px}
+.bf-footer-main .bf-footer-social{align-items:center;gap:10px;color:#493325}
+.bf-footer .bf-footer-main .bf-footer-social a{color:#493325}
+.bf-footer .bf-footer-main .bf-footer-social a:hover{color:#8a654b}
+.bf-footer-social a{width:24px;height:24px;opacity:1;color:inherit}
+.bf-footer-social svg{width:16px;height:16px;stroke-width:2}
+.bf-footer-social a:nth-child(3) svg{fill:currentColor;stroke:none}
+.bf-footer-social a:nth-child(3) svg path:last-child{fill:var(--bf-paper);stroke:none}
+.bf-footer-social a:nth-child(4){position:relative}
+.bf-footer-social a:nth-child(4) img{display:none}
+.bf-footer-social a:nth-child(4)::before{content:'LINE';display:grid;place-items:center;width:17px;height:14px;border:1.35px solid currentColor;border-radius:48%;font:700 5px/1 Arial,sans-serif;letter-spacing:-.2px}
+.bf-footer-social a:nth-child(4)::after{content:none}
+.bf-footer-bottom{min-height:30px;padding-block:6px;line-height:1.4}
+@media(max-width:1100px){
+ .bf-footer-main{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding-block:20px 16px}
+ .bf-footer-main .bf-footer-brand{width:min(145px,40vw)}
+ .bf-footer-main .bf-footer-motto{grid-column:2;display:block;text-align:right;white-space:normal;font-size:11px}
+ .bf-footer-main .bf-footer-links{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 0;margin:0}
+ .bf-footer-main .bf-footer-links a{padding:8px 3px;border:0;text-align:center;font-size:11px}
+ .bf-footer-main .bf-footer-social{grid-column:1;grid-row:3;justify-content:flex-start;gap:10px;margin:0}
+ .bf-footer-social a{width:44px;height:44px}
+ .bf-footer-social svg{width:22px;height:22px}
+ .bf-footer-social a:nth-child(4)::before{width:22px;height:18px;font-size:6px;border-width:1.6px}
+ .bf-footer-main .bf-footer-maker{grid-column:2;grid-row:3;justify-self:end;border:0;padding:0;text-align:right}
+ .bf-footer-main .bf-footer-maker strong{font-size:10px}
+ .bf-footer-main .bf-footer-maker small{font-size:8px}
+ .bf-footer-bottom{padding-block:12px}
+ .bf-footer-bottom .bf-wrap{flex-direction:column;align-items:flex-start;gap:9px}
+ .bf-footer-bottom small{font-size:9px}
+ .bf-footer-bottom nav{flex-wrap:wrap;justify-content:flex-start}
+ .bf-footer-bottom nav a,.bf-footer-bottom nav span{font-size:9px}
+ .bf-footer-bottom nav>*+*{margin-left:10px;padding-left:10px!important}
+}
+@media(max-width:440px){
+ .bf-footer-main .bf-footer-social{grid-column:1/-1;grid-row:auto}
+ .bf-footer-main .bf-footer-maker{grid-column:1/-1;grid-row:auto}
+}
 /* Data-driven collection filters and expanded course content. */
 .bf-collection-filter{display:grid;gap:10px;margin:25px 0 12px}.bf-collection-filter .bf-filter-list{display:flex;gap:8px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin}.bf-collection-filter button{flex:none;min-height:44px;padding:8px 15px;border:1px solid var(--bf-rule);background:transparent;color:var(--bf-ink);white-space:nowrap}.bf-collection-filter button.is-active{border-color:var(--bf-wood);background:var(--bf-wood);color:#fff}.bf-course-content-list{padding-block:38px 45px}.bf-course-content-list h2{margin:10px 0 18px}.bf-course-content-list ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 36px;padding-left:22px}.bf-course-card-plans{margin:10px 0;color:var(--bf-wood);font-size:13px}.bf-school-specialist{padding-top:35px}.bf-course-poster .bf-detail-gallery{margin-top:26px}
 @media(max-width:760px){.bf-collection-filter{margin-top:20px}.bf-collection-filter .bf-filter-list{margin-inline:-3px}.bf-course-content-list ul{grid-template-columns:1fr;gap:8px}.bf-course-content-list{padding-block:28px 34px}}
@@ -143,3 +176,32 @@ body.bfnd-body .bf-craft-content h3{font-size:21px}body.bfnd-body .bf-craft-cons
 /* Payment gateway marks must not inherit the full-bleed editorial image rule. */
 body.bfnd-body #payment .payment_methods li[class*="Wooecpay"] img{display:inline-block!important;width:auto!important;max-width:128px!important;height:auto!important;max-height:32px!important;object-fit:contain!important;vertical-align:middle;margin-inline-start:8px}
 @media(max-width:760px){body.bfnd-body #payment .payment_methods li[class*="Wooecpay"] img{max-width:104px!important;max-height:28px!important}}
+.bf-direct-contact{display:grid;gap:9px;margin:24px 0 20px;padding:18px 0;border-top:1px solid var(--bf-rule);border-bottom:1px solid var(--bf-rule)}
+.bf-direct-contact-row{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:baseline;gap:10px;margin:0!important;font-size:14px;line-height:1.7}
+.bf-direct-contact-row>span{color:var(--bf-muted);font-size:12px;letter-spacing:.06em}
+.bf-direct-contact-row>a{width:fit-content;max-width:100%;color:var(--bf-wood);overflow-wrap:anywhere;text-decoration:underline;text-decoration-color:#8a6a5555;text-underline-offset:3px}
+.bf-direct-contact-row>a:hover{color:#8a654b;text-decoration-color:currentColor}
+.bf-direct-contact-row>a:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+
+/* Use the same compact navigation breakpoint as the responsive footer. */
+@media(max-width:1100px){
+ .bf-header-inner{width:calc(100% - 34px);height:70px;gap:10px}
+ .bf-logo{width:154px}
+ .bf-header-tools{display:none}
+ .bf-header-contact{display:none}
+ .bf-menu-button{display:flex;margin-left:auto;gap:10px;align-items:center;min-height:44px;border:0;background:transparent;color:var(--bf-ink);font-size:13px}
+ .bf-nav{display:none;position:absolute;top:70px;left:0;right:0;background:#fff;box-shadow:0 15px 30px #30221918;margin:0;padding:17px;flex-direction:column;align-items:stretch;gap:0}
+ .bf-nav.is-open{display:flex}
+ .bf-nav a{font-size:16px;padding:11px 9px;min-height:44px}
+ .bf-nav a[aria-current]:after{bottom:4px;left:9px;right:auto;width:30px}
+ .bf-nav-school{display:block;min-height:0}
+ .bf-nav-school>a{display:inline-block}
+ .bf-nav-school-toggle{display:inline-block;min-height:44px}
+ .bf-nav-course-menu{position:static;transform:none;width:100%;box-shadow:none;border:0;border-top:1px solid #e8e0d6;padding:18px 9px;grid-template-columns:1fr 1fr;gap:15px}
+ .bf-nav-course-menu>div+div{padding-left:14px}
+ .bf-nav .bf-nav-course-menu a{min-height:36px;padding:5px 0;font-size:12px}
+}
+@media(max-width:420px){
+ .bf-header-inner{height:65px}
+ .bf-nav{top:65px}
+}

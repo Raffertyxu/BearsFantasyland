@@ -13,12 +13,21 @@
 | `NEWDESIGN/照片/`、`NEWDESIGN/網頁分層圖示及文字/` | 客戶提供的產品照片、版型參考、文字與設計文件 |
 | `components/`、`css/`、`images/`、`plugins/`、`index.html` | 原有網站與較早期的元件／外掛；動手修改前先確認要維護的是新版 `NEWDESIGN` 還是舊版來源 |
 
-## 目前版本與部署包
+## 目前版本與部署狀態
 
 - 外掛原始碼版本：`0.5.5`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`）
-- 主題原始碼版本：`1.3.3`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
-- 目前命名的部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`
-- 舊版 ZIP 也保留在 `dist/`，方便回溯；ZIP 使用 Git LFS。新電腦 clone 後若 ZIP 內容只顯示 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
+- 主題原始碼版本：`1.3.9`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
+- 正式站仍載入主題 CSS `public/style.css?ver=1.3.7`；頁首頁尾 RWD 與深棕 LINE 泡泡字標由 WordPress「外觀 → 自訂 → 額外的 CSS」覆寫，已在正式首頁即時確認生效。主題 ZIP 的完整覆蓋仍因 `assets/works/ripple/01.webp` 複製錯誤而未確認成功，不能將來源版本視為已部署版本。
+- 本機部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`。ZIP 由 Git LFS 管理；新電腦若只看到 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
+- 2026-10-01 本輪主題來源、部署 ZIP、README、HANDOFF 與部署紀錄已同步到 GitHub `main`。另一台電腦先執行 `git pull` 和 `git lfs pull`；每次接手仍要用 `git status --short --branch`、`git log -5 --oneline` 核對當下狀態。
+
+### 2026-10-01 頁首頁尾 RWD 與社群標記（最新）
+
+正式站原本頁首只在 760px 以下收合，頁尾也只在 760px 以下改排，761–1100px 平板仍擠在桌機列。本機主題來源升至 `1.3.9`，頁首與頁尾統一在 1100px 以下轉為窄版排列；桌機 LINE 標記高 14px，手機高 18px 並保留 44px 點擊區。正式首頁已發布等效額外 CSS，320／375／414／768／1024／1440px 瀏覽器寬度均無橫向溢位，320px 選單可實際展開。此為瀏覽器視窗尺寸檢查，沒有代表真實手機實機或全站每頁驗收。
+
+### 2026-10-01 較早的頁尾圖示迭代（歷史狀態）
+
+中途曾在正式首頁載入 LINE 官方 PNG 並調整社群圖示顏色；其後 1.3.9 的頁首頁尾修正改用配合設計稿的深棕泡泡字標。完整主題 ZIP 仍未成功覆蓋正式站，正式站目前依靠額外 CSS 呈現最新頁尾樣式。較早各次嘗試及錯誤訊息保留在 [`HANDOFF.md`](HANDOFF.md) 和[部署紀錄](NEWDESIGN/website/DEPLOYMENT.md)，其中舊記錄的部署／Git 狀態只代表當時快照。
 
 2026-10-01 生活木作版型修正：正式頁「生活木作的可能性」標題原先被 155px 欄寬擠成三行。主題升至 `1.3.3`，標題欄增至 240px，並在 1200px 以下改為標題與內文上下排列，圖片跟隨區塊高度。即時確認 CSS `public/style.css?ver=1.3.3`；1536px 桌機標題回到兩行、1024px 平板改為上下排列、390px 手機保留單欄圖文，四張製作圖片載入正常。修改、主題 ZIP 與部署結果記於 [`HANDOFF.md`](HANDOFF.md) 及[部署紀錄](NEWDESIGN/website/DEPLOYMENT.md)。
 
