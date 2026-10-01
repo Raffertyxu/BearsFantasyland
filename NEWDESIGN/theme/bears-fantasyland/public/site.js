@@ -28,19 +28,22 @@
   if (catalog) {
     const items = [...catalog.querySelectorAll('.bf-catalog-item')];
     const filters = [...document.querySelectorAll('[data-filter]')];
+    const seriesFilters = [...document.querySelectorAll('[data-series-filter]')];
     const search = document.querySelector('#bf-search');
     const sort = document.querySelector('#bf-sort');
     const count = document.querySelector('#bf-result-count');
     const empty = document.querySelector('#bf-no-results');
     const more = document.querySelector('#bf-load-more');
     const pageSize = 12;
-    let active = 'all';
+    let activeCategory = 'all';
+    let activeSeries = 'all';
     let visibleLimit = pageSize;
 
     const update = () => {
       const term = (search?.value || '').trim().toLocaleLowerCase();
       const matching = items.filter((item) =>
-        (active === 'all' || item.dataset.category === active) &&
+        (activeCategory === 'all' || item.dataset.category === activeCategory) &&
+        (activeSeries === 'all' || item.dataset.seriesFilter === activeSeries) &&
         (!term || item.dataset.search?.includes(term))
       );
       matching.sort((a, b) => {
@@ -61,8 +64,13 @@
     };
     const reset = () => { visibleLimit = pageSize; update(); };
     filters.forEach((button) => button.addEventListener('click', () => {
-      active = button.dataset.filter;
+      activeCategory = button.dataset.filter;
       filters.forEach((filter) => filter.classList.toggle('is-active', filter === button));
+      reset();
+    }));
+    seriesFilters.forEach((button) => button.addEventListener('click', () => {
+      activeSeries = button.dataset.seriesFilter;
+      seriesFilters.forEach((filter) => filter.classList.toggle('is-active', filter === button));
       reset();
     }));
     search?.addEventListener('input', reset);

@@ -61,8 +61,20 @@ function bfnd_work_card($post) {
     $id = $post->ID;
     $series = wp_get_post_terms($id, 'bf_series', array('fields' => 'names'));
     echo '<a class="bf-work-card" href="' . esc_url(get_permalink($id)) . '"><div class="bf-work-image">';
-    bfnd_image(bfnd_work_image($id, 'large'), get_the_title($id) . '・' . bfnd_meta($id, 'type') . '・' . bfnd_meta($id, 'material'));
+    bfnd_image(bfnd_work_image($id, 'large'), get_the_title($id) . '・' . bfnd_meta($id, 'type') . '・' . bfnd_public_material($id));
     echo '</div><div class="bf-card-line"><h3>' . bfnd_e(get_the_title($id)) . '</h3><span aria-hidden="true">↗</span></div><p>' . bfnd_e(bfnd_meta($id, 'english')) . '</p><small>' . bfnd_e($series ? $series[0] : '') . ' / ' . bfnd_e(bfnd_meta($id, 'type')) . '</small></a>';
+}
+function bfnd_public_material($id) {
+    $material = trim((string) bfnd_meta($id, 'material'));
+    $material = preg_replace('/[（(][^）)]*待確認[^）)]*[）)]/u', '', $material);
+    $material = trim(str_replace('待確認', '', $material), " \t\n\r\0\x0B，,、／/｜|");
+    return $material !== '' ? $material : '木材資訊請洽作品諮詢';
+}
+function bfnd_public_size($id) {
+    $size = trim((string) bfnd_meta($id, 'size'));
+    if ($size === '') { return ''; }
+    if (bfnd_meta($id, 'size_confirmed') !== '1') { return '尺寸請洽作品諮詢'; }
+    return '參考尺寸｜' . $size . '，手工製作，實際尺寸依作品為準。';
 }
 function bfnd_render_home() {
     $hero = bfnd_work_by_seed('muyo');
@@ -107,19 +119,28 @@ function bfnd_render_furniture() {
         usort($terms, function ($a, $b) use ($order) { return ($order[$a->slug] ?? 100) <=> ($order[$b->slug] ?? 100) ?: strcmp($a->name, $b->name); });
         foreach ($terms as $term) { echo '<button data-filter="' . esc_attr($term->slug) . '" type="button">' . bfnd_e($term->name) . '</button>'; }
     }
-    echo '<button data-filter="other" type="button">其他</button></div><div class="bf-catalog-controls"><label><span class="bf-visually-hidden">搜尋作品</span><input id="bf-search" type="search" placeholder="搜尋作品、系列或木材"></label><label><span class="bf-visually-hidden">排序</span><select id="bf-sort"><option value="recent">最新作品</option><option value="series">系列</option><option value="material">材質</option></select></label></div></div><p id="bf-result-count" class="bf-result-count" aria-live="polite"></p><div id="bf-catalog" class="bf-work-grid">';
+    echo '<button data-filter="other" type="button">其他</button></div><div class="bf-catalog-controls"><label><span class="bf-visually-hidden">搜尋作品</span><input id="bf-search" type="search" placeholder="搜尋作品、系列或木材"></label><label><span class="bf-visually-hidden">排序</span><select id="bf-sort"><option value="recent">最新作品</option><option value="series">系列</option><option value="material">材質</option></select></label></div></div>';
+    $series_terms = get_terms(array('taxonomy' => 'bf_series', 'hide_empty' => true));
+    if (!is_wp_error($series_terms) && $series_terms) {
+        echo '<div class="bf-collection-filter"><span class="bf-kicker">COLLECTIONS / 依系列瀏覽</span><div class="bf-filter-list" role="group" aria-label="作品系列"><button class="is-active" data-series-filter="all" type="button">全部系列</button>';
+        foreach ($series_terms as $term) { echo '<button data-series-filter="' . esc_attr($term->slug) . '" type="button">' . bfnd_e($term->name) . '</button>'; }
+        echo '</div></div>';
+    }
+    echo '<p id="bf-result-count" class="bf-result-count" aria-live="polite"></p><div id="bf-catalog" class="bf-work-grid">';
     $q = bfnd_work_query(array('orderby' => 'menu_order', 'order' => 'ASC'));
     foreach ($q->posts as $post) {
         $series = wp_get_post_terms($post->ID, 'bf_series', array('fields' => 'names'));
         $cat = wp_get_post_terms($post->ID, 'bf_work_cat', array('fields' => 'slugs'));
-        $search = implode(' ', array(get_the_title($post), bfnd_meta($post->ID, 'english'), $series ? $series[0] : '', bfnd_meta($post->ID, 'type'), bfnd_meta($post->ID, 'material')));
-        echo '<div class="bf-catalog-item" data-category="' . esc_attr($cat ? $cat[0] : 'other') . '" data-search="' . esc_attr(mb_strtolower($search)) . '" data-series="' . esc_attr($series ? $series[0] : '') . '" data-material="' . esc_attr(bfnd_meta($post->ID, 'material')) . '" data-date="' . esc_attr(get_post_time('U', true, $post)) . '">'; bfnd_work_card($post); echo '</div>';
+        $series_slugs = wp_get_post_terms($post->ID, 'bf_series', array('fields' => 'slugs'));
+        $material = bfnd_public_material($post->ID);
+        $search = implode(' ', array(get_the_title($post), bfnd_meta($post->ID, 'english'), $series ? $series[0] : '', bfnd_meta($post->ID, 'type'), $material));
+        echo '<div class="bf-catalog-item" data-category="' . esc_attr($cat ? $cat[0] : 'other') . '" data-search="' . esc_attr(mb_strtolower($search)) . '" data-series="' . esc_attr($series ? $series[0] : '') . '" data-series-filter="' . esc_attr($series_slugs ? $series_slugs[0] : '') . '" data-material="' . esc_attr($material) . '" data-date="' . esc_attr(get_post_time('U', true, $post)) . '">'; bfnd_work_card($post); echo '</div>';
     }
     echo '</div><p id="bf-no-results" class="bf-empty" hidden>沒有符合條件的作品，試試其他關鍵字或分類。</p><div class="bf-catalog-more"><button id="bf-load-more" class="bf-catalog-more-button" type="button" hidden>載入更多作品 <span aria-hidden="true">↓</span></button></div></section>';
-    bfnd_render_cta('喜歡這件作品，', '也可以為你的空間重新製作。', '了解訂製服務', bfnd_page_url('collaboration'));
+    bfnd_render_cta('喜歡這件作品？', '歡迎詢問作品尺寸、木種、製作方式與現有規格。', '作品諮詢', bfnd_page_url('collaboration') . '#inquiry');
 }
 function bfnd_render_cta($line1, $line2, $label, $url) {
-    echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">CUSTOM MADE</span><h2>' . bfnd_e($line1) . '<br>' . bfnd_e($line2) . '</h2>'; bfnd_button($label, $url); echo '</div></section>';
+    echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">BEAR’S FANTASYLAND</span><h2>' . bfnd_e($line1) . '<br>' . bfnd_e($line2) . '</h2>'; bfnd_button($label, $url); echo '</div></section>';
 }
 
 function bfnd_render_work($id) {
@@ -135,28 +156,35 @@ function bfnd_render_work($id) {
         echo '<div class="bf-story-copy"><span class="bf-index">01 / STORY</span><h2>作品故事</h2><p>' . nl2br(esc_html(get_post_field('post_content', $id))) . '</p></div></section>';
     }
     $series = wp_get_post_terms($id, 'bf_series', array('fields' => 'names'));
-    $specs = array('系列' => $series ? $series[0] : '', '作品類型' => bfnd_meta($id, 'type'), '木材／材質' => bfnd_meta($id, 'material'), '參考尺寸' => bfnd_meta($id, 'size'), '表面處理' => bfnd_meta($id, 'finish'), '設計製作' => '飛熊入夢 Bear’s Fantasyland');
+    $size = bfnd_public_size($id);
+    $specs = array('系列' => $series ? $series[0] : '', '作品類型' => bfnd_meta($id, 'type'), '木材／材質' => bfnd_public_material($id), '參考尺寸' => $size, '表面處理' => bfnd_meta($id, 'finish'), '設計製作' => '飛熊入夢 Bear’s Fantasyland');
     echo '<section class="bf-spec-section"><div class="bf-wrap"><span class="bf-index">02 / SPECIFICATION</span><h2>作品規格</h2><div class="bf-spec-grid">';
     foreach ($specs as $label => $value) { if ($value) { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . bfnd_e($value) . '</dd></div>'; } }
-    echo '</div><small>尺寸為參考尺寸，依作品照片推估；尺寸、木種與細節可依空間需求討論。</small></div></section>';
-    if (count($gallery) > 1) {
-        echo '<section class="bf-section bf-wrap"><div class="bf-section-head"><div><span class="bf-index">03 / DETAILS</span><h2>工藝細節</h2></div></div><div class="bf-detail-gallery">';
-        foreach (array_slice($gallery, 1, 6) as $src) { echo '<button class="bf-gallery-button" type="button" aria-label="放大作品照片">'; bfnd_image($src, $title . '・作品細節'); echo '</button>'; }
-        echo '</div></section>';
+    echo '</div></div></section>';
+    $detail_images = array_slice($gallery, 2, 6);
+    echo '<section class="bf-section bf-wrap"><div class="bf-section-head"><div><span class="bf-index">03 / DETAILS</span><h2>工藝細節</h2></div></div>';
+    if ($detail_images) {
+        echo '<div class="bf-detail-gallery">';
+        foreach ($detail_images as $src) { echo '<button class="bf-gallery-button" type="button" aria-label="放大作品照片">'; bfnd_image($src, $title . '・作品細節'); echo '</button>'; }
+        echo '</div>';
+    } else {
+        echo '<p>歡迎透過作品諮詢了解製作方式與作品細節。</p>';
     }
+    echo '</section>';
+    $selected = array_values(array_filter(array_map('absint', (array) bfnd_meta($id, 'related_ids'))));
+    $related = $selected ? bfnd_work_query(array('post__in' => $selected, 'orderby' => 'post__in', 'posts_per_page' => 4)) : bfnd_work_query(array('post__not_in' => array($id), 'posts_per_page' => 4, 'orderby' => 'menu_order', 'order' => 'ASC'));
+    if ($related->have_posts()) { echo '<section class="bf-section bf-wrap">'; bfnd_section_head('RELATED WORKS', '相關作品', bfnd_page_url('furniture'), '所有作品'); echo '<div class="bf-work-grid">'; foreach ($related->posts as $post) { bfnd_work_card($post); } echo '</div></section>'; }
     $craft = bfnd_meta($id, 'craft');
     $craft_image = wp_get_attachment_image_url((int) bfnd_meta($id, 'craft_image_id'), 'large');
     if ($craft && $craft_image) {
         echo '<section class="bf-craft-section"><div class="bf-wrap"><span class="bf-index">04 / CRAFT</span><h2>製作方式</h2><div class="bf-craft-layout"><div class="bf-craft-photo">'; bfnd_image($craft_image, $title . '的實際製作過程'); echo '</div><div class="bf-craft-content"><h3>以時間，完成一件作品</h3><p>從選材、加工到細節修整，每一道工序都讓材料與設計更貼近生活。</p><ol class="bf-craft-steps">';
         $steps = preg_split('/[、・,，]+/u', $craft);
         foreach ($steps as $i => $step) { $step = trim($step); if ($step) { echo '<li><span>' . sprintf('%02d', $i + 1) . '</span>' . bfnd_e($step) . '</li>'; } }
-        echo '</ol></div><aside class="bf-craft-consult"><b aria-hidden="true">◇</b><h3>訂製專屬於你的家具</h3><p>尺寸、木材、比例與細節，都可以依你的空間與使用需求討論。</p>'; bfnd_button('聯絡訂製', add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry'); echo '</aside></div></div></section>';
+        echo '</ol></div></div></div></section>';
     }
-    echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">CUSTOM MADE</span><h2>喜歡這件作品，<br>也可以為你的空間重新製作。</h2><p>' . bfnd_e(bfnd_meta($id, 'custom') ?: '尺寸、木種與細節皆可依需求討論。') . '</p>';
-    bfnd_button('詢問訂製', add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry'); echo '</div></section>';
-    $selected = array_values(array_filter(array_map('absint', (array) bfnd_meta($id, 'related_ids'))));
-    $related = $selected ? bfnd_work_query(array('post__in' => $selected, 'orderby' => 'post__in', 'posts_per_page' => 4)) : bfnd_work_query(array('post__not_in' => array($id), 'posts_per_page' => 4, 'orderby' => 'menu_order', 'order' => 'ASC'));
-    if ($related->have_posts()) { echo '<section class="bf-section bf-wrap">'; bfnd_section_head('RELATED WORKS', '相關作品', bfnd_page_url('furniture'), '所有作品'); echo '<div class="bf-work-grid">'; foreach ($related->posts as $post) { bfnd_work_card($post); } echo '</div></section>'; }
+    echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">WORKS INQUIRY</span><h2>喜歡這件作品？</h2><p>歡迎詢問作品尺寸、木種、製作方式與現有規格。</p>';
+    if (bfnd_meta($id, 'size_adjustable') === '1') { echo '<p>部分作品可依空間需求調整尺寸，實際製作方式歡迎與我們討論。</p>'; }
+    bfnd_button('作品諮詢', add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry'); echo '</div></section>';
     echo '<dialog id="bf-image-dialog" class="bf-image-dialog"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="作品照片放大檢視"></dialog>';
 }
 
@@ -221,7 +249,13 @@ function bfnd_render_school() {
     echo '<section class="bf-learning-path bf-wrap" aria-labelledby="bf-learning-path-title"><div class="bf-learning-path-heading"><span class="bf-kicker">LEARNING PATH</span><h2 id="bf-learning-path-title">木作學習路徑</h2></div><ol class="bf-learning-path-steps"><li><span>LEVEL 1</span><strong>基礎</strong></li><li><span>LEVEL 2</span><strong>進階</strong></li><li><span>LEVEL 3</span><strong>養成</strong></li><li><span>自由創作</span><strong>會員</strong></li></ol></section>';
     echo '<section class="bf-section bf-wrap bf-school-courses" id="onsite-courses"><div class="bf-tab-head">'; bfnd_section_head('LEARN BY MAKING', '實體課程', '#online-courses', '查看線上課程'); echo '</div>';
     $courses = get_posts(array('post_type' => 'bf_course', 'post_status' => current_user_can('edit_posts') ? array('publish', 'private') : 'publish', 'numberposts' => -1, 'orderby' => 'menu_order', 'order' => 'ASC'));
-    echo '<div class="bf-course-grid" data-course-group="onsite">'; foreach ($courses as $course) { if (bfnd_meta($course->ID, 'mode') !== 'online') { bfnd_course_card($course); } } echo '</div></section>';
+    echo '<div class="bf-course-grid" data-course-group="onsite">'; foreach ($courses as $course) { if (bfnd_meta($course->ID, 'mode') !== 'online' && bfnd_course_track($course->ID) !== 'specialist') { bfnd_course_card($course); } } echo '</div></section>';
+    $specialist_courses = array_filter($courses, function ($course) { return bfnd_meta($course->ID, 'mode') !== 'online' && bfnd_course_track($course->ID) === 'specialist'; });
+    if ($specialist_courses) {
+        echo '<section class="bf-section bf-wrap bf-school-specialist" id="specialist-courses">';
+        bfnd_section_head('SPECIALIST SKILLS', '專項技能課程');
+        echo '<div class="bf-course-grid">'; foreach ($specialist_courses as $course) { bfnd_course_card($course); } echo '</div></section>';
+    }
     echo '<section class="bf-section bf-wrap bf-school-online" id="online-courses">'; bfnd_section_head('LEARN FROM ANYWHERE', '線上課程', '#onsite-courses', '查看實體課程');
     echo '<div class="bf-course-grid" data-course-group="online">'; $online = 0; foreach ($courses as $course) { if (bfnd_meta($course->ID, 'mode') === 'online') { bfnd_course_card($course); $online++; } }
     if (!$online) {
@@ -240,29 +274,62 @@ function bfnd_render_school() {
     echo '<section class="bf-school-cta" style="background-image:linear-gradient(90deg,#24180dcc,#24180d22),url(' . esc_url($school_cta) . ')"><div class="bf-wrap"><h2>不知道哪一堂課適合你？</h2><p>歡迎與我們聊聊，找到最適合你的學習路徑。</p><div class="bf-actions">'; bfnd_button('課程選擇指南', '#onsite-courses', true); bfnd_button('聯絡我們', bfnd_page_url('collaboration') . '#inquiry', true); echo '</div></div></section>';
 }
 
+function bfnd_course_track($id) {
+    $track = bfnd_meta($id, 'track');
+    if ($track) { return $track; }
+    return in_array(bfnd_meta($id, 'seed'), array('cnc', 'sharpening'), true) ? 'specialist' : '';
+}
+
+function bfnd_render_course_list($id, $key, $title, $index) {
+    $value = trim((string) bfnd_meta($id, $key));
+    if ($value === '') { return; }
+    $items = preg_split('/\r\n|\r|\n/u', $value);
+    echo '<section class="bf-section bf-wrap bf-course-content-list"><span class="bf-index">' . bfnd_e($index) . '</span><h2>' . bfnd_e($title) . '</h2><ul>';
+    foreach ($items as $item) { $item = trim($item); if ($item !== '') { echo '<li>' . bfnd_e($item) . '</li>'; } }
+    echo '</ul></section>';
+}
+
 function bfnd_course_card($course) {
     $id = $course->ID;
-    echo '<article class="bf-course-card"><a class="bf-course-card-main" href="' . esc_url(get_permalink($id)) . '"><div class="bf-course-image">'; bfnd_image(bfnd_work_image($id, 'medium_large'), get_the_title($id) . '課程'); echo '</div><div class="bf-course-card-body"><span class="bf-kicker">' . (bfnd_meta($id, 'mode') === 'online' ? 'ONLINE COURSE' : 'ON-SITE COURSE') . '</span><h3>' . bfnd_e(get_the_title($id)) . '</h3><div class="bf-course-meta"><span>' . bfnd_e(bfnd_meta($id, 'duration')) . '</span><span>' . bfnd_e(bfnd_meta($id, 'level')) . '</span></div>';
-    $price = bfnd_meta($id, 'price'); if ($price) { echo '<p class="bf-course-price">NT$ ' . bfnd_e(number_format((int) $price)) . ($id && bfnd_meta($id, 'seed') === 'open-studio' ? ' 起' : '') . '</p>'; }
+    $duration = trim((string) bfnd_meta($id, 'duration'));
+    $level = trim((string) bfnd_meta($id, 'level'));
+    echo '<article class="bf-course-card"><a class="bf-course-card-main" href="' . esc_url(get_permalink($id)) . '"><div class="bf-course-image">'; bfnd_image(bfnd_work_image($id, 'medium_large'), get_the_title($id) . '課程'); echo '</div><div class="bf-course-card-body"><span class="bf-kicker">' . (bfnd_meta($id, 'mode') === 'online' ? 'ONLINE COURSE' : (bfnd_course_track($id) === 'specialist' ? 'SPECIALIST SKILLS' : 'ON-SITE COURSE')) . '</span><h3>' . bfnd_e(get_the_title($id)) . '</h3><div class="bf-course-meta">';
+    if ($duration !== '') { echo '<span>' . bfnd_e($duration) . '</span>'; }
+    if ($level !== '') { echo '<span>' . bfnd_e($level) . '</span>'; }
+    echo '</div>';
+    $price = bfnd_meta($id, 'price'); if ($price !== '') { echo '<p class="bf-course-price">NT$ ' . bfnd_e(number_format((int) $price)) . '</p>'; }
+    $features = trim((string) bfnd_meta($id, 'features'));
+    if ($features !== '') { echo '<p class="bf-course-card-plans">' . nl2br(esc_html($features)) . '</p>'; }
     echo '<span class="bf-plain-link">查看課程詳情 ↗</span></div></a>';
     $woo = absint(bfnd_meta($id, 'woo_id'));
-    if ($woo && class_exists('WooCommerce') && get_post_status($woo) === 'publish') {
-        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('add-to-cart', $woo, wc_get_cart_url())) . '">加入購物車 ↗</a>';
+    $product = $woo && function_exists('wc_get_product') ? wc_get_product($woo) : false;
+    $button = trim((string) bfnd_meta($id, 'registration_button'));
+    if ($product && $product->is_purchasable()) {
+        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('add-to-cart', $woo, wc_get_cart_url())) . '">' . bfnd_e($button ?: '立即報名') . ' ↗</a>';
     } else {
-        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry') . '">洽詢報名 ↗</a>';
+        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry') . '">' . bfnd_e($button ?: '詢問課程') . ' ↗</a>';
     }
     echo '</article>';
 }
 
 function bfnd_render_course($id) {
     bfnd_simple_hero('WOODWORKING COURSE', get_the_title($id), get_the_excerpt($id), bfnd_work_image($id, 'full'));
-    echo '<section class="bf-story-grid bf-wrap"><div><span class="bf-index">01 / ABOUT THE COURSE</span><h2>課程介紹</h2><div class="bf-prose">' . apply_filters('the_content', get_post_field('post_content', $id)) . '</div></div><div class="bf-course-facts"><dl><div><dt>課程形式</dt><dd>' . (bfnd_meta($id, 'mode') === 'online' ? '線上課程' : '實體課程') . '</dd></div><div><dt>課程時數</dt><dd>' . bfnd_e(bfnd_meta($id, 'duration')) . '</dd></div><div><dt>適合對象</dt><dd>' . bfnd_e(bfnd_meta($id, 'level')) . '</dd></div><div><dt>開課資訊</dt><dd>' . bfnd_e(bfnd_meta($id, 'schedule') ?: '請洽詢最新梯次') . '</dd></div></dl>';
+    echo '<section class="bf-story-grid bf-wrap"><div><span class="bf-index">01 / ABOUT THE COURSE</span><h2>課程介紹</h2><div class="bf-prose">' . apply_filters('the_content', get_post_field('post_content', $id)) . '</div></div><div class="bf-course-facts"><dl><div><dt>課程形式</dt><dd>' . (bfnd_meta($id, 'mode') === 'online' ? '線上課程' : '實體課程') . '</dd></div>';
+    $facts = array('課程時數' => bfnd_meta($id, 'duration'), '課程費用' => bfnd_meta($id, 'price') !== '' ? 'NT$ ' . number_format((int) bfnd_meta($id, 'price')) : '', '程度' => bfnd_meta($id, 'level'), '適合對象' => bfnd_meta($id, 'audience') ?: bfnd_meta($id, 'level'), '開課梯次' => bfnd_meta($id, 'schedule'));
+    foreach ($facts as $label => $value) { if (trim((string) $value) !== '') { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . nl2br(bfnd_e($value)) . '</dd></div>'; } }
     $woo = absint(bfnd_meta($id, 'woo_id'));
-    if ($woo && class_exists('WooCommerce') && get_post_status($woo) === 'publish') { bfnd_button('加入購物車', add_query_arg('add-to-cart', $woo, wc_get_cart_url())); }
-    else { bfnd_button('詢問課程', add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry'); }
+    $product = $woo && function_exists('wc_get_product') ? wc_get_product($woo) : false;
+    $button = trim((string) bfnd_meta($id, 'registration_button'));
+    if ($product && $product->is_purchasable()) { bfnd_button($button ?: '立即報名', add_query_arg('add-to-cart', $woo, wc_get_cart_url())); }
+    else { bfnd_button($button ?: '詢問課程', add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry'); }
     echo '</div></section>';
+    bfnd_render_course_list($id, 'features', '課程特色', '02 / COURSE FEATURES');
+    bfnd_render_course_list($id, 'learning', '學習內容', '03 / LEARNING');
+    bfnd_render_course_list($id, 'tools', '使用工具', '04 / TOOLS');
+    bfnd_render_course_list($id, 'outcomes', '完成成果', '05 / OUTCOMES');
+    bfnd_render_course_list($id, 'notices', '注意事項', '06 / NOTES');
     $posters = bfnd_gallery($id);
-    if ($posters) { echo '<section class="bf-section bf-wrap bf-course-poster"><span class="bf-kicker">COURSE INFORMATION</span><h2>課程簡章</h2>'; bfnd_image($posters[0], get_the_title($id) . '課程簡章'); echo '</section>'; }
+    if ($posters) { echo '<section class="bf-section bf-wrap bf-course-poster"><span class="bf-kicker">COURSE INFORMATION</span><h2>課程簡章</h2>'; bfnd_image($posters[0], get_the_title($id) . '課程簡章'); if (count($posters) > 1) { echo '<h3>課程照片</h3><div class="bf-detail-gallery">'; foreach (array_slice($posters, 1, 8) as $photo) { bfnd_image($photo, get_the_title($id) . '課程照片'); } echo '</div>'; } echo '</section>'; }
 }
 
 function bfnd_story_row($number, $en, $title, $text, $image, $image_alt, $link = '', $link_label = '', $reverse = false) {
@@ -367,7 +434,7 @@ function bfnd_render_journal() {
 }
 function bfnd_render_service() {
     bfnd_simple_hero('PURCHASE & SERVICE', '購買與服務', '讓實木家具安心走進生活，也陪伴你長久使用。');
-    echo '<section class="bf-service-section bf-wrap"><div id="custom-process"><span class="bf-kicker">01 / CUSTOM PROCESS</span><h2>訂製流程</h2><p>需求討論 → 提案報價 → 確認細節 → 製作執行 → 完成交付。每個階段都會依作品、空間與使用需求確認，並於報價時說明交期與交付方式。</p><a class="bf-text-link" href="' . esc_url(bfnd_page_url('collaboration') . '#process') . '">了解合作流程 ↗</a></div><div id="shipping"><span class="bf-kicker">02 / SHIPPING</span><h2>運送說明</h2><p>依作品尺寸、配送地點及現場條件，安排適合的運送與安裝方式。大型家具、特殊樓層或需現場組裝的作品，將於報價時另外確認交付細節。</p></div><div id="care"><span class="bf-kicker">03 / WARRANTY & CARE</span><h2>保固與維護</h2><p>對正常使用下的製作與結構問題，我們提供售後檢查與協助。實木可能隨季節溫濕度變化而有自然伸縮、色澤與紋理差異；具體保固範圍與期間以訂單確認內容為準。</p><p>若需保養、修繕或重新整理，歡迎與我們聯繫評估。</p></div><div id="faq"><span class="bf-kicker">04 / FAQ</span><h2>常見問題</h2><details><summary>可以調整尺寸或木種嗎？</summary><p>可以。家具作品可依空間需求討論尺寸、木種與細節，實際可行性需依設計與材料評估。</p></details><details><summary>訂製流程如何進行？</summary><p>從需求討論、提案報價、確認細節，到製作執行與完成交付。我們會在每個階段與你確認。</p></details><details><summary>如何詢問運送與安裝？</summary><p>請在詢問表單提供配送地點與現場條件，我們會依作品尺寸評估方式。</p></details></div></section>';
+    echo '<section class="bf-service-section bf-wrap"><div id="purchase"><span class="bf-kicker">01 / WORKS INQUIRY</span><h2>作品購買／詢問</h2><p>飛熊入夢以自有家具作品為主。歡迎詢問作品尺寸、木種、製作方式、現有規格與可購買狀態；實際商品資訊以作品頁及訂單確認內容為準。</p><a class="bf-text-link" href="' . esc_url(bfnd_page_url('furniture')) . '">瀏覽家具作品 ↗</a></div><div id="shipping-install"><span class="bf-kicker">02 / DELIVERY</span><h2>運送與安裝</h2><p>運送及安裝安排依作品尺寸、配送地址、樓層與現場動線確認。費用、方式與交期請於下單前確認，並以訂單記載內容為準。</p></div><div id="warranty"><span class="bf-kicker">03 / WARRANTY</span><h2>作品保固</h2><p>各作品保固範圍與期間依正式保固說明及訂單記載內容為準。若有疑問，請在購買前與我們確認。</p></div><div id="care"><span class="bf-kicker">04 / CARE & REPAIR</span><h2>保養與修繕</h2><p>木材與表面處理方式不同，日常保養方法請依作品說明。若需保養或修繕，請提供作品名稱、購買資訊及狀況照片，我們會先評估可行方式與費用。</p></div><div id="faq"><span class="bf-kicker">05 / FAQ</span><h2>常見問題</h2><details><summary>作品尺寸都是固定的嗎？</summary><p>請先參閱作品頁上的規格。部分作品可依空間需求調整尺寸，實際製作方式需按個別作品確認。</p></details><details><summary>如何確認運送和安裝費用？</summary><p>請提供配送地址、樓層及現場動線，我們會依作品狀況確認可行的配送方式及費用。</p></details><details><summary>可以協助作品保養或修繕嗎？</summary><p>請提供作品資料與目前狀況，我們會先確認作品及可行的處理方式，再回覆費用與安排。</p></details></div></section>';
     bfnd_render_cta('有其他問題？', '讓我們一起討論。', '聯絡我們', bfnd_page_url('collaboration') . '#inquiry');
 }
 

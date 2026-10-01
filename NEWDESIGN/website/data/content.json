@@ -401,15 +401,17 @@
       "duration": "6 小時",
       "price": "3680",
       "level": "初學者適合",
+      "track": "level1",
       "mode": "onsite",
       "image": "/assets/courses/beginner.webp"
     },
     {
       "slug": "cnc",
       "title": "CNC 數位木工",
-      "duration": "依最新公告",
+      "duration": "",
       "price": "",
       "level": "有基礎佳",
+      "track": "specialist",
       "mode": "onsite",
       "image": "/assets/courses/cnc.webp"
     },
@@ -419,6 +421,7 @@
       "duration": "6 小時",
       "price": "3680",
       "level": "工具保養",
+      "track": "specialist",
       "mode": "onsite",
       "image": "/assets/courses/sharpening.webp"
     },
@@ -428,6 +431,9 @@
       "duration": "彈性時段",
       "price": "",
       "level": "進階創作",
+      "track": "membership",
+      "features": "4 次方案\n8 次方案\n12 次方案",
+      "audience": "適合已完成基礎課程或具相應木工能力者",
       "mode": "onsite",
       "image": "/assets/courses/open-studio.webp"
     }

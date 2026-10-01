@@ -7,7 +7,7 @@ function bfnd_register_types() {
     register_post_type('bf_work', array_merge($common, array('labels' => array('name' => '家具作品', 'singular_name' => '家具作品', 'add_new_item' => '新增家具作品', 'edit_item' => '編輯家具作品'), 'menu_icon' => 'dashicons-art')));
     register_post_type('bf_lifestyle', array_merge($common, array('labels' => array('name' => '生活木作', 'singular_name' => '生活木作', 'add_new_item' => '新增生活木作'), 'rewrite' => array('slug' => 'lifestyle-works'), 'menu_icon' => 'dashicons-palmtree')));
     register_post_type('bf_course', array_merge($common, array('labels' => array('name' => '木作課程', 'singular_name' => '木作課程', 'add_new_item' => '新增木作課程'), 'rewrite' => array('slug' => 'woodworking-course'), 'menu_icon' => 'dashicons-welcome-learn-more')));
-    register_post_type('bf_inquiry', array('labels' => array('name' => '訂製與合作詢問', 'singular_name' => '詢問', 'edit_item' => '查看詢問'),
+    register_post_type('bf_inquiry', array('labels' => array('name' => '作品、課程與合作詢問', 'singular_name' => '詢問', 'edit_item' => '查看詢問'),
         'public' => false, 'show_ui' => true, 'show_in_rest' => false, 'menu_icon' => 'dashicons-email-alt', 'supports' => array('title', 'editor')));
     register_taxonomy('bf_work_cat', 'bf_work', array('label' => '家具分類', 'hierarchical' => true, 'public' => true, 'show_in_rest' => true, 'rewrite' => array('slug' => 'furniture-category')));
     register_taxonomy('bf_series', 'bf_work', array('label' => '作品系列', 'hierarchical' => true, 'public' => true, 'show_in_rest' => true, 'rewrite' => array('slug' => 'furniture-series')));
@@ -39,8 +39,8 @@ function bfnd_migrate_native_journal_categories() {
 
 function bfnd_fields($type) {
     $shared = array('english' => '英文名稱', 'tagline' => '一句話介紹', 'seo_title' => 'SEO Title', 'seo_description' => 'SEO Description');
-    if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'size' => '參考尺寸', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'custom' => '訂製說明', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '細節照片')); }
-    if ($type === 'bf_course') { return array_merge($shared, array('mode' => '課程模式：onsite / online', 'duration' => '課程時數', 'price' => '課程價格（NT$）', 'level' => '適合對象', 'schedule' => '開課資訊', 'woo_id' => 'WooCommerce 商品 ID（選填）', 'gallery_ids' => '其他照片')); }
+    if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
+    if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price' => '課程價格（NT$；未定請留空）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；尚非梯次報名管理）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 商品 ID（連結至商品／報名按鈕）', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
     if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'size' => '參考尺寸', 'gallery_ids' => '作品照片')); }
     return array();
 }
@@ -54,7 +54,7 @@ function bfnd_meta_boxes() {
 
 function bfnd_meta_box($post) {
     wp_nonce_field('bfnd_save_meta', 'bfnd_meta_nonce');
-    echo '<p>主圖請使用右側「特色圖片」。作品故事與課程內容請編輯上方本文；作品分類、系列可在右側管理。照片可從媒體庫選取，ID 順序就是前台顯示順序。</p>';
+    echo '<p>主圖請使用右側「特色圖片」。作品故事與課程介紹請編輯上方本文；作品分類、系列可在右側管理。作品圖片、課程照片與簡章可從媒體庫選取排序；附件 ALT 文字在媒體庫編輯。</p>';
     foreach (bfnd_fields($post->post_type) as $key => $label) {
         $value = get_post_meta($post->ID, '_bfnd_' . $key, true);
         if ($key === 'gallery_ids') {
@@ -64,9 +64,17 @@ function bfnd_meta_box($post) {
             echo '</div><button id="bfnd-gallery-pick" class="button" type="button">從媒體庫選取照片</button></div>';
             continue;
         }
+        if ($key === 'size_adjustable' || $key === 'size_confirmed') {
+            echo '<p><label><input type="checkbox" name="bfnd[' . esc_attr($key) . ']" value="1" ' . checked((string) $value, '1', false) . '> <strong>' . esc_html($label) . '</strong></label></p>';
+            continue;
+        }
         if (is_array($value)) { $value = implode(',', $value); }
         echo '<p><label for="bfnd_' . esc_attr($key) . '"><strong>' . esc_html($label) . '</strong></label><br>';
-        echo '<input style="width:100%;max-width:780px" type="text" id="bfnd_' . esc_attr($key) . '" name="bfnd[' . esc_attr($key) . ']" value="' . esc_attr((string) $value) . '"></p>';
+        if (in_array($key, array('features', 'audience', 'learning', 'tools', 'outcomes', 'schedule', 'notices'), true)) {
+            echo '<textarea style="width:100%;max-width:780px" rows="4" id="bfnd_' . esc_attr($key) . '" name="bfnd[' . esc_attr($key) . ']">' . esc_textarea((string) $value) . '</textarea></p>';
+        } else {
+            echo '<input style="width:100%;max-width:780px" type="text" id="bfnd_' . esc_attr($key) . '" name="bfnd[' . esc_attr($key) . ']" value="' . esc_attr((string) $value) . '"></p>';
+        }
     }
 }
 
@@ -90,9 +98,10 @@ function bfnd_save_meta($post_id) {
     if (!in_array($type, array('bf_work', 'bf_course', 'bf_lifestyle'), true)) { return; }
     $input = isset($_POST['bfnd']) && is_array($_POST['bfnd']) ? wp_unslash($_POST['bfnd']) : array();
     foreach (bfnd_fields($type) as $key => $unused) {
-        $value = isset($input[$key]) ? sanitize_text_field($input[$key]) : '';
+        $value = isset($input[$key]) ? (in_array($key, array('features', 'audience', 'learning', 'tools', 'outcomes', 'schedule', 'notices'), true) ? sanitize_textarea_field($input[$key]) : sanitize_text_field($input[$key])) : '';
         if ($key === 'gallery_ids' || $key === 'related_ids') { $value = array_values(array_filter(array_map('absint', explode(',', $value)))); }
         if ($key === 'featured') { $value = $value === '1' ? '1' : '0'; }
+        if ($key === 'size_adjustable' || $key === 'size_confirmed') { $value = $value === '1' ? '1' : '0'; }
         update_post_meta($post_id, '_bfnd_' . $key, $value);
         if ($key === 'gallery_ids') { update_post_meta($post_id, '_bfnd_gallery_override', '1'); }
     }
@@ -103,8 +112,8 @@ function bfnd_admin_enqueue($hook) {
     $screen = get_current_screen();
     if (!$screen || !in_array($screen->post_type, array('bf_work', 'bf_course', 'bf_lifestyle'), true)) { return; }
     wp_enqueue_media();
-    wp_enqueue_style('bfnd-admin', bfnd_asset('public/admin.css'), array(), '0.1.0');
-    wp_enqueue_script('bfnd-admin', bfnd_asset('public/admin.js'), array('jquery'), '0.1.0', true);
+    wp_enqueue_style('bfnd-admin', bfnd_asset('public/admin.css'), array(), '0.1.1');
+    wp_enqueue_script('bfnd-admin', bfnd_asset('public/admin.js'), array('jquery'), '0.1.1', true);
 }
 
 function bfnd_admin_menu() {
@@ -225,6 +234,30 @@ function bfnd_seed_content() {
     foreach ($data['courses'] as $course) { bfnd_import_course($course, false); }
 }
 
+function bfnd_migrate_course_editor_fields() {
+    if (get_option('bfnd_course_editor_fields_v1')) { return; }
+    foreach (bfnd_manifest()['courses'] as $course) {
+        $id = bfnd_find_seed($course['slug'], 'bf_course');
+        if (!$id) { continue; }
+        foreach (array('track', 'features', 'audience') as $field) {
+            if (!empty($course[$field]) && get_post_meta($id, '_bfnd_' . $field, true) === '') {
+                update_post_meta($id, '_bfnd_' . $field, $course[$field]);
+            }
+        }
+        if ($course['slug'] === 'cnc') {
+            $duration = trim((string) get_post_meta($id, '_bfnd_duration', true));
+            if (in_array(preg_replace('/\s+/u', '', $duration), array('6小時', '依最新公告'), true)) { update_post_meta($id, '_bfnd_duration', ''); }
+            $price = trim((string) get_post_meta($id, '_bfnd_price', true));
+            if (preg_replace('/[^0-9]/', '', $price) === '8800') { update_post_meta($id, '_bfnd_price', ''); }
+        }
+        if ($course['slug'] === 'open-studio') {
+            $price = trim((string) get_post_meta($id, '_bfnd_price', true));
+            if (preg_replace('/[^0-9]/', '', $price) === '1800') { update_post_meta($id, '_bfnd_price', ''); }
+        }
+    }
+    update_option('bfnd_course_editor_fields_v1', 1, false);
+}
+
 function bfnd_import_work($work, $with_media = true) {
     $id = bfnd_find_seed($work['slug'], 'bf_work');
     if (!$id) {
@@ -286,7 +319,11 @@ function bfnd_import_course($course, $with_media = true) {
             'post_title' => $course['title'], 'post_excerpt' => '從一堂課開始，親手理解木作。',
             'post_content' => '課程內容、開課日期與報名方式請以品牌公告為準。',
             'meta_input' => array('_bfnd_seed' => $course['slug'], '_bfnd_mode' => $course['mode'],
-                '_bfnd_duration' => $course['duration'], '_bfnd_price' => $course['price'], '_bfnd_level' => $course['level'])));
+                '_bfnd_duration' => $course['duration'], '_bfnd_price' => $course['price'], '_bfnd_level' => $course['level'],
+                '_bfnd_track' => $course['track'] ?? '', '_bfnd_features' => $course['features'] ?? '',
+                '_bfnd_audience' => $course['audience'] ?? '', '_bfnd_learning' => $course['learning'] ?? '',
+                '_bfnd_tools' => $course['tools'] ?? '', '_bfnd_outcomes' => $course['outcomes'] ?? '',
+                '_bfnd_notices' => $course['notices'] ?? '')));
         if (is_wp_error($id)) { return; }
         update_post_meta($id, '_bfnd_image', $course['image']);
     }

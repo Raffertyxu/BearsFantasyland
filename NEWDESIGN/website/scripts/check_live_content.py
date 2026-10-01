@@ -1,15 +1,25 @@
 """Smoke check the client artwork fixes on the deployed public pages."""
 
+import json
+import re
 from urllib.request import Request, urlopen
 
 BASE = "https://a1.haotaimaker.com"
+FORBIDDEN_TEXT = ("Haotai TEST", "待確認", "待補", "暫定", "推估", "Sample", "【示範文章】")
+
+
+def assert_no_placeholders(label, text):
+    for marker in FORBIDDEN_TEXT:
+        assert marker.casefold() not in text.casefold(), f"{label} contains internal placeholder: {marker}"
+    assert not re.search(r"\b(?:test|demo|sample)\b", text, re.IGNORECASE), f"{label} contains TEST/DEMO/SAMPLE text"
 CASES = {
     "/": ("logo-transparent.png", "飛熊日誌"),
     "/woodworking-school/": ("VCarve CNC 設計入門", "木工磨刀技術", "訂閱上架通知"),
+    "/furniture/": ("COLLECTIONS / 依系列瀏覽", "搜尋作品、系列或木材"),
     "/brand-story/": ("我們希望有一天", "對這片土地的自信", "職人手工刨木情境示意圖"),
     "/collaboration/": ("需求討論", "提案報價", "完成交付", "bf-sdg-goals", "飛熊日誌"),
     "/journal/": ("飛熊日誌", "最新文章"),
-    "/service/": ("custom-process", "訂製流程", "常見問題"),
+    "/service/": ("作品購買／詢問", "運送與安裝", "作品保固", "保養與修繕", "05 / FAQ"),
 }
 
 for path, markers in CASES.items():
@@ -35,4 +45,43 @@ print("PASS", "latest post teasers match the journal list")
 with urlopen(Request(BASE + "/works/ridge-table/", headers={"User-Agent": "BFND content check"}), timeout=25) as response:
     detail = response.read().decode("utf-8", errors="replace")
 assert "bf-craft-section" not in detail, "work detail still shows unverified process image"
-print("PASS", "/works/ridge-table/", "unverified process block hidden")
+for marker in ("01 / STORY", "02 / SPECIFICATION", "03 / DETAILS", "RELATED WORKS", "WORKS INQUIRY"):
+    assert marker in detail, f"work detail missing {marker}"
+positions = [detail.index(marker) for marker in ("01 / STORY", "02 / SPECIFICATION", "03 / DETAILS", "RELATED WORKS")]
+assert positions == sorted(positions), "work detail section order changed"
+for marker in ("CUSTOM MADE", "重新製作", "依作品照片推估", "木種待確認"):
+    assert marker not in detail, f"work detail still contains retired copy: {marker}"
+print("PASS", "/works/ridge-table/", "section order and inquiry copy")
+
+with urlopen(Request(BASE + "/service/", headers={"User-Agent": "BFND content check"}), timeout=25) as response:
+    service = response.read().decode("utf-8", errors="replace")
+for marker in ("CUSTOM PROCESS", "訂製流程", "CUSTOM MADE"):
+    assert marker not in service, f"service page still contains retired copy: {marker}"
+print("PASS", "/service/", "purchase and after-sales structure")
+
+for path in ("/", "/furniture/", "/woodworking-school/", "/brand-story/", "/collaboration/", "/journal/", "/service/"):
+    with urlopen(Request(BASE + path, headers={"User-Agent": "BFND content check"}), timeout=25) as response:
+        html = response.read().decode("utf-8", errors="replace")
+    assert_no_placeholders(path, html)
+print("PASS", "public core-page placeholder scan")
+
+for post_type in ("bf_work", "bf_course", "posts"):
+    with urlopen(Request(BASE + f"/wp-json/wp/v2/{post_type}?per_page=100", headers={"User-Agent": "BFND content check"}), timeout=25) as response:
+        posts = json.loads(response.read().decode("utf-8", errors="replace"))
+    for post in posts:
+        content = " ".join((post.get("title", {}).get("rendered", ""), post.get("excerpt", {}).get("rendered", ""), post.get("content", {}).get("rendered", "")))
+        assert_no_placeholders(f"{post_type} {post.get('id')}", content)
+    print("PASS", "public content records", post_type, len(posts))
+
+with urlopen(Request(BASE + "/wp-json/wc/store/v1/products/categories?per_page=100", headers={"User-Agent": "BFND content check"}), timeout=25) as response:
+    categories = json.loads(response.read().decode("utf-8", errors="replace"))
+test_categories = {"ar", "be", "ch"}
+found_categories = sorted(category.get("slug", "") for category in categories if category.get("slug", "").lower() in test_categories)
+assert not found_categories, f"test product categories remain public: {found_categories}"
+
+with urlopen(Request(BASE + "/wp-json/wc/store/v1/products?per_page=100", headers={"User-Agent": "BFND content check"}), timeout=25) as response:
+    products = json.loads(response.read().decode("utf-8", errors="replace"))
+for product in products:
+    content = " ".join((product.get("name", ""), product.get("short_description", ""), product.get("description", "")))
+    assert_no_placeholders(f"product {product.get('id')}", content)
+print("PASS", "public WooCommerce products", len(products), "and no Ar/Be/Ch test categories")

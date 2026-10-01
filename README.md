@@ -15,18 +15,20 @@
 
 ## 目前版本與部署包
 
-- 外掛原始碼版本：`0.5.4`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`）
-- 主題原始碼版本：`1.3.0`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
+- 外掛原始碼版本：`0.5.5`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`）
+- 主題原始碼版本：`1.3.1`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
 - 目前命名的部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`
 - 舊版 ZIP 也保留在 `dist/`，方便回溯；ZIP 使用 Git LFS。新電腦 clone 後若 ZIP 內容只顯示 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
 
 2026-10-01 更新：正式站已將舊商品「陪伴伴陪托盤」、三篇示範日誌與五篇舊測試草稿移至回收桶；CNC 數位木工及自由創作會員頁已暫停顯示未確認的價格／課程資訊。ECPay 廠商專區顯示信箱、身分、銀行、實質受益人驗證均通過，信用卡、非信用卡金流及物流均已開通；WooCommerce 綠界金流／物流開關已啟用並儲存。外掛 `0.5.4`、主題 `1.3.0` 部署包已重建，含木作學習路徑與課程價格修正，但尚未安裝到正式站。未送出正式訂單或付款；逐筆交易通知、運送建單與正式結帳顯示仍未驗證。詳見 [`HANDOFF.md`](HANDOFF.md) 與 [部署紀錄](NEWDESIGN/website/DEPLOYMENT.md)。
 
+2026-10-01 最新驗收盤點：本地外掛 `0.5.5`、主題 `1.3.1` 已更新家具作品諮詢文案、系列篩選、尺寸確認閘門、課程後台欄位及專項課程分類；新增 [`ADMIN-GUIDE.md`](NEWDESIGN/website/ADMIN-GUIDE.md) 與 [`ACCEPTANCE-AUDIT-2026-10-01.md`](NEWDESIGN/website/ACCEPTANCE-AUDIT-2026-10-01.md)。正式站完整路由檢查 12/12 HTTP 200、19/19 舊網址 301 通過；內容檢查在家具頁因尚未有新系列篩選而失敗，家具／服務頁仍顯示舊文案。Store API 公開可見 Ar／Be／Ch 測試分類及其 7 件關聯商品；本次未登入後台做移除或隱藏。梯次報名、完整測試訂單、會員 Email、備份／權限交付、手機桌機驗收及 SEO 分享設定仍未完成。程式及 ZIP 不代表已安裝或已上線。
+
 2026-09-30 已依設計圖稿紅筆註記，從新版外掛與主題的共用頁首移除「台中 Maker 工藝基地」連結；原稿頁尾仍保留此連結，品牌故事內文也保留。「網站版面」後台明示單頁 CRUD 不含共用頁首／頁尾，並連到可編輯品牌故事內文的管理頁。正式站外掛 `0.5.3` 與主題 `1.2.6` 已更新。會員中心 CSS Grid 與 WooCommerce clearfix 衝突已修正；本次也修正 WooCommerce 通知圖示覆蓋文字，通知左側內距調整為 `52px`，圖示仍位於 `24px`。即時檢查 `/my-account/orders/` 與 `/checkout/` 均載入主題 CSS `?ver=1.2.6`，通知計算樣式為 `padding-left:52px`、圖示 `left:24px`。未送出訂單，完整正式站路由／內容檢查腳本尚未重跑。程式、文件及 ZIP 已提交於 `395dc88` 並推送到 GitHub `main`。
 
 2026-09-30 依使用者提供的頁尾設計圖稿重做共用頁尾：品牌列只留家具、生活木作、木作學堂、品牌故事、合作提案五項導覽，加入 Instagram／Facebook／YouTube／LINE 圖示及 Maker 資訊；深色列只放版權、隱私權政策、服務條款、聯絡我們。正式站主題更新至 `1.2.9`，部署成功後首頁即時畫面確認兩列頁尾、五項導覽、四個社群圖示、Maker 資訊與指定底列。原桌機核對量得頁尾 120px（品牌列 82px、底列 38px）；`1.2.9` 另補上 761–1100px 與手機寬度顯示品牌標語的規則。2026-09-30 後續已在正式站發布隱私權政策（頁面 ID 3）及服務條款（頁面 ID 1615，`terms-of-service`），並將 WooCommerce 條款頁指定為 ID 1615；首頁頁尾兩個政策標籤與結帳頁條款／隱私權連結已即時確認可點擊。正式站結帳頁目前顯示沒有可用付款方式；服務條款已寫明此狀態下須先聯絡確認。法律頁使用公開商業登記與工藝名錄核對公司／品牌關係，並採用服務商類別及保存目的描述；實際主機／第三方服務商與地區、精確保存期限、個別付款配送／課程規則仍待營運盤點。法律頁尚未由法律專業人士審閱；WooCommerce 帳號／隱私設定及保留期間欄位未更動。詳見 [法律頁發布紀錄](NEWDESIGN/website/LEGAL-POLICY-DRAFT.md)。社群帳號網址未在新版來源確認，圖示目前不帶外連。程式、文件、部署包與主題回復包已於提交 `395dc88` 推送到 GitHub `main`。
 
-部署版本與本次線上核對範圍記在 `NEWDESIGN/website/DEPLOYMENT.md`。完整路由／內容檢查仍需依該文件的指引另行執行；不可把原始碼或 ZIP 版本當成已部署證據。
+部署版本與本次線上核對範圍記在 `NEWDESIGN/website/DEPLOYMENT.md`。每次涉及線上站仍須依該文件重跑路由／內容與流程檢查；不可把原始碼或 ZIP 版本當成已部署證據。
 
 ## 本機檢查與打包
 
