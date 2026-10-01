@@ -16,11 +16,13 @@
 ## 目前版本與部署包
 
 - 外掛原始碼版本：`0.5.5`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`）
-- 主題原始碼版本：`1.3.2`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
+- 主題原始碼版本：`1.3.3`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
 - 目前命名的部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`
 - 舊版 ZIP 也保留在 `dist/`，方便回溯；ZIP 使用 Git LFS。新電腦 clone 後若 ZIP 內容只顯示 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
 
-2026-10-01 結帳圖示即時修正：付款外掛的綠界 Logo 原先套用新版主題「站內圖片全寬」規則，造成圖示撐滿付款欄。主題已升至 `1.3.2` 並更新正式站；即時結帳頁 CSS 為 `public/style.css?ver=1.3.2`，五個綠界付款圖示各顯示約 `70 × 25px`（CSS 上限 `128 × 32px`），尺寸已正常。當時結帳工作階段顯示「線鋸 ×1／NT$666」；本次未更動購物車、未下單、未付款。結帳已顯示信用卡、網路 ATM、ATM 櫃員機、超商代碼、超商條碼五種付款選項；物流區仍未設定配送方式與寄件資料，因此完整金物流及訂單流程未驗收。此前輔助技術讀取曾暴露綠界 HashKey／HashIV 欄位；正式收款前先於綠界輪替兩把金鑰並更新 WordPress，絕不將值寫入 Git。
+2026-10-01 生活木作版型修正：正式頁「生活木作的可能性」標題原先被 155px 欄寬擠成三行。主題升至 `1.3.3`，標題欄增至 240px，並在 1200px 以下改為標題與內文上下排列，圖片跟隨區塊高度。即時確認 CSS `public/style.css?ver=1.3.3`；1536px 桌機標題回到兩行、1024px 平板改為上下排列、390px 手機保留單欄圖文，四張製作圖片載入正常。修改、主題 ZIP 與部署結果記於 [`HANDOFF.md`](HANDOFF.md) 及[部署紀錄](NEWDESIGN/website/DEPLOYMENT.md)。
+
+2026-10-01 結帳圖示即時修正：付款外掛的綠界 Logo 原先套用新版主題「站內圖片全寬」規則，造成圖示撐滿付款欄。主題 `1.3.2` 已更新正式站；即時結帳頁 CSS 為 `public/style.css?ver=1.3.2`，五個綠界付款圖示各顯示約 `70 × 25px`（CSS 上限 `128 × 32px`），尺寸已正常。當時結帳工作階段顯示「線鋸 ×1／NT$666」；該次未更動購物車、未下單、未付款。結帳已顯示信用卡、網路 ATM、ATM 櫃員機、超商代碼、超商條碼五種付款選項；物流區仍未設定配送方式與寄件資料，因此完整金物流及訂單流程未驗收。此前輔助技術讀取曾暴露綠界 HashKey／HashIV 欄位；正式收款前先於綠界輪替兩把金鑰並更新 WordPress，絕不將值寫入 Git。
 
 2026-10-01 安裝前清理與綠界狀態快照：舊商品「陪伴伴陪托盤」、三篇示範日誌、五篇舊測試草稿，以及 Ar／Be／Ch 分類的 7 件測試商品已移至回收桶；Ar、Be、Ch 三個空分類已刪除。清理後公開 Store API 確認剩 3 件商品及 2 個分類。CNC 數位木工及自由創作會員頁價格皆空白。ECPay 廠商專區顯示信箱、身分、銀行、實質受益人驗證均通過，信用卡、非信用卡金流及物流均已開通；WooCommerce 綠界金流／物流開關已啟用並儲存。該快照當時記錄外掛 `0.5.5`、主題 `1.3.1` 尚未安裝；其後安裝及驗收狀態見下文與 [`HANDOFF.md`](HANDOFF.md)。未送出正式訂單或付款；逐筆交易通知與運送建單仍未驗證。
 
