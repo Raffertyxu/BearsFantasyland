@@ -30,7 +30,7 @@ function bfnd_yoast_analysis_admin_assets($hook) {
     $key = get_post_meta($post_id, '_bfnd_page', true);
     if (!isset(bfnd_pages()[$key])) { return; }
 
-    wp_enqueue_script('bfnd-yoast-analysis', bfnd_asset('public/yoast-analysis.js'), array('jquery'), '0.5.8', true);
+    wp_enqueue_script('bfnd-yoast-analysis', bfnd_asset('public/yoast-analysis.js'), array('jquery'), '0.5.9', true);
     wp_localize_script('bfnd-yoast-analysis', 'BFNDYoastPageContent', array(
         'content' => bfnd_yoast_analysis_content($post_id),
     ));

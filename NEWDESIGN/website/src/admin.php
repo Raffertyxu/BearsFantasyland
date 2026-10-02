@@ -328,39 +328,24 @@ function bfnd_import_course($course, $with_media = true) {
         update_post_meta($id, '_bfnd_image', $course['image']);
     }
     if (!$with_media) { return; }
-    $poster = bfnd_import_attachment($course['image'], $id, $course['title'] . '・課程簡章');
-    $editorial = '/assets/courses/editorial-' . $course['slug'] . '.png';
-    $photo = bfnd_import_attachment($editorial, $id, $course['title'] . '・木作情境示意圖');
     $current = get_post_thumbnail_id($id);
-    if ($photo && (!$current || $current === $poster)) { set_post_thumbnail($id, $photo); }
-    if ($poster && !get_post_meta($id, '_bfnd_gallery_override', true)) { update_post_meta($id, '_bfnd_gallery_ids', array($poster)); }
+    $current_source = $current ? (string) get_post_meta($current, '_bfnd_source', true) : '';
+    $photo = bfnd_import_attachment('/assets/brand/real-lecture.webp', $id, $course['title'] . '・木作教學現場');
+    if ($photo && (!$current || stripos($current_source, 'editorial') !== false)) { set_post_thumbnail($id, $photo); }
+    if (!get_post_meta($id, '_bfnd_gallery_override', true)) { update_post_meta($id, '_bfnd_gallery_ids', array()); }
 }
 
 function bfnd_import_brand_image() {
-    $id = bfnd_import_attachment('/assets/brand/home-editorial.png', 0, '木韻 MUYO 胡桃木餐桌椅・情境示意圖');
+    $id = bfnd_import_attachment('/assets/works/muyo/01.webp', 0, '木韻 MUYO 胡桃木餐桌椅');
     if ($id) { update_option('bfnd_home_hero_id', $id); }
-    $school = bfnd_import_attachment('/assets/brand/school-editorial.png', 0, '木作學堂・木工實作情境示意圖');
+    $school = bfnd_import_attachment('/assets/brand/real-lecture.webp', 0, '飛熊入夢木作教學現場');
     if ($school) { update_option('bfnd_school_hero_id', $school); }
     $lecture = bfnd_import_attachment('/assets/brand/real-lecture.webp', 0, '飛熊入夢・木工教育實際授課照片');
     if ($lecture) { update_option('bfnd_real_lecture_id', $lecture); }
-    $forest = bfnd_import_attachment('/assets/brand/forest-editorial.png', 0, '永續合作・森林情境示意圖');
-    if ($forest) { update_option('bfnd_forest_id', $forest); }
-    $manifesto = bfnd_import_attachment('/assets/brand/wood-ring-editorial.png', 0, '木・人・空間・未來・年輪情境示意圖');
+    $manifesto = bfnd_import_attachment('/assets/works/muyo/02.webp', 0, '木韻 MUYO 胡桃木桌面細節');
     if ($manifesto) { update_option('bfnd_manifesto_id', $manifesto); }
-    $lifestyle = bfnd_import_attachment('/assets/brand/lifestyle-editorial.png', 0, '生活木作・工作檯木器物情境示意圖');
+    $lifestyle = bfnd_import_attachment('/assets/lifestyle/tray-01.webp', 0, '晨露圓境托盤・木款');
     if ($lifestyle) { update_option('bfnd_lifestyle_hero_id', $lifestyle); }
-    $selecting = bfnd_import_attachment('/assets/brand/selecting-wood-editorial.png', 0, '生活木作・選材情境示意圖');
-    if ($selecting) { update_option('bfnd_selecting_wood_id', $selecting); }
-    $finishing = bfnd_import_attachment('/assets/brand/finishing-editorial.png', 0, '生活木作・上油情境示意圖');
-    if ($finishing) { update_option('bfnd_finishing_id', $finishing); }
-    $cnc = bfnd_import_attachment('/assets/courses/editorial-cnc.png', 0, '生活木作・加工情境示意圖');
-    if ($cnc) { update_option('bfnd_process_cnc_id', $cnc); }
-    $sanding = bfnd_import_attachment('/assets/courses/editorial-beginner.png', 0, '生活木作・打磨情境示意圖');
-    if ($sanding) { update_option('bfnd_process_sanding_id', $sanding); }
-    foreach (array('office' => '企業辦公', 'cafe' => '商業空間', 'library' => '公共空間') as $key => $label) {
-        $photo = bfnd_import_attachment('/assets/brand/collab-' . $key . '-editorial.png', 0, $label . '・合作情境示意圖');
-        if ($photo) { update_option('bfnd_collab_' . $key . '_id', $photo); }
-    }
 }
 
 function bfnd_inquiry_action() {

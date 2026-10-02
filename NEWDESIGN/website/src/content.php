@@ -75,26 +75,75 @@ function bfnd_redirect_legacy_pages() {
     if (is_tax(array('bf_work_cat', 'bf_series'))) { wp_safe_redirect(bfnd_page_url('furniture'), 301); exit; }
 }
 
+function bfnd_nonfinal_photo($url, $attachment_id = 0, $alt = '') {
+    if ($attachment_id) {
+        $source = (string) get_post_meta($attachment_id, '_bfnd_source', true);
+        if ($alt === '') { $alt = (string) get_post_meta($attachment_id, '_wp_attachment_image_alt', true); }
+    } else { $source = ''; }
+    return stripos((string) $url . ' ' . $source, 'editorial') !== false
+        || stripos((string) $url . ' ' . $source, 'wooden-cup') !== false
+        || strpos((string) $alt, "\xe7\xa4\xba\xe6\x84\x8f") !== false;
+}
+
+function bfnd_filter_nonfinal_attachment_html($html, $attachment_id, $size = 'thumbnail', $icon = false, $attr = array()) {
+    $url = wp_get_attachment_url((int) $attachment_id);
+    $alt = (string) get_post_meta((int) $attachment_id, '_wp_attachment_image_alt', true);
+    return bfnd_nonfinal_photo($url, (int) $attachment_id, $alt) ? '' : $html;
+}
+add_filter('wp_get_attachment_image', 'bfnd_filter_nonfinal_attachment_html', 10, 5);
+
+function bfnd_filter_nonfinal_inline_images($content) {
+    if (!is_string($content) || stripos($content, '<img') === false) { return $content; }
+    return preg_replace_callback('/<img\\b[^>]*>/i', function ($match) {
+        $tag = $match[0];
+        preg_match('/\\bsrc=["\\\']([^"\\\']+)["\\\']/i', $tag, $src);
+        preg_match('/\\balt=["\\\']([^"\\\']*)["\\\']/i', $tag, $alt);
+        preg_match('/\\bwp-image-(\\d+)\\b/', $tag, $attachment);
+        $url = html_entity_decode($src[1] ?? '', ENT_QUOTES, 'UTF-8');
+        $image_alt = html_entity_decode($alt[1] ?? '', ENT_QUOTES, 'UTF-8');
+        return bfnd_nonfinal_photo($url, (int) ($attachment[1] ?? 0), $image_alt) ? '' : $tag;
+    }, $content);
+}
+add_filter('the_content', 'bfnd_filter_nonfinal_inline_images', 20);
+add_filter('woocommerce_short_description', 'bfnd_filter_nonfinal_inline_images', 20);
+
 function bfnd_media_src($path) {
     if (!$path) { return ''; }
-    if (is_numeric($path)) { return wp_get_attachment_image_url((int) $path, 'full') ?: ''; }
-    if (preg_match('#^https?://#', $path)) { return esc_url_raw($path); }
-    return bfnd_asset($path);
+    if (is_numeric($path)) {
+        $id = (int) $path;
+        $url = wp_get_attachment_image_url($id, 'full') ?: '';
+        return bfnd_nonfinal_photo($url, $id) ? '' : $url;
+    }
+    if (preg_match('#^https?://#', $path)) { $url = esc_url_raw($path); }
+    else { $url = bfnd_asset($path); }
+    return bfnd_nonfinal_photo($url) ? '' : $url;
 }
 
 function bfnd_work_image($post_id, $size = 'large') {
+    if (get_post_type($post_id) === 'bf_course') {
+        if (!function_exists('get_post_thumbnail_id')) { return ''; }
+        $attachment_id = (int) get_post_thumbnail_id($post_id);
+        if (!$attachment_id) { return ''; }
+        $url = wp_get_attachment_image_url($attachment_id, $size) ?: '';
+        return bfnd_nonfinal_photo($url, $attachment_id) ? '' : $url;
+    }
     $url = get_the_post_thumbnail_url($post_id, $size);
-    if ($url) { return $url; }
+    if ($url) {
+        $attachment_id = function_exists('get_post_thumbnail_id') ? (int) get_post_thumbnail_id($post_id) : 0;
+        return bfnd_nonfinal_photo($url, $attachment_id) ? '' : $url;
+    }
     return bfnd_media_src(get_post_meta($post_id, '_bfnd_image', true));
 }
 
 function bfnd_gallery($post_id) {
     $ids = get_post_meta($post_id, '_bfnd_gallery_ids', true);
-    if (get_post_meta($post_id, '_bfnd_gallery_override', true)) {
-        return is_array($ids) ? array_values(array_filter(array_map(function ($id) { return wp_get_attachment_image_url((int) $id, 'large'); }, $ids))) : array();
+    $has_override = get_post_meta($post_id, '_bfnd_gallery_override', true);
+    if (get_post_type($post_id) === 'bf_course' && !$has_override) { return array(); }
+    if ($has_override) {
+        return is_array($ids) ? array_values(array_filter(array_map(function ($id) { return bfnd_media_src($id); }, $ids))) : array();
     }
     if (is_array($ids) && $ids) {
-        return array_values(array_filter(array_map(function ($id) { return wp_get_attachment_image_url((int) $id, 'large'); }, $ids)));
+        return array_values(array_filter(array_map(function ($id) { return bfnd_media_src($id); }, $ids)));
     }
     $sources = get_post_meta($post_id, '_bfnd_gallery', true);
     return is_array($sources) ? array_map('bfnd_media_src', $sources) : array();

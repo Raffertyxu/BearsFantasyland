@@ -144,6 +144,7 @@ function bfnd_template_editor($key) {
             if ($field['type'] === 'image') {
                 $id = !empty($saved['image'][$field_key]) ? absint($saved['image'][$field_key]) : 0;
                 $url = $id ? wp_get_attachment_image_url($id, 'medium') : (!empty($saved['image_url'][$field_key]) ? $saved['image_url'][$field_key] : $field['default']);
+                if (bfnd_page_design_image_is_blocked($url, $id)) { $id = 0; $url = $field['default']; }
                 echo '<div class="bfnd-design-field bfnd-design-media"><label><strong>' . esc_html($field['label']) . '</strong></label><div class="bfnd-design-image-preview"><img src="' . esc_url($url) . '" data-default="' . esc_url($field['default']) . '" alt=""></div><input type="hidden" name="bfnd_design_image[' . esc_attr($field_key) . ']" value="' . esc_attr($id) . '"><input type="hidden" class="bfnd-image-reset" name="bfnd_design_image_reset[' . esc_attr($field_key) . ']" value="0"><button type="button" class="button bfnd-design-pick">從媒體庫選取</button> <button type="button" class="button bfnd-design-reset">恢復預設圖</button></div>';
             } else {
                 $value = isset($saved['text'][$field_key]) ? $saved['text'][$field_key] : $field['default'];

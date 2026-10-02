@@ -47,29 +47,65 @@ function bfnd_page_design_set_inner_html($node, $html) {
     else { $node->appendChild($node->ownerDocument->createTextNode(wp_strip_all_tags($html))); }
 }
 
+function bfnd_page_design_image_is_blocked($url, $attachment_id = 0, $alt = '') {
+    if (function_exists('bfnd_nonfinal_photo') && bfnd_nonfinal_photo($url, $attachment_id, $alt)) { return true; }
+    $source = '';
+    if ($attachment_id) {
+        $source = (string) get_post_meta($attachment_id, '_bfnd_source', true);
+        if ($alt === '') { $alt = (string) get_post_meta($attachment_id, '_wp_attachment_image_alt', true); }
+    }
+    return stripos((string) $url . ' ' . $source, 'editorial') !== false
+        || stripos((string) $url . ' ' . $source, 'wooden-cup') !== false
+        || strpos((string) $alt, "\xe7\xa4\xba\xe6\x84\x8f") !== false;
+}
+
+function bfnd_filter_nonfinal_image_block($content, $block) {
+    if (!is_array($block) || ($block['blockName'] ?? '') !== 'core/image') { return $content; }
+    if (!preg_match('/<img\\b[^>]*\\bsrc=["\\\']([^"\\\']+)["\\\'][^>]*>/i', $content, $image)) { return $content; }
+    preg_match('/\\bwp-image-(\\d+)\\b/', $image[0], $attachment);
+    preg_match('/\\balt=["\\\']([^"\\\']*)["\\\']/i', $image[0], $alt);
+    return bfnd_page_design_image_is_blocked(html_entity_decode($image[1], ENT_QUOTES, 'UTF-8'), (int) ($attachment[1] ?? 0), html_entity_decode($alt[1] ?? '', ENT_QUOTES, 'UTF-8')) ? '' : $content;
+}
+add_filter('render_block', 'bfnd_filter_nonfinal_image_block', 10, 2);
+
 function bfnd_page_design_walk($node, $section, &$fields, $overrides, $apply, &$serial) {
     if (!$node instanceof DOMElement || bfnd_page_design_skip($node)) { return; }
+    // Retired front-end fields keep their old ordinal slots so saved overrides
+    // remain attached to the same fields after captions and images are removed.
+    if ($node->hasAttribute('data-bfnd-reserved-text')) { $serial['text']++; return; }
+    if ($node->hasAttribute('data-bfnd-reserved-image')) { $serial['image']++; return; }
     $tag = strtolower($node->tagName);
     $style = $node->getAttribute('style');
     if ($style && preg_match('/url\([\'\"]?([^\)\'\"]+)[\'\"]?\)/', $style, $background)) {
         $key = $section . '_image_' . ++$serial['image'];
         $fields[$key] = array('type' => 'image', 'label' => '背景圖片', 'default' => $background[1]);
+        if ($apply && bfnd_page_design_image_is_blocked($background[1])) {
+            $style = preg_replace('/background-image\\s*:[^;]*;?/i', '', $style);
+            $node->setAttribute('style', $style);
+        }
         if ($apply && (!empty($overrides['image'][$key]) || !empty($overrides['image_url'][$key]))) {
-            $url = !empty($overrides['image'][$key]) ? wp_get_attachment_image_url(absint($overrides['image'][$key]), 'full') : esc_url_raw($overrides['image_url'][$key]);
-            if ($url) { $node->setAttribute('style', str_replace($background[1], esc_url_raw($url), $style)); }
+            $image_id = !empty($overrides['image'][$key]) ? absint($overrides['image'][$key]) : 0;
+            $url = $image_id ? wp_get_attachment_image_url($image_id, 'full') : esc_url_raw($overrides['image_url'][$key]);
+            if ($url && !bfnd_page_design_image_is_blocked($url, $image_id)) { $node->setAttribute('style', str_replace($background[1], esc_url_raw($url), $style)); }
         }
     }
     if ($tag === 'img') {
         $key = $section . '_image_' . ++$serial['image'];
         $fallback = $node->getAttribute('src');
-        $fields[$key] = array('type' => 'image', 'label' => $node->getAttribute('alt') ?: '版面圖片', 'default' => $fallback);
+        $fallback_alt = $node->getAttribute('alt');
+        $fields[$key] = array('type' => 'image', 'label' => $fallback_alt ?: '版面圖片', 'default' => $fallback);
+        preg_match('/\\bwp-image-(\\d+)\\b/', $node->getAttribute('class'), $fallback_attachment);
+        if ($apply && bfnd_page_design_image_is_blocked($fallback, (int) ($fallback_attachment[1] ?? 0), $fallback_alt)) {
+            if ($node->parentNode) { $node->parentNode->removeChild($node); }
+            return;
+        }
         if ($apply && (!empty($overrides['image'][$key]) || !empty($overrides['image_url'][$key]))) {
             $id = !empty($overrides['image'][$key]) ? absint($overrides['image'][$key]) : 0;
             $url = $id ? wp_get_attachment_image_url($id, 'full') : esc_url_raw($overrides['image_url'][$key]);
-            if ($url) {
+            if ($url && !bfnd_page_design_image_is_blocked($url, $id)) {
                 $node->setAttribute('src', $url);
                 $alt = get_post_meta($id, '_wp_attachment_image_alt', true);
-                if ($alt) { $node->setAttribute('alt', $alt); }
+                if ($alt && !bfnd_page_design_image_is_blocked($url, $id, $alt)) { $node->setAttribute('alt', $alt); }
             }
         }
         return;

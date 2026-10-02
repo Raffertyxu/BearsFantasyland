@@ -9,7 +9,7 @@ function bfnd_work_by_seed($slug) {
     return $items ? $items[0] : null;
 }
 function bfnd_image($url, $alt, $class = '', $lazy = true) {
-    if (!$url) { return; }
+    if (!$url || stripos((string) $url, 'editorial') !== false || stripos((string) $url, 'wooden-cup') !== false || strpos((string) $alt, "\xe7\xa4\xba\xe6\x84\x8f") !== false) { return; }
     echo '<img class="' . esc_attr($class) . '" src="' . esc_url($url) . '" alt="' . esc_attr($alt) . '" ' . ($lazy ? 'loading="lazy"' : 'fetchpriority="high"') . ' decoding="async">';
 }
 function bfnd_button($label, $url, $light = false) {
@@ -79,18 +79,18 @@ function bfnd_public_size($id) {
 }
 function bfnd_render_home() {
     $hero = bfnd_work_by_seed('muyo');
-    $hero_image = wp_get_attachment_image_url((int) get_option('bfnd_home_hero_id'), 'full') ?: bfft_asset('assets/brand/home-editorial.png');
+    $hero_image = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
     echo '<section class="bf-home-hero"><div class="bf-home-hero-image">';
-    bfnd_image($hero_image, '木韻 MUYO 胡桃木餐桌椅情境示意圖', '', false);
+    bfnd_image($hero_image, '木韻 MUYO 胡桃木餐桌椅', '', false);
     echo '</div><div class="bf-home-hero-shade"></div><div class="bf-home-hero-content bf-wrap"><span class="bf-kicker">BEAR’S FANTASYLAND / TAIWAN</span><h1>讓木，<br>成為生活的<br class="bf-mobile-break">一部分。</h1><p>從一件家具，到一堂木工課。<br>我們用傳統工藝 × 數位製造，<br>延續台灣木作的下一個世代。</p><div class="bf-actions">';
     bfnd_button('探索家具作品', bfnd_page_url('furniture'), true); bfnd_button('開始學木工', bfnd_page_url('school'), true);
-    echo '</div></div><span class="bf-vertical-note">GOOD WOOD<br>BETTER LIVING.</span><span class="bf-hero-disclosure">家具情境示意</span></section>';
+    echo '</div></div><span class="bf-vertical-note">GOOD WOOD<br>BETTER LIVING.</span><span class="bf-hero-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></section>';
     echo '<div class="bf-values bf-home-values bf-wrap"><div><b aria-hidden="true">♧</b><span>嚴選木材</span><small>來自永續森林・天然・安心</small></div><div><b aria-hidden="true">⚙</b><span>工藝 × 數位製造</span><small>傳統工藝結合 CNC 技術</small></div><div><b aria-hidden="true">⌂</b><span>在地製造</span><small>台中工坊・品質把關</small></div><div><b aria-hidden="true">∞</b><span>耐久設計</span><small>陪伴生活・延長使用年限</small></div><div><b aria-hidden="true">♧</b><span>永續理念</span><small>友善環境・珍惜資源</small></div></div>';
     echo '<section class="bf-split-promos"><a href="' . esc_url(bfnd_page_url('furniture')) . '"><div class="bf-promo-image">';
     bfnd_image(bfft_asset('assets/works/ridge-table/01.webp'), '稜 RIDGE 實木餐桌');
     echo '</div><div class="bf-promo-copy"><span class="bf-kicker">FURNITURE</span><h2>讓作品，進入生活。</h2><span class="bf-plain-link">探索家具系列 ↗</span></div></a><a href="' . esc_url(bfnd_page_url('school')) . '"><div class="bf-promo-image">';
-    $school_promo = wp_get_attachment_image_url((int) get_option('bfnd_school_hero_id'), 'large') ?: bfft_asset('assets/brand/school-editorial.png');
-    bfnd_image($school_promo, '木作學堂木工實作情境示意圖');
+    $school_promo = bfnd_brand_photo('bfnd_school_hero_id', 'large', 'assets/brand/real-lecture.webp');
+    bfnd_image($school_promo, '飛熊入夢木作教學現場');
     echo '</div><div class="bf-promo-copy"><span class="bf-kicker">WOODWORKING SCHOOL</span><h2>從雙手，開始認識木。</h2><span class="bf-plain-link">了解木作學堂 ↗</span></div></a></section>';
     echo '<section class="bf-section bf-wrap">'; bfnd_section_head('SELECTED WORKS', '作品系列精選', bfnd_page_url('furniture'), '探索更多作品');
     $q = bfnd_work_query(array('posts_per_page' => 3, 'orderby' => 'menu_order', 'order' => 'ASC', 'meta_key' => '_bfnd_featured', 'meta_value' => '1'));
@@ -102,12 +102,12 @@ function bfnd_render_home() {
     $cards = array(
         array('企業／空間合作', '辦公・商業・公共空間', 'assets/works/cherry-island-table/01.webp'),
         array('教育／文化合作', '木工教育・工藝體驗', 'assets/brand/real-lecture.webp'),
-        array('永續合作', '材料・耐久設計', 'assets/brand/forest-editorial.png'),
+        array('永續合作', '材料・耐久設計', 'assets/works/muyo/03.webp'),
         array('家具採購', '既有家具系列・專案合作', 'assets/works/muyo/01.webp'),
     );
-    foreach ($cards as $card) { echo '<a class="bf-home-collab-card" href="' . esc_url(bfnd_page_url('collaboration')) . '"><div>'; $option = $card[2] === 'assets/brand/forest-editorial.png' ? 'bfnd_forest_id' : ($card[2] === 'assets/brand/real-lecture.webp' ? 'bfnd_real_lecture_id' : ''); $card_image = $option ? (wp_get_attachment_image_url((int) get_option($option), 'large') ?: bfft_asset($card[2])) : bfft_asset($card[2]); bfnd_image($card_image, $card[0]); echo '</div><strong>' . bfnd_e($card[0]) . '</strong><small>' . bfnd_e($card[1]) . '</small></a>'; }
+    foreach ($cards as $card) { echo '<a class="bf-home-collab-card" href="' . esc_url(bfnd_page_url('collaboration')) . '"><div>'; $option = $card[2] === 'assets/brand/real-lecture.webp' ? 'bfnd_real_lecture_id' : ''; $card_image = $option ? (bfnd_selected_photo($option, 'large') ?: bfft_asset($card[2])) : bfft_asset($card[2]); bfnd_image($card_image, $card[0]); echo '</div><strong>' . bfnd_e($card[0]) . '</strong><small>' . bfnd_e($card[1]) . '</small></a>'; }
     echo '</div></div></section>';
-    $manifesto = wp_get_attachment_image_url((int) get_option('bfnd_manifesto_id'), 'full') ?: bfft_asset('assets/brand/wood-ring-editorial.png');
+    $manifesto = bfnd_brand_photo('bfnd_manifesto_id', 'full', 'assets/works/muyo/02.webp');
     echo '<section class="bf-manifesto" style="background-image:url(' . esc_url($manifesto) . ')"><div class="bf-wrap bf-manifesto-inner"><div><h2>木・人・空間・未來</h2><p>從土地出發，為下一個世代設計更好的生活。</p></div><span>A Better<br>Tomorrow.</span>'; bfnd_button('認識飛熊入夢', bfnd_page_url('story'), true); echo '</div></section>';
     bfnd_render_journal_teaser();
 }
@@ -206,20 +206,20 @@ function bfnd_lifestyle_icon($kind) {
 }
 
 function bfnd_render_lifestyle() {
-    $hero = wp_get_attachment_image_url((int) get_option('bfnd_lifestyle_hero_id'), 'full') ?: bfft_asset('assets/brand/lifestyle-editorial.png');
-    echo '<section class="bf-lifestyle-hero"><div class="bf-lifestyle-hero-image">'; bfnd_image($hero, '生活木作木工器物情境示意圖', '', false);
-    echo '</div><div class="bf-lifestyle-hero-shade"></div><div class="bf-wrap bf-lifestyle-hero-copy"><h1>生活木作</h1><span>WOODEN LIVING</span><p>讓木作，走進每一天的生活。<br>從家具，到生活中的每一件小物，<br>我們相信，木頭不只是材料，更是一種陪伴日常的溫度。</p></div><small class="bf-school-disclosure">木作情境示意</small></section>';
-    echo '<section class="bf-lifestyle-intro-grid"><div class="bf-lifestyle-intro-copy"><span class="bf-kicker">A LITTLE WOOD, A BETTER DAY</span><h2>生活木作的<br>可能性</h2><p>木作不只存在於大件家具，也能出現在餐桌、書桌、廚房、孩子的房間，甚至是旅途中的風景。我們持續探索木頭在生活中的各種可能，用手作的溫度，連結人與物、日常與自然。</p></div><div class="bf-lifestyle-intro-image">'; bfnd_image(bfft_asset('assets/brand/wooden-cup-editorial.png'), '木杯與木托盤・生活木作情境示意圖'); echo '<small class="bf-editorial-caption">木杯情境示意，非正式販售作品</small></div></section>';
+    $hero = bfnd_brand_photo('bfnd_lifestyle_hero_id', 'full', 'assets/lifestyle/tray-01.webp');
+    echo '<section class="bf-lifestyle-hero"><div class="bf-lifestyle-hero-image">'; bfnd_image($hero, '生活木作器物', '', false);
+    echo '</div><div class="bf-lifestyle-hero-shade"></div><div class="bf-wrap bf-lifestyle-hero-copy"><h1>生活木作</h1><span>WOODEN LIVING</span><p>讓木作，走進每一天的生活。<br>從家具，到生活中的每一件小物，<br>我們相信，木頭不只是材料，更是一種陪伴日常的溫度。</p></div><small class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></section>';
+    echo '<section class="bf-lifestyle-intro-grid"><div class="bf-lifestyle-intro-copy"><span class="bf-kicker">A LITTLE WOOD, A BETTER DAY</span><h2>生活木作的<br>可能性</h2><p>木作不只存在於大件家具，也能出現在餐桌、書桌、廚房、孩子的房間，甚至是旅途中的風景。我們持續探索木頭在生活中的各種可能，用手作的溫度，連結人與物、日常與自然。</p></div><div class="bf-lifestyle-intro-image">'; bfnd_image(bfft_asset('assets/lifestyle/tray-01.webp'), '晨露圓境托盤・木款'); echo '<span data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></div></section>';
     echo '<section class="bf-lifestyle-directions bf-wrap"><div class="bf-center-head"><span class="bf-kicker">COMING DIRECTIONS</span><h2>未來將發展的系列方向</h2><p>從生活出發，讓木作走進更多日常場景。</p></div><div class="bf-lifestyle-direction-grid"><article><b aria-hidden="true">' . bfnd_lifestyle_icon('table') . '</b><h3>餐桌器物</h3><p>木盤・餐具・托盤<br>讓飲食時光更溫暖</p></article><article><b aria-hidden="true">' . bfnd_lifestyle_icon('home') . '</b><h3>居家小物</h3><p>燈具・時鐘・掛勾<br>生活裡的小小木作</p></article><article><b aria-hidden="true">' . bfnd_lifestyle_icon('storage') . '</b><h3>收納擺飾</h3><p>收納盒・書架・擺飾<br>有秩序的美感</p></article><article><b aria-hidden="true">' . bfnd_lifestyle_icon('culture') . '</b><h3>文化木作</h3><p>兒童木作・體驗延伸品<br>讓木作走進更多人群</p></article></div></section>';
     echo '<section class="bf-lifestyle-process"><div class="bf-wrap"><div class="bf-center-head"><span class="bf-kicker">OUR MAKING PROCESS</span><h2>製作中的生活木作</h2><p>從一塊木頭，慢慢成為生活的一部分。</p></div><div class="bf-lifestyle-process-grid">';
     $steps = array(
-        array('選材', '挑選適合的木材', 'bfnd_selecting_wood_id', 'assets/brand/selecting-wood-editorial.png'),
-        array('加工', '結合手作與機械', 'bfnd_process_cnc_id', 'assets/courses/editorial-cnc.png'),
-        array('打磨', '讓質感更細緻', 'bfnd_process_sanding_id', 'assets/courses/editorial-beginner.png'),
-        array('上油', '呈現木頭的自然之美', 'bfnd_finishing_id', 'assets/brand/finishing-editorial.png'),
+        array('選材', '挑選適合的木材', 'bfnd_selecting_wood_id'),
+        array('加工', '結合手作與機械', 'bfnd_process_cnc_id'),
+        array('打磨', '讓質感更細緻', 'bfnd_process_sanding_id'),
+        array('上油', '呈現木頭的自然之美', 'bfnd_finishing_id'),
     );
-    foreach ($steps as $step) { $photo = wp_get_attachment_image_url((int) get_option($step[2]), 'large') ?: bfft_asset($step[3]); echo '<article><div>'; bfnd_image($photo, $step[0] . '・木作情境示意圖'); echo '</div><h3>' . bfnd_e($step[0]) . '</h3><p>' . bfnd_e($step[1]) . '</p></article>'; }
-    echo '</div><small class="bf-lifestyle-process-note">製作過程照片為情境示意</small></div></section>';
+    foreach ($steps as $i => $step) { $photo = bfnd_selected_photo($step[2], 'large'); echo '<article>'; if ($photo) { echo '<div>'; bfnd_image($photo, $step[0] . '・木作工序'); echo '</div>'; } else { echo '<span class="bf-index">' . sprintf('%02d', $i + 1) . '</span><span data-bfnd-reserved-image="1" hidden aria-hidden="true"></span>'; } echo '<h3>' . bfnd_e($step[0]) . '</h3><p>' . bfnd_e($step[1]) . '</p></article>'; }
+    echo '</div><small class="bf-lifestyle-process-note" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></div></section>';
     $lifestyle_page = bfnd_page_post('lifestyle');
     $layout_settings = get_option('bfnd_page_design_lifestyle', null);
     $show_works = empty($GLOBALS['bfnd_template_schema_render']) && (is_array($layout_settings) ? !empty($layout_settings['show_works']) : ($lifestyle_page && (has_shortcode($lifestyle_page->post_content, 'bfnd_page')
@@ -240,12 +240,12 @@ function bfnd_render_lifestyle_work($id) {
 }
 
 function bfnd_render_school() {
-    $hero = wp_get_attachment_image_url((int) get_option('bfnd_school_hero_id'), 'full') ?: bfft_asset('assets/brand/school-editorial.png');
+    $hero = bfnd_brand_photo('bfnd_school_hero_id', 'full', 'assets/brand/real-lecture.webp');
     echo '<section class="bf-school-hero"><div class="bf-school-hero-image">';
-    bfnd_image($hero, '木作學堂木工實作情境示意圖', '', false);
+    bfnd_image($hero, '飛熊入夢木作教學現場', '', false);
     echo '</div><div class="bf-school-hero-shade"></div><div class="bf-school-hero-content bf-wrap"><span class="bf-kicker">WOODWORKING SCHOOL</span><h1>木作學堂</h1><p>從一堂課開始，<br>用雙手創造屬於自己的作品。</p><div class="bf-actions">';
     bfnd_button('實體課程', '#onsite-courses', true);
-    echo '<a class="bf-button bf-button-light" href="#online-courses"><span>線上課程</span><span aria-hidden="true">↗</span></a></div></div><span class="bf-school-disclosure">木作情境示意</span></section>';
+    echo '<a class="bf-button bf-button-light" href="#online-courses"><span>線上課程</span><span aria-hidden="true">↗</span></a></div></div><span class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></section>';
     echo '<div class="bf-values bf-wrap"><div><b>01</b><span>專業師資</span><small>來自實務現場的教學</small></div><div><b>02</b><span>完整設備</span><small>手工具、木工機械與 CNC</small></div><div><b>03</b><span>小班教學</span><small>實作為主，安全有保障</small></div><div><b>04</b><span>從興趣到創作</span><small>陪你完成自己的作品</small></div></div>';
     echo '<section class="bf-learning-path bf-wrap" aria-labelledby="bf-learning-path-title"><div class="bf-learning-path-heading"><span class="bf-kicker">LEARNING PATH</span><h2 id="bf-learning-path-title">木作學習路徑</h2></div><ol class="bf-learning-path-steps"><li><span>LEVEL 1</span><strong>基礎</strong></li><li><span>LEVEL 2</span><strong>進階</strong></li><li><span>LEVEL 3</span><strong>養成</strong></li><li><span>自由創作</span><strong>會員</strong></li></ol></section>';
     echo '<section class="bf-section bf-wrap bf-school-courses" id="onsite-courses"><div class="bf-tab-head">'; bfnd_section_head('LEARN BY MAKING', '實體課程', '#online-courses', '查看線上課程'); echo '</div>';
@@ -261,18 +261,10 @@ function bfnd_render_school() {
     echo '<section class="bf-section bf-wrap bf-school-online" id="online-courses">'; bfnd_section_head('LEARN FROM ANYWHERE', '線上課程', '#onsite-courses', '查看實體課程');
     echo '<div class="bf-course-grid" data-course-group="online">'; $online = 0; foreach ($courses as $course) { if (bfnd_meta($course->ID, 'mode') === 'online') { bfnd_course_card($course); $online++; } }
     if (!$online) {
-        $previews = array(
-            array('VCarve CNC 設計入門', '從數位設計認識 CNC 木作流程', 'assets/courses/editorial-cnc.png'),
-            array('木工磨刀技術', '認識刀具保養與基礎磨刀方法', 'assets/courses/editorial-sharpening.png'),
-        );
-        foreach ($previews as $preview) {
-            echo '<article class="bf-course-card bf-course-preview"><div class="bf-course-image">'; bfnd_image(bfft_asset($preview[2]), $preview[0] . '課程情境示意圖'); echo '</div><div class="bf-course-card-body"><span class="bf-kicker">ONLINE COURSE / 籌備中</span><h3>' . bfnd_e($preview[0]) . '</h3><p>' . bfnd_e($preview[1]) . '</p><span class="bf-preview-status">尚未開放報名</span></div></article>';
-        }
-        echo '<article class="bf-course-preview-panel"><span class="bf-kicker">COMING SOON</span><h3>更多線上課程<br>陸續規劃中</h3><p>讓木作學習不受地點限制。正式課綱與開課資訊將於確認後公布。</p></article>';
-        echo '<article class="bf-course-preview-panel bf-course-preview-subscribe"><span class="bf-kicker">STAY IN TOUCH</span><h3>訂閱上架通知</h3><p>留下聯絡方式，當線上課程準備完成時，我們再通知你。</p><a class="bf-button" href="' . esc_url(add_query_arg('interest', 'online-course', bfnd_page_url('collaboration')) . '#inquiry') . '"><span>留下聯絡方式</span><span aria-hidden="true">↗</span></a></article>';
+        echo '<article class="bf-course-preview-panel"><span class="bf-kicker">ONLINE COURSES</span><h3>線上課程資訊近期公布</h3><p>正式課綱與開課資訊確認後，將於此頁更新。</p></article>';
     }
     echo '</div></section>';
-    $school_cta = wp_get_attachment_image_url((int) get_option('bfnd_home_hero_id'), 'full') ?: bfft_asset('assets/brand/home-editorial.png');
+    $school_cta = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
     echo '<section class="bf-school-cta" style="background-image:linear-gradient(90deg,#24180dcc,#24180d22),url(' . esc_url($school_cta) . ')"><div class="bf-wrap"><h2>不知道哪一堂課適合你？</h2><p>歡迎與我們聊聊，找到最適合你的學習路徑。</p><div class="bf-actions">'; bfnd_button('課程選擇指南', '#onsite-courses', true); bfnd_button('聯絡我們', bfnd_page_url('collaboration') . '#inquiry', true); echo '</div></div></section>';
 }
 
@@ -295,7 +287,8 @@ function bfnd_course_card($course) {
     $id = $course->ID;
     $duration = trim((string) bfnd_meta($id, 'duration'));
     $level = trim((string) bfnd_meta($id, 'level'));
-    echo '<article class="bf-course-card"><a class="bf-course-card-main" href="' . esc_url(get_permalink($id)) . '"><div class="bf-course-image">'; bfnd_image(bfnd_work_image($id, 'medium_large'), get_the_title($id) . '課程'); echo '</div><div class="bf-course-card-body"><span class="bf-kicker">' . (bfnd_meta($id, 'mode') === 'online' ? 'ONLINE COURSE' : (bfnd_course_track($id) === 'specialist' ? 'SPECIALIST SKILLS' : 'ON-SITE COURSE')) . '</span><h3>' . bfnd_e(get_the_title($id)) . '</h3><div class="bf-course-meta">';
+    $image = bfnd_work_image($id, 'medium_large');
+    echo '<article class="bf-course-card"><a class="bf-course-card-main" href="' . esc_url(get_permalink($id)) . '">'; if ($image) { echo '<div class="bf-course-image">'; bfnd_image($image, get_the_title($id) . '課程'); echo '</div>'; } echo '<div class="bf-course-card-body"><span class="bf-kicker">' . (bfnd_meta($id, 'mode') === 'online' ? 'ONLINE COURSE' : (bfnd_course_track($id) === 'specialist' ? 'SPECIALIST SKILLS' : 'ON-SITE COURSE')) . '</span><h3>' . bfnd_e(get_the_title($id)) . '</h3><div class="bf-course-meta">';
     if ($duration !== '') { echo '<span>' . bfnd_e($duration) . '</span>'; }
     if ($level !== '') { echo '<span>' . bfnd_e($level) . '</span>'; }
     echo '</div>';
@@ -334,18 +327,18 @@ function bfnd_render_course($id) {
     if ($posters) { echo '<section class="bf-section bf-wrap bf-course-poster"><span class="bf-kicker">COURSE INFORMATION</span><h2>課程簡章</h2>'; bfnd_image($posters[0], get_the_title($id) . '課程簡章'); if (count($posters) > 1) { echo '<h3>課程照片</h3><div class="bf-detail-gallery">'; foreach (array_slice($posters, 1, 8) as $photo) { bfnd_image($photo, get_the_title($id) . '課程照片'); } echo '</div>'; } echo '</section>'; }
 }
 
-function bfnd_story_row($number, $en, $title, $text, $image, $image_alt, $link = '', $link_label = '', $reverse = false) {
-    echo '<section class="bf-story-row' . ($reverse ? ' bf-story-row-reverse' : '') . '"><div class="bf-story-row-image">'; bfnd_image($image, $image_alt); if (strpos($image_alt, '情境示意') !== false) { echo '<small class="bf-editorial-caption">工藝／空間情境示意</small>'; } echo '</div><div class="bf-story-row-content"><span class="bf-story-number">' . bfnd_e($number) . '</span><span class="bf-kicker">' . bfnd_e($en) . '</span><h2>' . bfnd_e($title) . '</h2><p>' . nl2br(bfnd_e($text)) . '</p>';
+function bfnd_story_row($number, $en, $title, $text, $image, $image_alt, $link = '', $link_label = '', $reverse = false, $reserve_caption = false, $reserve_image = false) {
+    echo '<section class="bf-story-row' . ($reverse ? ' bf-story-row-reverse' : '') . (!$image ? ' bf-story-row-text-only' : '') . '">'; if ($image) { echo '<div class="bf-story-row-image">'; bfnd_image($image, $image_alt); if ($reserve_caption) { echo '<span data-bfnd-reserved-text="1" hidden aria-hidden="true"></span>'; } echo '</div>'; } else { if ($reserve_image) { echo '<span data-bfnd-reserved-image="1" hidden aria-hidden="true"></span>'; } if ($reserve_caption) { echo '<span data-bfnd-reserved-text="1" hidden aria-hidden="true"></span>'; } } echo '<div class="bf-story-row-content"><span class="bf-story-number">' . bfnd_e($number) . '</span><span class="bf-kicker">' . bfnd_e($en) . '</span><h2>' . bfnd_e($title) . '</h2><p>' . nl2br(bfnd_e($text)) . '</p>';
     if ($link) { echo '<a class="bf-text-link" href="' . esc_url($link) . '">' . bfnd_e($link_label) . ' ↗</a>'; }
     echo '</div></section>';
 }
 
 function bfnd_render_story() {
-    $brand_hero = wp_get_attachment_image_url((int) get_option('bfnd_home_hero_id'), 'full') ?: bfft_asset('assets/brand/home-editorial.png');
-    echo '<section class="bf-brand-hero"><div class="bf-brand-hero-copy"><span class="bf-kicker">BRAND STORY / BEAR’S FANTASYLAND</span><h1>飛熊入夢<br><em>木，讓生活更美好。</em></h1><p>從一雙木工的手，<br>到一個新的世代。<br>我們相信，木不只是材料，<br>而是一種更好的生活方式。</p></div><div class="bf-brand-hero-image">'; bfnd_image($brand_hero, '飛熊入夢實木家具情境示意圖', '', false); echo '</div></section>';
-    bfnd_story_row('01', 'OUR ORIGIN', '源於熱愛', "飛熊入夢源自對木工的熱愛。我們從傳統木工出發，結合現代設計與數位製造，在手作的溫度與科技的精準之間，尋找屬於這個時代的木作方式。\n\n我們希望，木作不只是被保存的技藝，而能真正走進更多人的生活。", bfft_asset('assets/courses/editorial-beginner.png'), '職人手工刨木情境示意圖');
+    $brand_hero = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
+    echo '<section class="bf-brand-hero"><div class="bf-brand-hero-copy"><span class="bf-kicker">BRAND STORY / BEAR’S FANTASYLAND</span><h1>飛熊入夢<br><em>木，讓生活更美好。</em></h1><p>從一雙木工的手，<br>到一個新的世代。<br>我們相信，木不只是材料，<br>而是一種更好的生活方式。</p></div><div class="bf-brand-hero-image">'; bfnd_image($brand_hero, '飛熊入夢實木家具', '', false); echo '</div></section>';
+    bfnd_story_row('01', 'OUR ORIGIN', '源於熱愛', "飛熊入夢源自對木工的熱愛。我們從傳統木工出發，結合現代設計與數位製造，在手作的溫度與科技的精準之間，尋找屬於這個時代的木作方式。\n\n我們希望，木作不只是被保存的技藝，而能真正走進更多人的生活。", bfft_asset('assets/brand/real-lecture.webp'), '飛熊入夢木作教學現場', '', '', false, true);
     bfnd_story_row('02', 'FURNITURE', '實木家具', "我們設計並製作實木家具。從木材的選擇、比例、結構到使用方式，回到家具最單純的本質——自然、耐用，並且能長久陪伴生活。\n\n每件作品都能隨著時間與使用，慢慢留下屬於生活的痕跡。", bfft_asset('assets/works/muyo/02.webp'), '木韻 MUYO 胡桃木桌椅結構細節', bfnd_page_url('furniture'), '探索家具作品', true);
-    $wood_ring = wp_get_attachment_image_url((int) get_option('bfnd_manifesto_id'), 'large') ?: bfft_asset('assets/brand/wood-ring-editorial.png');
+    $wood_ring = bfnd_brand_photo('bfnd_manifesto_id', 'large', 'assets/works/muyo/02.webp');
     echo '<section class="bf-philosophy bf-wrap"><span class="bf-kicker">OUR PHILOSOPHY</span><h2>讓傳承，成為創新的開始。</h2><div class="bf-philosophy-layout"><div class="bf-philosophy-longform">';
     $philosophy = array(
         array('p', '我們從傳統木工走來。曾經，一把鉋刀、一支鑿刀、一雙佈滿木屑的手，就是一位木工師傅最熟悉的日常。那些看似平凡的技藝，藏著的是一代又一代累積下來的經驗。對木材的理解、對尺寸的堅持、對結構的講究，以及對一件作品負責到底的態度。這些，是台灣木工珍貴的底蘊。'),
@@ -358,36 +351,35 @@ function bfnd_render_story() {
         array('p', '飛熊入夢所做的，是把兩個世代的手，牽在一起。讓老技藝有新的生命，讓新設計有深厚的根。讓「台灣製造」不只代表產地，而是一件值得被珍惜、被認同，也值得我們感到驕傲的事。'),
     );
     foreach ($philosophy as $block) { $tag = $block[0] === 'quote' ? 'blockquote' : 'p'; echo '<' . $tag . '>' . bfnd_e($block[1]) . '</' . $tag . '>'; }
-    echo '</div><div class="bf-philosophy-image">'; bfnd_image($wood_ring, '木材年輪・品牌理念情境示意圖'); echo '</div></div></section>';
-    $workshop = wp_get_attachment_image_url((int) get_option('bfnd_school_hero_id'), 'large') ?: bfft_asset('assets/brand/school-editorial.png');
-    bfnd_story_row('03', 'EDUCATION & MAKING', '木工教育 × 數位製造', "真正值得傳承的，不只有一件完成的作品，還有製作它的方法。從木工基礎、自由創作，到 CNC 數位木工，讓更多人從第一次接觸木材開始，逐步完成自己的作品。", $workshop, '木工教育工坊情境示意圖', bfnd_page_url('school'), '了解木作學堂');
-    $cnc_story = wp_get_attachment_image_url((int) get_option('bfnd_process_cnc_id'), 'large') ?: bfft_asset('assets/courses/editorial-cnc.png');
-    bfnd_story_row('04', 'TAICHUNG MAKER', '台中 Maker 工藝基地', "飛熊入夢扎根台中。這裡結合木工設備、CNC 數位製造、設計、教育與創作，是我們發展課程，也讓創意真正被實現的地方。", $cnc_story, '台中 Maker CNC 數位木工情境示意圖', '', '', true);
+    echo '</div><div class="bf-philosophy-image">'; bfnd_image($wood_ring, '木材年輪與木紋'); echo '</div></div></section>';
+    $workshop = bfnd_brand_photo('bfnd_school_hero_id', 'large', 'assets/brand/real-lecture.webp');
+    bfnd_story_row('03', 'EDUCATION & MAKING', '木工教育 × 數位製造', "真正值得傳承的，不只有一件完成的作品，還有製作它的方法。從木工基礎、自由創作，到 CNC 數位木工，讓更多人從第一次接觸木材開始，逐步完成自己的作品。", $workshop, '木工教育工坊', bfnd_page_url('school'), '了解木作學堂', false, true);
+    $cnc_story = bfnd_selected_photo('bfnd_process_cnc_id', 'large');
+    bfnd_story_row('04', 'TAICHUNG MAKER', '台中 Maker 工藝基地', "飛熊入夢扎根台中。這裡結合木工設備、CNC 數位製造、設計、教育與創作，是我們發展課程，也讓創意真正被實現的地方。", $cnc_story, '台中 Maker CNC 數位木工設備', '', '', true, true, true);
     echo '<section class="bf-brand-statement bf-wrap"><span class="bf-kicker">A BETTER LIVING WITH WOOD</span><h2>承一代人的手藝，<br>創下一代人的家具。</h2><p>從台灣出發，做讓我們自己都感到驕傲的設計。</p><div class="bf-actions">'; bfnd_button('探索家具作品', bfnd_page_url('furniture')); bfnd_button('開始學木工', bfnd_page_url('school')); echo '</div></section>';
 }
 
 function bfnd_render_collaboration() {
-    $hero = wp_get_attachment_image_url((int) get_option('bfnd_home_hero_id'), 'full') ?: bfft_asset('assets/brand/home-editorial.png');
-    echo '<section class="bf-collab-hero"><div class="bf-collab-hero-image">'; bfnd_image($hero, '木韻 MUYO 餐桌合作情境示意圖', '', false); echo '</div><div class="bf-collab-hero-copy bf-wrap"><span class="bf-kicker">COLLABORATION</span><h1>與木一起，<br>創造更好的空間。</h1><p>飛熊入夢以家具設計為核心，<br>結合木工技藝、數位製造與木工教育，<br>與企業、設計單位、學校及文化組織，<br>共同發展更美好的空間與生活。</p>'; bfnd_button('與我們談合作', '#inquiry'); echo '</div><small class="bf-school-disclosure">空間情境示意</small></section>';
+    $hero = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
+    echo '<section class="bf-collab-hero"><div class="bf-collab-hero-image">'; bfnd_image($hero, '木韻 MUYO 胡桃木餐桌椅', '', false); echo '</div><div class="bf-collab-hero-copy bf-wrap"><span class="bf-kicker">COLLABORATION</span><h1>與木一起，<br>創造更好的空間。</h1><p>飛熊入夢以家具設計為核心，<br>結合木工技藝、數位製造與木工教育，<br>與企業、設計單位、學校及文化組織，<br>共同發展更美好的空間與生活。</p>'; bfnd_button('與我們談合作', '#inquiry'); echo '</div><small class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></section>';
     echo '<section class="bf-collab-possibilities bf-wrap"><div><span class="bf-index">01</span><h2>我們可以怎麼合作？</h2><p>不同的空間，一樣的木作溫度。<br>從家具到教育，與你一起創造更多可能。</p></div><div class="bf-collab-possibilities-grid"><article><b aria-hidden="true">▰</b><h3>家具採購</h3><p>飛熊入夢<br>既有家具系列</p></article><article><b aria-hidden="true">⌂</b><h3>企業／空間合作</h3><p>辦公・商業・公共<br>及教育空間</p></article><article><b aria-hidden="true">♧</b><h3>永續合作</h3><p>材料・耐久設計<br>維修延壽・減少浪費</p></article><article><b aria-hidden="true">◇</b><h3>教育／文化合作</h3><p>木工教育・工藝體驗<br>文化及企業活動</p></article></div></section>';
     echo '<section class="bf-collab-design"><div class="bf-collab-design-image">'; bfnd_image(bfft_asset('assets/works/ridge-table/01.webp'), '稜 RIDGE 實木餐桌'); echo '</div><div class="bf-collab-design-copy"><span class="bf-kicker">FROM OUR DESIGN TO YOUR SPACE</span><h2>從我們的設計，<br>走進你的空間。</h2><p>我們以飛熊入夢的設計語言與既有作品為基礎，依不同空間需求，在尺寸、木材與使用情境上進行適度調整，讓家具真正融入生活。</p></div><div class="bf-collab-design-image">'; bfnd_image(bfft_asset('assets/works/muyo/01.webp'), '木韻 MUYO 胡桃木餐桌椅'); echo '</div></section>';
     echo '<section id="process" class="bf-collab-process bf-wrap"><div class="bf-collab-process-head"><span class="bf-index">03</span><h2>合作流程</h2><p>簡單透明，讓合作更順利。</p></div><ol class="bf-collab-process-list">';
     $steps = array(array('需求討論', '了解使用情境、空間與需求'), array('提案報價', '提出合適作品及製作方案'), array('確認細節', '確認材質、尺寸、數量與細節'), array('製作執行', '台中工坊製作與品質管控'), array('完成交付', '依作品安排運送與安裝'));
     foreach ($steps as $i => $step) { echo '<li><b>' . sprintf('%02d', $i + 1) . '</b><strong>' . bfnd_e($step[0]) . '</strong><small>' . bfnd_e($step[1]) . '</small></li>'; }
     echo '</ol></section>';
-    echo '<section class="bf-collab-scenarios"><div class="bf-wrap bf-collab-scenarios-inner"><div><span class="bf-index">04</span><h2>合作場景</h2><p>不同的場景，<br>同樣的木作價值。</p><small>圖片為可合作空間情境示意</small></div><div class="bf-collab-scenarios-grid">';
+    echo '<section class="bf-collab-scenarios"><div class="bf-wrap bf-collab-scenarios-inner"><div><span class="bf-index">04</span><h2>合作場景</h2><p>不同的場景，<br>同樣的木作價值。</p><small data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></div><div class="bf-collab-scenarios-grid">';
+
     $scenarios = array(
-        array('企業辦公空間', '會議桌・辦公桌・收納櫃', 'bfnd_collab_office_id', 'assets/brand/collab-office-editorial.png'),
-        array('商業空間', '餐桌椅・展示櫃・空間規劃', 'bfnd_collab_cafe_id', 'assets/brand/collab-cafe-editorial.png'),
-        array('教育場域', '教學桌椅・木作教具', 'bfnd_school_hero_id', 'assets/brand/school-editorial.png'),
-        array('公共空間', '圖書館・社區空間・展覽', 'bfnd_collab_library_id', 'assets/brand/collab-library-editorial.png'),
+        array('企業辦公空間', '會議桌・辦公桌・收納櫃'),
+        array('商業空間', '餐桌椅・展示櫃・空間規劃'),
+        array('教育場域', '教學桌椅・木作教具'),
+        array('公共空間', '圖書館・社區空間・展覽'),
     );
-    foreach ($scenarios as $scene) { $photo = wp_get_attachment_image_url((int) get_option($scene[2]), 'large') ?: bfft_asset($scene[3]); echo '<article><div>'; bfnd_image($photo, $scene[0] . '情境示意圖'); echo '</div><h3>' . bfnd_e($scene[0]) . '</h3><p>' . bfnd_e($scene[1]) . '</p></article>'; }
+    foreach ($scenarios as $i => $scene) { echo '<article><span data-bfnd-reserved-image="1" hidden aria-hidden="true"></span><span class="bf-index">' . sprintf('%02d', $i + 1) . '</span><h3>' . bfnd_e($scene[0]) . '</h3><p>' . bfnd_e($scene[1]) . '</p></article>'; }
     echo '</div></div></section>';
-    $forest = wp_get_attachment_image_url((int) get_option('bfnd_forest_id'), 'full') ?: bfft_asset('assets/brand/forest-editorial.png');
-    echo '<section class="bf-collab-sustain"><div class="bf-collab-sustain-image">'; bfnd_image($forest, '永續森林情境示意圖'); echo '</div><div class="bf-wrap bf-collab-sustain-inner"><div><span class="bf-kicker">05 / SUSTAINABILITY</span><h2>永續設計 × 企業合作</h2><p>從一件家具開始，為下一個世代設計更長久的生活。</p>'; bfnd_button('洽談永續合作', '#inquiry', true); echo '</div><div class="bf-collab-sustain-values"><article><b>♧</b><h3>責任材料</h3><p>建立木材來源與材料紀錄</p></article><article><b>⌂</b><h3>在地製造</h3><p>台中工坊・設計製作</p></article><article><b>∞</b><h3>耐久設計</h3><p>延長家具使用生命週期</p></article><article><b>↻</b><h3>維修再生</h3><p>保養・修繕與重新整理</p></article></div><div class="bf-sdg-goals" aria-label="設計方向呼應的聯合國永續發展目標"><span class="bf-sdg-4"><b>4</b>優質教育</span><span class="bf-sdg-8"><b>8</b>合適的工作與經濟成長</span><span class="bf-sdg-11"><b>11</b>永續城市與社區</span><span class="bf-sdg-12"><b>12</b>負責任的消費與生產</span></div></div></section>';
-    $after_photo = wp_get_attachment_image_url((int) get_option('bfnd_process_sanding_id'), 'large') ?: bfft_asset('assets/courses/editorial-beginner.png');
-    echo '<section class="bf-collab-after"><div class="bf-collab-after-image">'; bfnd_image($after_photo, '木作售後服務情境示意圖'); echo '</div><div class="bf-wrap bf-collab-after-inner"><div><span class="bf-kicker">06 / AFTER SERVICE</span><h2>售後與交付服務</h2><p>一件好的家具，值得被長久使用。我們提供完整的交付與維護服務。</p><a class="bf-text-link" href="' . esc_url(bfnd_page_url('service')) . '">了解服務內容 ↗</a></div><div class="bf-collab-after-grid"><article><b>↗</b><h3>運送與安裝</h3><p>依作品尺寸與地點安排</p></article><article><b>◇</b><h3>作品保固</h3><p>提供售後檢查與保固服務</p></article><article><b>⌘</b><h3>維護與修繕</h3><p>保養・修繕・重新整理</p></article></div></div></section>';
+    echo '<section class="bf-collab-sustain"><span data-bfnd-reserved-image="1" hidden aria-hidden="true"></span><div class="bf-wrap bf-collab-sustain-inner"><div><span class="bf-kicker">05 / SUSTAINABILITY</span><h2>永續設計 × 企業合作</h2><p>從一件家具開始，為下一個世代設計更長久的生活。</p>'; bfnd_button('洽談永續合作', '#inquiry', true); echo '</div><div class="bf-collab-sustain-values"><article><b>♧</b><h3>責任材料</h3><p>建立木材來源與材料紀錄</p></article><article><b>⌂</b><h3>在地製造</h3><p>台中工坊・設計製作</p></article><article><b>∞</b><h3>耐久設計</h3><p>延長家具使用生命週期</p></article><article><b>↻</b><h3>維修再生</h3><p>保養・修繕與重新整理</p></article></div><div class="bf-sdg-goals" aria-label="設計方向呼應的聯合國永續發展目標"><span class="bf-sdg-4"><b>4</b>優質教育</span><span class="bf-sdg-8"><b>8</b>合適的工作與經濟成長</span><span class="bf-sdg-11"><b>11</b>永續城市與社區</span><span class="bf-sdg-12"><b>12</b>負責任的消費與生產</span></div></div></section>';
+    echo '<section class="bf-collab-after"><span data-bfnd-reserved-image="1" hidden aria-hidden="true"></span><div class="bf-wrap bf-collab-after-inner"><div><span class="bf-kicker">06 / AFTER SERVICE</span><h2>售後與交付服務</h2><p>一件好的家具，值得被長久使用。我們提供完整的交付與維護服務。</p><a class="bf-text-link" href="' . esc_url(bfnd_page_url('service')) . '">了解服務內容 ↗</a></div><div class="bf-collab-after-grid"><article><b>↗</b><h3>運送與安裝</h3><p>依作品尺寸與地點安排</p></article><article><b>◇</b><h3>作品保固</h3><p>提供售後檢查與保固服務</p></article><article><b>⌘</b><h3>維護與修繕</h3><p>保養・修繕・重新整理</p></article></div></div></section>';
     bfnd_render_journal_teaser();
     bfnd_render_inquiry_form();
 }
@@ -472,7 +464,7 @@ function bfnd_render_journal_article() {
     while (have_posts()) {
         the_post();
         echo '<article class="bf-journal-article bf-wrap"><a class="bf-back" href="' . esc_url(bfnd_page_url('journal')) . '">← 返回飛熊日誌</a><span class="bf-kicker">JOURNAL / ' . esc_html(get_the_date('Y.m.d')) . '</span><h1>' . esc_html(get_the_title()) . '</h1>';
-        if (has_post_thumbnail()) { echo '<div class="bf-journal-article-image">'; the_post_thumbnail('full'); echo '</div>'; }
+        if (has_post_thumbnail()) { echo '<div class="bf-journal-article-image">'; bfnd_image(get_the_post_thumbnail_url(get_the_ID(), 'full'), get_the_title()); echo '</div>'; }
         echo '<div class="bf-journal-article-body">'; the_content(); echo '</div></article>';
     }
     bfnd_render_cta('還想看看更多木作故事？', '從作品、課程與日常持續探索。', '閱讀飛熊日誌', bfnd_page_url('journal'));

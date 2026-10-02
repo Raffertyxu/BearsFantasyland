@@ -5,7 +5,7 @@ import re
 from urllib.request import Request, urlopen
 
 BASE = "https://a1.haotaimaker.com"
-FORBIDDEN_TEXT = ("Haotai TEST", "待確認", "待補", "暫定", "推估", "Sample", "【示範文章】")
+FORBIDDEN_TEXT = ("Haotai TEST", "待確認", "待補", "暫定", "推估", "Sample", "【示範文章】", chr(0x793A) + chr(0x610F), chr(0x6E2C) + chr(0x8A66))
 
 
 def assert_no_placeholders(label, text):
@@ -14,9 +14,10 @@ def assert_no_placeholders(label, text):
     assert not re.search(r"\b(?:test|demo|sample)\b", text, re.IGNORECASE), f"{label} contains TEST/DEMO/SAMPLE text"
 CASES = {
     "/": ("logo-transparent.png", "飛熊日誌"),
-    "/woodworking-school/": ("VCarve CNC 設計入門", "木工磨刀技術", "訂閱上架通知"),
+    "/woodworking-school/": ("木作學習路徑", "專項技能課程", "線上課程資訊近期公布"),
     "/furniture/": ("COLLECTIONS / 依系列瀏覽", "搜尋作品、系列或木材"),
-    "/brand-story/": ("我們希望有一天", "對這片土地的自信", "職人手工刨木情境示意圖"),
+    "/lifestyle/": ("生活木作", "晨露圓境托盤"),
+    "/brand-story/": ("我們希望有一天", "對這片土地的自信", "飛熊入夢木作教學現場"),
     "/collaboration/": ("需求討論", "提案報價", "完成交付", "bf-sdg-goals", "飛熊日誌"),
     "/journal/": ("飛熊日誌", "最新文章"),
     "/service/": ("作品購買／詢問", "運送與安裝", "作品保固", "保養與修繕", "05 / FAQ"),
@@ -29,6 +30,8 @@ for path, markers in CASES.items():
     print(("PASS" if not missing else "FAIL"), path, "missing:", missing)
     if missing:
         raise SystemExit(1)
+    assert not re.search(r"(?i)(editorial|wooden-cup)", html), f"{path} references an illustrative image asset"
+    assert_no_placeholders(path, html)
 
 journal_counts = {}
 for path in ("/", "/collaboration/", "/journal/"):
@@ -59,7 +62,7 @@ for marker in ("CUSTOM PROCESS", "訂製流程", "CUSTOM MADE"):
     assert marker not in service, f"service page still contains retired copy: {marker}"
 print("PASS", "/service/", "purchase and after-sales structure")
 
-for path in ("/", "/furniture/", "/woodworking-school/", "/brand-story/", "/collaboration/", "/journal/", "/service/"):
+for path in ("/", "/furniture/", "/lifestyle/", "/woodworking-school/", "/brand-story/", "/collaboration/", "/journal/", "/service/"):
     with urlopen(Request(BASE + path, headers={"User-Agent": "BFND content check"}), timeout=25) as response:
         html = response.read().decode("utf-8", errors="replace")
     assert_no_placeholders(path, html)
