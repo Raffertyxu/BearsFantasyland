@@ -68,26 +68,6 @@ function bfnd_migrate_page_slugs() {
 }
 
 function bfnd_redirect_legacy_pages() {
-    $legacy = array(
-        'newdesign-preview' => 'home', 'newdesign-furniture' => 'furniture',
-        'newdesign-lifestyle' => 'lifestyle', 'newdesign-school' => 'school',
-        'newdesign-story' => 'story', 'newdesign-collaboration' => 'collaboration',
-        'newdesign-journal' => 'journal', 'newdesign-service' => 'service',
-        'tools' => 'shop', 'contact' => 'collaboration', 'faq' => 'service',
-        'news' => 'journal', 'masters' => 'story', 'bearnews' => 'journal',
-        '聯絡我們' => 'collaboration', 'custom-delivery' => 'service',
-        'about' => 'story', 'youtube' => 'school', 'school' => 'school',
-        '首頁' => 'home',
-    );
-    $anchors = array('contact' => 'inquiry', '聯絡我們' => 'inquiry', 'faq' => 'faq');
-    $path = rawurldecode(trim((string) wp_parse_url(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '', PHP_URL_PATH), '/'));
-    if (isset($legacy[$path])) {
-        $url = $legacy[$path] === 'shop' ? bfnd_shop_url() : bfnd_page_url($legacy[$path]);
-        if (!empty($_SERVER['QUERY_STRING'])) { $url .= (strpos($url, '?') === false ? '?' : '&') . wp_unslash($_SERVER['QUERY_STRING']); }
-        if (isset($anchors[$path])) { $url .= '#' . $anchors[$path]; }
-        wp_safe_redirect($url, 301);
-        exit;
-    }
     $archives = array('bf_work' => 'furniture', 'bf_lifestyle' => 'lifestyle', 'bf_course' => 'school');
     foreach ($archives as $type => $key) {
         if (is_post_type_archive($type)) { wp_safe_redirect(bfnd_page_url($key), 301); exit; }

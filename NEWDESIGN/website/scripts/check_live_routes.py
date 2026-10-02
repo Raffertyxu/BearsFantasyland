@@ -1,7 +1,6 @@
 """Check that the published pages share the NEWDESIGN layout and clean URLs."""
 
 from urllib.error import HTTPError
-from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 
@@ -20,27 +19,28 @@ PAGES = (
     "/my-account/",
     "/product/%e7%b7%9a%e9%8b%b8/",
 )
-LEGACY = {
-    "/newdesign-furniture/": "/furniture/",
-    "/newdesign-lifestyle/": "/lifestyle/",
-    "/newdesign-school/": "/woodworking-school/",
-    "/newdesign-story/": "/brand-story/",
-    "/newdesign-collaboration/": "/collaboration/",
-    "/newdesign-journal/": "/journal/",
-    "/newdesign-service/": "/service/",
-    "/tools/": "/woodshop/",
-    "/contact/": "/collaboration/#inquiry",
-    "/faq/": "/service/#faq",
-    "/news/": "/journal/",
-    "/masters/": "/brand-story/",
-    "/bearnews/": "/journal/",
-    "/%e8%81%af%e7%b5%a1%e6%88%91%e5%80%91/": "/collaboration/#inquiry",
-    "/custom-delivery/": "/service/",
-    "/about/": "/brand-story/",
-    "/youtube/": "/woodworking-school/",
-    "/school/": "/woodworking-school/",
-    "/%e9%a6%96%e9%a0%81/": "/",
-}
+RETIRED = (
+    "/newdesign-preview/",
+    "/newdesign-furniture/",
+    "/newdesign-lifestyle/",
+    "/newdesign-school/",
+    "/newdesign-story/",
+    "/newdesign-collaboration/",
+    "/newdesign-journal/",
+    "/newdesign-service/",
+    "/tools/",
+    "/contact/",
+    "/faq/",
+    "/news/",
+    "/masters/",
+    "/bearnews/",
+    "/%e8%81%af%e7%b5%a1%e6%88%91%e5%80%91/",
+    "/custom-delivery/",
+    "/about/",
+    "/youtube/",
+    "/school/",
+    "/%e9%a6%96%e9%a0%81/",
+)
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -65,21 +65,18 @@ for path in PAGES:
         print("FAIL", path, error.code)
         failures.append(path)
 
-for old, new in LEGACY.items():
+for path in RETIRED:
     try:
-        opener.open(Request(BASE + old, headers={"User-Agent": "BFND route check"}), timeout=20)
-        print("FAIL", old, "did not redirect")
-        failures.append(old)
-    except HTTPError as error:
-        location = error.headers.get("Location", "")
-        actual = urlsplit(location)
-        expected = urlsplit(BASE + new)
-        good = (error.code == 301 and actual.netloc == expected.netloc
-                and actual.path.rstrip("/").lower() == expected.path.rstrip("/").lower()
-                and actual.fragment == expected.fragment)
-        print(("PASS" if good else "FAIL"), old, error.code, location)
+        response = opener.open(Request(BASE + path, headers={"User-Agent": "BFND route check"}), timeout=20)
+        good = response.status == 404
+        print(("PASS" if good else "FAIL"), path, response.status)
         if not good:
-            failures.append(old)
+            failures.append(path)
+    except HTTPError as error:
+        good = error.code == 404
+        print(("PASS" if good else "FAIL"), path, error.code)
+        if not good:
+            failures.append(path)
 
 if failures:
     raise SystemExit("Route check failed: " + ", ".join(failures))
