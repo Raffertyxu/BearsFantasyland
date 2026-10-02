@@ -2,6 +2,14 @@
 
 更新日期：2026-10-02
 
+## 2026-10-02 前台互動提升（最新來源狀態）
+
+- 主題來源 `1.3.10`、外掛來源 `0.5.6` 新增 `public/interactions.css`，並同步更新兩套前台 JavaScript。加入鍵盤焦點、按鈕按壓、篩選選取狀態及主視覺短促進場；學堂選單與照片放大視窗可順暢開合。
+- 手機導覽／學堂選單支援 Escape 和點擊外側關閉；作品數量使用 polite live region，篩選按鈕同步 `aria-pressed`，照片視窗關閉後把焦點還給原本縮圖。
+- 遵守 `prefers-reduced-motion`。沒有加入自動播放或捲動觸發動畫。
+- **尚未發布至正式站**：正式站最後可見外掛與 CSS 版本依 `NEWDESIGN/website/DEPLOYMENT.md` 頂部紀錄為準。新 ZIP 是本機交付套件；上傳成功並重新核對正式站前不能視為已部署。
+- 詳細來源與部署區分請讀 `README.md`、`NEWDESIGN/website/design.md` 及 `NEWDESIGN/website/DEPLOYMENT.md`。
+
 ## 2026-10-02 正式站連結與公開內容稽核（最新）
 
 - 最新即時證據與範圍見 [`NEWDESIGN/website/LIVE-LINK-CONTENT-AUDIT-2026-10-02.md`](NEWDESIGN/website/LIVE-LINK-CONTENT-AUDIT-2026-10-02.md)。12／12 個主要網址為 HTTP 200、19／19 個舊網址為預期 HTTP 301；40 筆公開內容網址、69 個站內目標、4 個社群外連均未發現確認失效的連結或測試頁轉址，頁內錨點均存在。為避免修改正式購物車，`?add-to-cart=` 操作連結未請求。

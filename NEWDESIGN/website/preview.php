@@ -62,7 +62,7 @@ $post = null;
 if (in_array($page, array('work', 'lifestyle-work', 'course'))) {
     foreach ($preview_posts as $candidate) if (($candidate->data['slug'] ?? '') === ($_GET['slug'] ?? '')) $post = $candidate;
 }
-?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢 NEWDESIGN 預覽</title><link rel="stylesheet" href="/public/style.css"></head><body class="bfnd-body"><?php bfnd_render_header($page); ?><main id="bf-main"><?php
+?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢 NEWDESIGN 預覽</title><link rel="stylesheet" href="/public/style.css"><link rel="stylesheet" href="/public/interactions.css"></head><body class="bfnd-body"><?php bfnd_render_header($page); ?><main id="bf-main"><?php
 if ($post && $page === 'work') bfnd_render_work($post->ID);
 elseif ($post && $page === 'lifestyle-work') bfnd_render_lifestyle_work($post->ID);
 elseif ($post && $page === 'course') bfnd_render_course($post->ID);

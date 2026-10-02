@@ -15,11 +15,17 @@
 
 ## 目前版本與部署狀態
 
-- 外掛原始碼版本：`0.5.5`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`）
-- 主題原始碼版本：`1.3.9`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
+- 外掛原始碼版本：`0.5.6`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`）
+- 主題原始碼版本：`1.3.10`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
 - 正式站仍載入主題 CSS `public/style.css?ver=1.3.7`；頁首頁尾 RWD 與深棕 LINE 泡泡字標由 WordPress「外觀 → 自訂 → 額外的 CSS」覆寫，已在正式首頁即時確認生效。主題 ZIP 的完整覆蓋仍因 `assets/works/ripple/01.webp` 複製錯誤而未確認成功，不能將來源版本視為已部署版本。
 - 本機部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`。ZIP 由 Git LFS 管理；新電腦若只看到 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
 - 2026-10-01 本輪主題來源、部署 ZIP、README、HANDOFF 與部署紀錄已同步到 GitHub `main`。另一台電腦先執行 `git pull` 和 `git lfs pull`；每次接手仍要用 `git status --short --branch`、`git log -5 --oneline` 核對當下狀態。
+
+### 2026-10-02 前台互動提升（來源／套件狀態）
+
+- 主題來源升至 `1.3.10`、外掛來源升至 `0.5.6`；兩套前台都加入共用互動樣式。按鈕／連結有清楚鍵盤焦點與按壓回饋，首頁、家具、學堂與生活木作主視覺做一次短促進場；家具篩選會同步呈現選取狀態，作品數量可被螢幕閱讀器朗讀。
+- 手機主導覽與學堂子選單可用 Escape／點擊外部關閉；照片放大視窗有淡入淡出、描述標籤與關閉後焦點返回。尊重系統「減少動態效果」，沒有加入自動播放、視差或捲動觸發動畫。
+- 此為本機來源與部署 ZIP 更新紀錄；尚未表示正式站已安裝新版，正式站最後可見 CSS 版本仍以後續部署驗證為準。
 
 ### 2026-10-02 正式站連結與公開文案檢查
 

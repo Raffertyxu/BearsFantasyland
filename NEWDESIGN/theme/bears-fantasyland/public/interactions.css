@@ -1,0 +1,168 @@
+/* Quiet, useful motion for navigation, actions, and visual feedback. */
+body.bfnd-body :where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid #775640;
+  outline-offset: 3px;
+}
+
+body.bfnd-body :is(.bf-button, .bf-course-card-action, .bf-filter-list button,
+  .bf-tabs button, .bf-menu-button, .bf-nav-school-toggle, button,
+  input[type="submit"], .button,
+  .bf-gallery-button, .bf-footer-social a) {
+  transition: color 180ms ease, background-color 180ms ease,
+    border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+body.bfnd-body :is(.bf-button, .bf-course-card-action, .bf-filter-list button,
+  .bf-tabs button, .bf-menu-button, .bf-nav-school-toggle, button,
+  input[type="submit"], .button):active {
+  transform: translateY(1px) scale(.99);
+}
+
+body.bfnd-body .bf-filter-list button::after {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 180ms ease;
+}
+
+body.bfnd-body .bf-filter-list button.is-active::after {
+  transform: scaleX(1);
+}
+
+body.bfnd-body .bf-nav-school-toggle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+body.bfnd-body .bf-nav-school .bf-nav-course-menu {
+  display: grid;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+}
+
+body.bfnd-body .bf-nav-school.is-open .bf-nav-course-menu {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+body.bfnd-body .bf-image-dialog {
+  opacity: 0;
+  transform: scale(.985);
+  transition: opacity 180ms ease, transform 180ms ease,
+    display 180ms allow-discrete, overlay 180ms allow-discrete;
+}
+
+body.bfnd-body .bf-image-dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+body.bfnd-body .bf-image-dialog::backdrop {
+  background: rgb(19 13 11 / 0%);
+  transition: background-color 180ms ease, display 180ms allow-discrete,
+    overlay 180ms allow-discrete;
+}
+
+body.bfnd-body .bf-image-dialog[open]::backdrop {
+  background: rgb(19 13 11 / 82%);
+}
+
+@starting-style {
+  body.bfnd-body .bf-image-dialog[open] {
+    opacity: 0;
+    transform: scale(.985);
+  }
+
+  body.bfnd-body .bf-image-dialog[open]::backdrop {
+    background: rgb(19 13 11 / 0%);
+  }
+}
+
+@media (max-width: 760px) {
+  body.bfnd-body .bf-nav {
+    display: flex;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+  }
+
+  body.bfnd-body .bf-nav.is-open {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  body.bfnd-body .bf-nav-school .bf-nav-course-menu,
+  body.bfnd-body .bf-nav-school.is-open .bf-nav-course-menu {
+    transform: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  body.bfnd-body .bf-work-card:is(:hover, :focus-visible) .bf-card-line span {
+    transform: translateX(3px);
+  }
+
+  body.bfnd-body .bf-work-card .bf-card-line span {
+    display: inline-block;
+    transition: transform 180ms ease;
+  }
+
+  body.bfnd-body .bf-footer-social a:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bf-hero-arrive {
+    from { opacity: 0; transform: translateY(9px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  body.bfnd-body :is(.bf-home-hero-content, .bf-page-hero-copy,
+    .bf-school-hero-content, .bf-lifestyle-hero-copy) > * {
+    animation: bf-hero-arrive 420ms cubic-bezier(.2, .7, .2, 1) both;
+  }
+
+  body.bfnd-body :is(.bf-home-hero-content, .bf-page-hero-copy,
+    .bf-school-hero-content, .bf-lifestyle-hero-copy) > :nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  body.bfnd-body :is(.bf-home-hero-content, .bf-page-hero-copy,
+    .bf-school-hero-content, .bf-lifestyle-hero-copy) > :nth-child(3) {
+    animation-delay: 130ms;
+  }
+
+  body.bfnd-body :is(.bf-home-hero-content, .bf-page-hero-copy,
+    .bf-school-hero-content, .bf-lifestyle-hero-copy) > :nth-child(4) {
+    animation-delay: 190ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  body.bfnd-body,
+  body.bfnd-body *,
+  body.bfnd-body *::before,
+  body.bfnd-body *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  body.bfnd-body dialog::backdrop {
+    transition-duration: .01ms !important;
+  }
+}

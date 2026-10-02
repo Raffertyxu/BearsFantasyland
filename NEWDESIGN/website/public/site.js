@@ -1,28 +1,52 @@
 (() => {
-  const menu = document.querySelector('.bf-menu-button');
-  const nav = document.querySelector('#bf-nav');
-  if (menu && nav) {
-    menu.addEventListener('click', () => {
-      const open = menu.getAttribute('aria-expanded') !== 'true';
-      menu.setAttribute('aria-expanded', String(open));
-      nav.classList.toggle('is-open', open);
-    });
-    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-      nav.classList.remove('is-open');
-      menu.setAttribute('aria-expanded', 'false');
-    }));
-  }
   const schoolMenu = document.querySelector('.bf-nav-school');
   const schoolToggle = schoolMenu?.querySelector('.bf-nav-school-toggle');
-  schoolToggle?.addEventListener('click', () => {
-    const open = schoolToggle.getAttribute('aria-expanded') !== 'true';
-    schoolToggle.setAttribute('aria-expanded', String(open));
+  const menu = document.querySelector('.bf-menu-button');
+  const nav = document.querySelector('#bf-nav');
+  const setSchoolMenuOpen = (open) => {
+    if (!schoolMenu || !schoolToggle) return;
     schoolMenu.classList.toggle('is-open', open);
+    schoolToggle.setAttribute('aria-expanded', String(open));
+  };
+  const setNavOpen = (open) => {
+    if (!menu || !nav) return;
+    nav.classList.toggle('is-open', open);
+    menu.setAttribute('aria-expanded', String(open));
+    if (!open) setSchoolMenuOpen(false);
+  };
+
+  if (menu && nav) {
+    menu.addEventListener('click', () => setNavOpen(menu.getAttribute('aria-expanded') !== 'true'));
+    nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+      setSchoolMenuOpen(false);
+      setNavOpen(false);
+    }));
+  }
+  schoolToggle?.addEventListener('click', () => {
+    setSchoolMenuOpen(schoolToggle.getAttribute('aria-expanded') !== 'true');
   });
-  schoolMenu?.querySelectorAll('.bf-nav-course-menu a').forEach(link => link.addEventListener('click', () => {
-    schoolMenu.classList.remove('is-open');
-    schoolToggle?.setAttribute('aria-expanded', 'false');
-  }));
+  document.addEventListener('pointerdown', (event) => {
+    if (nav?.classList.contains('is-open') && !nav.contains(event.target) && !menu?.contains(event.target)) {
+      const focusWasInNav = nav.contains(document.activeElement);
+      setNavOpen(false);
+      if (focusWasInNav) menu?.focus({ preventScroll: true });
+    }
+    if (schoolMenu?.classList.contains('is-open') && !schoolMenu.contains(event.target)) {
+      const focusWasInSubmenu = schoolMenu.contains(document.activeElement);
+      setSchoolMenuOpen(false);
+      if (focusWasInSubmenu) schoolToggle?.focus({ preventScroll: true });
+    }
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    if (schoolMenu?.classList.contains('is-open')) {
+      setSchoolMenuOpen(false);
+      schoolToggle?.focus();
+    } else if (nav?.classList.contains('is-open')) {
+      setNavOpen(false);
+      menu?.focus();
+    }
+  });
 
   const catalog = document.querySelector('#bf-catalog');
   if (catalog) {
@@ -38,6 +62,15 @@
     let activeCategory = 'all';
     let activeSeries = 'all';
     let visibleLimit = pageSize;
+    const syncPressedState = (buttons) => buttons.forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.classList.contains('is-active')));
+    });
+    syncPressedState(filters);
+    syncPressedState(seriesFilters);
+    if (count) {
+      count.setAttribute('aria-live', 'polite');
+      count.setAttribute('aria-atomic', 'true');
+    }
 
     const update = () => {
       const term = (search?.value || '').trim().toLocaleLowerCase();
@@ -66,16 +99,22 @@
     filters.forEach((button) => button.addEventListener('click', () => {
       activeCategory = button.dataset.filter;
       filters.forEach((filter) => filter.classList.toggle('is-active', filter === button));
+      syncPressedState(filters);
       reset();
     }));
     seriesFilters.forEach((button) => button.addEventListener('click', () => {
       activeSeries = button.dataset.seriesFilter;
       seriesFilters.forEach((filter) => filter.classList.toggle('is-active', filter === button));
+      syncPressedState(seriesFilters);
       reset();
     }));
     search?.addEventListener('input', reset);
     sort?.addEventListener('change', reset);
-    more?.addEventListener('click', () => { visibleLimit += pageSize; update(); });
+    more?.addEventListener('click', () => {
+      visibleLimit += pageSize;
+      update();
+      if (more.hidden) items.filter((item) => !item.hidden).at(-1)?.querySelector('a')?.focus({ preventScroll: true });
+    });
     update();
   }
 
@@ -100,9 +139,11 @@
   const dialog = document.querySelector('#bf-image-dialog');
   if (dialog) {
     const zoom = dialog.querySelector('img');
+    let lastTrigger = null;
     document.querySelectorAll('.bf-gallery-button').forEach((button) => button.addEventListener('click', () => {
       const image = button.querySelector('img');
       if (image) {
+        lastTrigger = button;
         zoom.src = image.src;
         zoom.alt = image.alt;
         dialog.showModal();
@@ -110,5 +151,9 @@
     }));
     dialog.querySelector('button')?.addEventListener('click', () => dialog.close());
     dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => {
+      lastTrigger?.focus({ preventScroll: true });
+      lastTrigger = null;
+    });
   }
 })();

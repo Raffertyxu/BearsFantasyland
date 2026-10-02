@@ -171,7 +171,7 @@ function bfnd_render_work($id) {
     echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">WORKS INQUIRY</span><h2>喜歡這件作品？</h2><p>歡迎詢問作品尺寸、木種、製作方式與現有規格。</p>';
     if (bfnd_meta($id, 'size_adjustable') === '1') { echo '<p>部分作品可依空間需求調整尺寸，實際製作方式歡迎與我們討論。</p>'; }
     bfnd_button('作品諮詢', add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry'); echo '</div></section>';
-    echo '<dialog id="bf-image-dialog" class="bf-image-dialog"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="作品照片放大檢視"></dialog>';
+    echo '<dialog id="bf-image-dialog" class="bf-image-dialog" aria-label="作品照片放大檢視"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="作品照片放大檢視"></dialog>';
 }
 
 function bfnd_simple_hero($en, $title, $intro, $image = '') {
@@ -221,7 +221,7 @@ function bfnd_render_lifestyle_work($id) {
     echo '<section class="bf-lifestyle-detail bf-wrap"><a class="bf-back" href="' . esc_url(bfnd_page_url('lifestyle')) . '">← 返回生活木作</a><div class="bf-lifestyle-detail-grid"><div class="bf-lifestyle-main-image">'; bfnd_image(bfnd_work_image($id, 'full'), $title, '', false); echo '</div><div><span class="bf-kicker">LIFESTYLE WORKS</span><h1>' . bfnd_e($title) . '</h1><p class="bf-serif">一器承日常，一圓納天地。</p><p>' . nl2br(esc_html(get_post_field('post_content', $id))) . '</p><p>竹款｜Bamboo Edition<br>木款｜Wood Edition</p>'; bfnd_button('詢問作品', bfnd_page_url('collaboration') . '#inquiry'); echo '</div></div></section>';
     $gallery = bfnd_gallery($id);
     if ($gallery) { echo '<section class="bf-section bf-wrap">'; bfnd_section_head('THE DETAILS', '器物與光影'); echo '<div class="bf-detail-gallery">'; foreach ($gallery as $src) { echo '<button class="bf-gallery-button" type="button" aria-label="放大作品照片">'; bfnd_image($src, $title); echo '</button>'; } echo '</div></section>'; }
-    echo '<dialog id="bf-image-dialog" class="bf-image-dialog"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="生活木作照片放大檢視"></dialog>';
+    echo '<dialog id="bf-image-dialog" class="bf-image-dialog" aria-label="生活木作照片放大檢視"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="生活木作照片放大檢視"></dialog>';
 }
 
 function bfnd_render_school() {
