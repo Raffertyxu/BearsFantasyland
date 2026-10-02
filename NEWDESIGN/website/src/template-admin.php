@@ -57,6 +57,25 @@ function bfnd_template_content_links($key) {
     echo '</p>';
 }
 
+function bfnd_template_seo_fields($page) {
+    $title = get_post_meta($page->ID, '_yoast_wpseo_title', true);
+    if ($title === '') { $title = get_post_meta($page->ID, '_bfnd_seo_title', true); }
+    $description = get_post_meta($page->ID, '_yoast_wpseo_metadesc', true);
+    if ($description === '') { $description = get_post_meta($page->ID, '_bfnd_seo_description', true); }
+    $focus_keyphrase = get_post_meta($page->ID, '_yoast_wpseo_focuskw', true);
+    $editor_url = admin_url('post.php?post=' . absint($page->ID) . '&action=edit');
+
+    echo '<details class="bfnd-design-section bfnd-seo-settings" open><summary>SEO｜搜尋結果資訊</summary>';
+    echo '<p>SEO 資料會存到這一頁，前台標題與摘要由 Yoast 輸出。Yoast 分析會讀取已儲存的版面實際文字，不會只看到短代碼。焦點關鍵字詞是編輯檢查用，不會顯示在搜尋結果。<br><a href="' . esc_url($editor_url) . '" target="_blank" rel="noopener noreferrer">開啟 WordPress 頁面編輯器查看 Yoast 分析 ↗</a></p>';
+    if (!defined('WPSEO_VERSION')) {
+        echo '<div class="notice notice-warning inline"><p>目前未偵測到 Yoast SEO；欄位可先儲存，但 Yoast 分析與 SEO 標籤需要外掛啟用後才會生效。</p></div>';
+    }
+    echo '<p class="bfnd-design-field"><label for="bfnd_yoast_title"><strong>SEO 標題</strong></label><input id="bfnd_yoast_title" name="bfnd_yoast_title" type="text" maxlength="200" value="' . esc_attr($title) . '" placeholder="每頁獨立撰寫：主要主題｜飛熊入夢 Bear’s Fantasyland"></p>';
+    echo '<p class="bfnd-design-field"><label for="bfnd_yoast_description"><strong>Meta Description</strong></label><textarea id="bfnd_yoast_description" name="bfnd_yoast_description" rows="3" maxlength="350" placeholder="用一至兩句準確說明這頁提供什麼，以及訪客可以做什麼。">' . esc_textarea($description) . '</textarea></p>';
+    echo '<p class="bfnd-design-field"><label for="bfnd_yoast_focus_keyphrase"><strong>Yoast 焦點關鍵字詞</strong></label><input id="bfnd_yoast_focus_keyphrase" name="bfnd_yoast_focus_keyphrase" type="text" maxlength="200" value="' . esc_attr($focus_keyphrase) . '" placeholder="填一個最符合此頁搜尋意圖的詞組"></p>';
+    echo '<p><small>不要為了讓指示燈變綠而重複堆詞。先寫給客戶看的清楚標題與摘要，再用 Yoast 檢查；紅／橘燈是編輯提示，不是搜尋排名保證。</small></p></details>';
+}
+
 function bfnd_template_dashboard() {
     if (!current_user_can('edit_pages')) { wp_die('權限不足'); }
     echo '<div class="wrap bfnd-template-admin"><h1>網站版面</h1><p>從下方選擇頁面，直接修改固定版型的文字、圖片和顯示區塊。公開頁面只載入一行短代碼。家具作品、生活木作、課程及飛熊日誌的新增與刪除，請使用左側各自的內容列表。</p>';
@@ -114,6 +133,7 @@ function bfnd_template_editor($key) {
     echo '<p><a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-overview')) . '">← 返回網站版面</a>　<a href="' . esc_url(get_permalink($page)) . '" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></p>';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_save_template"><input type="hidden" name="page_key" value="' . esc_attr($key) . '">';
     wp_nonce_field('bfnd_save_template_' . $key);
+    bfnd_template_seo_fields($page);
     if ($key === 'lifestyle') {
         echo '<p class="bfnd-design-field"><label><input type="checkbox" name="bfnd_show_lifestyle_works" value="1"' . checked(!empty($saved['show_works']), true, false) . '> 顯示已發布的生活木作作品</label><small>未勾選時依客戶手稿顯示「持續製作中」。</small></p>';
     }
@@ -168,6 +188,22 @@ function bfnd_save_template_action() {
         }
     }
     update_option('bfnd_page_design_' . $key, $save, false);
+    $seo_fields = array(
+        'bfnd_yoast_title' => array('_yoast_wpseo_title', 'text', 200),
+        'bfnd_yoast_description' => array('_yoast_wpseo_metadesc', 'textarea', 350),
+        'bfnd_yoast_focus_keyphrase' => array('_yoast_wpseo_focuskw', 'text', 200),
+    );
+    foreach ($seo_fields as $request_key => $field) {
+        if (!isset($_POST[$request_key]) || !is_string($_POST[$request_key])) { continue; }
+        $raw_value = wp_unslash($_POST[$request_key]);
+        $meta_value = $field[1] === 'textarea' ? sanitize_textarea_field($raw_value) : sanitize_text_field($raw_value);
+        $meta_key = $field[0];
+        $meta_value = mb_substr($meta_value, 0, $field[2]);
+        if ($meta_value === '') { delete_post_meta($page->ID, $meta_key); }
+        else { update_post_meta($page->ID, $meta_key, $meta_value); }
+    }
+    if (isset($_POST['bfnd_yoast_title']) && is_string($_POST['bfnd_yoast_title'])) { delete_post_meta($page->ID, '_bfnd_seo_title'); }
+    if (isset($_POST['bfnd_yoast_description']) && is_string($_POST['bfnd_yoast_description'])) { delete_post_meta($page->ID, '_bfnd_seo_description'); }
     wp_safe_redirect(add_query_arg('updated', '1', admin_url('admin.php?page=bfnd-layout-' . $key)));
     exit;
 }

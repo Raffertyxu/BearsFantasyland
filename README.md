@@ -15,8 +15,8 @@
 
 ## 目前版本與部署狀態
 
-- 外掛原始碼／正式站版本：`0.5.7`（`NEWDESIGN/website/bears-fantasyland-newdesign.php`；已於 2026-10-02 在後台確認啟用）
-- 主題原始碼版本：`1.3.10`（`NEWDESIGN/theme/bears-fantasyland/style.css`）
+- 外掛原始碼版本：`0.5.8`；正式站最後確認啟用版本為 `0.5.7`（2026-10-02）。
+- 主題原始碼版本：`1.3.11`（`NEWDESIGN/theme/bears-fantasyland/style.css`）；正式站最後可見 CSS 仍為 `1.3.7`。
 - 正式站仍載入主題 CSS `public/style.css?ver=1.3.7`；頁首頁尾 RWD 與深棕 LINE 泡泡字標由 WordPress「外觀 → 自訂 → 額外的 CSS」覆寫，已在正式首頁即時確認生效。主題 ZIP 的完整覆蓋仍因 `assets/works/ripple/01.webp` 複製錯誤而未確認成功，不能將來源版本視為已部署版本。
 - 本機部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`。ZIP 由 Git LFS 管理；新電腦若只看到 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
 - 2026-10-01 本輪主題來源、部署 ZIP、README、HANDOFF 與部署紀錄已同步到 GitHub `main`。另一台電腦先執行 `git pull` 和 `git lfs pull`；每次接手仍要用 `git status --short --branch`、`git log -5 --oneline` 核對當下狀態。
@@ -26,7 +26,13 @@
 - 外掛升至 `0.5.7` 並確認仍啟用；移除 19 個已知舊網址及額外的 `/newdesign-preview/` 轉址，共 20 條。即時檢查 12 個新版主要路由全數 HTTP 200、20 個舊路徑全數 HTTP 404。
 - 後台 12 個舊版草稿頁已移至回收桶；頁面列表顯示 15 個正式發布頁、1 個保留中的「退款和退貨政策」草稿、12 個舊頁回收項目。舊頁仍可從回收桶還原，尚未永久刪除或清空回收桶。
 - 15 個正式頁、購物／帳戶頁與政策頁均保留。這次清的是舊版頁面與 URL，沒有清理 WooCommerce 訂單、會員、媒體或其他內容資料；不能把它描述成整個 WordPress 資料庫已清空。
-- 本次沒有調整 Yoast SEO 分數或可讀性欄位；正式頁的 Yoast 逐頁優化仍待處理。操作紀錄與 20 個路徑清單見[舊網址及舊頁清理紀錄](NEWDESIGN/website/LEGACY-URL-CLEANUP-2026-10-02.md)。
+- 舊網址清理當時沒有調整 Yoast 分數或可讀性；其後本機來源已加入短代碼內容分析與逐頁 SEO 欄位，部署狀態見下方新紀錄。清理操作紀錄與 20 個路徑清單見[舊網址及舊頁清理紀錄](NEWDESIGN/website/LEGACY-URL-CLEANUP-2026-10-02.md)。
+
+### 2026-10-02 短代碼頁的 Yoast SEO 整合（本機來源，尚未部署）
+
+- 外掛 `0.5.8` 把八個固定版面的已儲存實際渲染內容加入 Yoast 編輯分析，SEO／可讀性不再只看到一行短代碼；分析只帶入公開狀態的作品與課程資料。
+- 「網站版面」每頁新增 SEO 標題、Meta Description、焦點關鍵字詞欄位，儲存到該頁的標準 Yoast 中繼資料；前台標題與描述改由 Yoast 單一輸出，避免模板重複標籤。OG 圖片沿用 WordPress 精選圖片／Yoast 社群設定。
+- 主題來源升至 `1.3.11`、已重建外掛及主題部署 ZIP。尚未安裝正式站、未逐頁填寫 SEO 文案，亦未即時驗證 Yoast 分析或前台標籤。操作方式見[短代碼頁 Yoast SEO 操作說明](NEWDESIGN/website/SEO-SHORTCODE-GUIDE.md)。
 
 ### 2026-10-02 前台互動提升（來源／套件狀態）
 
@@ -92,7 +98,7 @@ python build_package.py
 
 ## WordPress 架構摘要
 
-新版由獨立主題和「飛熊入夢 NEWDESIGN 官網」外掛組成，不依賴 Astra 父主題。八個主要頁面使用 `[bfnd_page key="..."]`；固定版型與文案由「網站版面」後台管理。家具、生活木作、課程與日誌內容由 WordPress 內容管理；購物車、結帳、帳戶和訂單仍交由 WooCommerce。詳細編輯範圍請以 `SECTION-CRUD-AUDIT.md` 為準。
+新版由獨立主題和「飛熊入夢 NEWDESIGN 官網」外掛組成，不依賴 Astra 父主題。八個主要頁面使用 `[bfnd_page key="..."]`；固定版型、文案及逐頁 SEO 欄位由「網站版面」後台管理，Yoast 分析讀取已儲存的實際版面內容。家具、生活木作、課程與日誌內容由 WordPress 內容管理；購物車、結帳、帳戶和訂單仍交由 WooCommerce。詳細編輯範圍請以 `SECTION-CRUD-AUDIT.md` 為準。
 
 ## 重要操作原則
 

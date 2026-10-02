@@ -4,7 +4,8 @@ if (!defined('ABSPATH')) { exit; }
 function bfnd_e($text) { return esc_html((string) $text); }
 function bfnd_meta($id, $name) { return get_post_meta($id, '_bfnd_' . $name, true); }
 function bfnd_work_by_seed($slug) {
-    $items = get_posts(array('post_type' => 'bf_work', 'post_status' => array('publish', 'private'), 'meta_key' => '_bfnd_seed', 'meta_value' => $slug, 'numberposts' => 1));
+    $statuses = empty($GLOBALS['bfnd_public_content_render']) ? array('publish', 'private') : array('publish');
+    $items = get_posts(array('post_type' => 'bf_work', 'post_status' => $statuses, 'meta_key' => '_bfnd_seed', 'meta_value' => $slug, 'numberposts' => 1));
     return $items ? $items[0] : null;
 }
 function bfnd_image($url, $alt, $class = '', $lazy = true) {
@@ -248,7 +249,8 @@ function bfnd_render_school() {
     echo '<div class="bf-values bf-wrap"><div><b>01</b><span>專業師資</span><small>來自實務現場的教學</small></div><div><b>02</b><span>完整設備</span><small>手工具、木工機械與 CNC</small></div><div><b>03</b><span>小班教學</span><small>實作為主，安全有保障</small></div><div><b>04</b><span>從興趣到創作</span><small>陪你完成自己的作品</small></div></div>';
     echo '<section class="bf-learning-path bf-wrap" aria-labelledby="bf-learning-path-title"><div class="bf-learning-path-heading"><span class="bf-kicker">LEARNING PATH</span><h2 id="bf-learning-path-title">木作學習路徑</h2></div><ol class="bf-learning-path-steps"><li><span>LEVEL 1</span><strong>基礎</strong></li><li><span>LEVEL 2</span><strong>進階</strong></li><li><span>LEVEL 3</span><strong>養成</strong></li><li><span>自由創作</span><strong>會員</strong></li></ol></section>';
     echo '<section class="bf-section bf-wrap bf-school-courses" id="onsite-courses"><div class="bf-tab-head">'; bfnd_section_head('LEARN BY MAKING', '實體課程', '#online-courses', '查看線上課程'); echo '</div>';
-    $courses = get_posts(array('post_type' => 'bf_course', 'post_status' => current_user_can('edit_posts') ? array('publish', 'private') : 'publish', 'numberposts' => -1, 'orderby' => 'menu_order', 'order' => 'ASC'));
+    $course_statuses = empty($GLOBALS['bfnd_public_content_render']) && current_user_can('edit_posts') ? array('publish', 'private') : 'publish';
+    $courses = get_posts(array('post_type' => 'bf_course', 'post_status' => $course_statuses, 'numberposts' => -1, 'orderby' => 'menu_order', 'order' => 'ASC'));
     echo '<div class="bf-course-grid" data-course-group="onsite">'; foreach ($courses as $course) { if (bfnd_meta($course->ID, 'mode') !== 'online' && bfnd_course_track($course->ID) !== 'specialist') { bfnd_course_card($course); } } echo '</div></section>';
     $specialist_courses = array_filter($courses, function ($course) { return bfnd_meta($course->ID, 'mode') !== 'online' && bfnd_course_track($course->ID) === 'specialist'; });
     if ($specialist_courses) {

@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check public/site.js"
+    "check": "node --check public/site.js && node --check public/yoast-analysis.js"
   }
 }

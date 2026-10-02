@@ -4,6 +4,14 @@
 正式站：https://a1.haotaimaker.com/  
 正式站最新可見版本（2026-10-02）：WordPress 外掛「飛熊入夢 NEWDESIGN 官網」0.5.7（已確認啟用）；首頁仍載入主題樣式 `public/style.css?ver=1.3.7`，頁首頁尾最新版由額外 CSS 覆寫並已發布。WordPress 主題整包覆蓋曾回報 WebP 複製錯誤，完整安裝狀態未確認。
 
+## 2026-10-02 短代碼頁 Yoast SEO 整合（本機來源，尚未部署）
+
+- 外掛來源升至 `0.5.8`：依 Yoast 官方自訂內容分析介面，把 `[bfnd_page]` 對應的已儲存版面 HTML 加入 Yoast 編輯器分析；分析只帶入公開狀態的作品／課程資料。
+- 「網站版面」新增每頁 SEO 標題、Meta Description、焦點關鍵字詞欄位，寫入該 WordPress 頁面的 Yoast 中繼資料。先儲存版面，再開 WordPress 頁面編輯器檢查 Yoast SEO／可讀性；精選圖片／社群分享圖仍從頁面精選圖片或 Yoast 社群欄位設定。
+- 主題來源升至 `1.3.11` 並支援 WordPress `title-tag`。主題及外掛模板不再輸出與 Yoast 重複的自訂 title／description，舊 `_bfnd_seo_title`／`_bfnd_seo_description` 由 Yoast filter 相容讀取。
+- 已重建外掛與主題部署 ZIP；尚未安裝正式站、尚未逐頁填寫 meta，亦未驗證正式站 Yoast 分析、搜尋摘要或分享標籤。驗收步驟見 [`SEO-SHORTCODE-GUIDE.md`](SEO-SHORTCODE-GUIDE.md)。
+- 實作依據：[Yoast 自訂內容分析介面](https://developer.yoast.com/customization/yoast-seo/adding-custom-data-analysis/)及[Yoast Metadata API](https://developer.yoast.com/customization/apis/metadata-api/)。燈號是內容提示，不能代表排名保證。
+
 ## 2026-10-02 舊版網址及草稿頁清理（最新）
 
 - 後台將 12 個舊版草稿頁移至回收桶：首頁（ID 13）、優質工具（1344）、寫信給我們（1346）、常見問題（1226）、最新消息（1354）、木師介紹（1337）、熊熊速報（1357）、聯絡我們（341）、訂製與運送（1204）、關於我們（1297）、飛熊入夢 YouTube 頻道（1349）、飛熊造木所（1240）。清理後頁面清單顯示已發布 15、草稿 1、回收桶 12；唯一保留草稿為「退款和退貨政策」。回收桶內容仍可還原，沒有永久刪除或清空。

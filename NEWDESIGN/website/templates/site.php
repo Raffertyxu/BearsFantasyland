@@ -6,17 +6,17 @@ $title = is_singular() ? get_the_title() : (bfnd_pages()[$page_type][0] ?? '飛�
 if (bfnd_is_commerce_page()) {
     $title = is_cart() ? '購物車' : (is_checkout() ? '結帳' : (is_account_page() ? '會員中心' : $title));
 }
-$seo_title = is_singular() ? get_post_meta(get_queried_object_id(), '_bfnd_seo_title', true) : '';
-$seo_desc = is_singular() ? get_post_meta(get_queried_object_id(), '_bfnd_seo_description', true) : '';
-if (!$seo_title) { $seo_title = $title . '｜飛熊入夢 Bear’s Fantasyland'; }
-if (!$seo_desc) { $seo_desc = '飛熊入夢從台灣傳統木工出發，透過實木家具設計、木工教育與數位製造，讓木成為生活的一部分。'; }
 ?><!doctype html>
 <html <?php language_attributes(); ?>>
 <head>
 <meta charset="<?php bloginfo('charset'); ?>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?php echo esc_html($seo_title); ?></title>
-<meta name="description" content="<?php echo esc_attr($seo_desc); ?>">
+<?php if (!defined('WPSEO_VERSION')) : ?>
+<?php if (!current_theme_supports('title-tag')) : ?><title><?php echo esc_html($title . '｜飛熊入夢 Bear’s Fantasyland'); ?></title><?php endif; ?>
+<?php if (!bfnd_is_commerce_page() && !is_404()) : $seo_desc = is_singular() ? get_post_meta(get_queried_object_id(), '_bfnd_seo_description', true) : ''; ?>
+<meta name="description" content="<?php echo esc_attr($seo_desc ?: '飛熊入夢從台灣傳統木工出發，透過實木家具設計、木工教育與數位製造，讓木成為生活的一部分。'); ?>">
+<?php endif; ?>
+<?php endif; ?>
 <?php if (is_page() && get_post_status() === 'private') : ?><meta name="robots" content="noindex,nofollow"><?php endif; ?>
 <?php wp_head(); ?>
 </head>

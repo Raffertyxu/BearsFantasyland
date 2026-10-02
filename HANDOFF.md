@@ -2,6 +2,13 @@
 
 更新日期：2026-10-02
 
+## 2026-10-02 短代碼頁 Yoast SEO（最新本機來源；正式站待部署）
+
+- 本機外掛來源 `0.5.8` 將八個 `[bfnd_page]` 頁面已儲存的實際版面 HTML 加入 Yoast 內容分析；後台分析時只取公開作品／課程資料，不把私人項目混進去。
+- 「網站版面」每頁新增 SEO 標題、Meta Description、焦點關鍵字詞，儲存到對應頁面的 Yoast 中繼資料。版面內容和 SEO 欄位儲存後，點「開啟 WordPress 頁面編輯器查看 Yoast 分析」；精選圖片／OG 分享圖仍從頁面精選圖片或 Yoast 社群分享設定管理。
+- 主題原始碼升至 `1.3.11`，啟用 WordPress `title-tag`；主題與外掛模板不再重複輸出自製 title／description 標籤，舊 `_bfnd_seo_*` 欄位經 Yoast filter 相容讀取。
+- 已重建部署 ZIP，尚未安裝正式站、未填逐頁 SEO 文案，也未即時驗證分析面板或前台標籤。Yoast 燈號僅作編輯提示，並非排名保證。步驟及限制見 [`NEWDESIGN/website/SEO-SHORTCODE-GUIDE.md`](NEWDESIGN/website/SEO-SHORTCODE-GUIDE.md)。正式站最後確認仍為外掛 `0.5.7`／主題 CSS `1.3.7`。
+
 ## 2026-10-02 舊網址及舊頁清理（最新正式站狀態）
 
 - 正式站外掛已更新並確認啟用 `0.5.7`。移除 19 個舊網址及程式中另有的一條 `/newdesign-preview/` 轉址，共 20 條；即時路由檢查顯示 12／12 新版主要網址 HTTP 200、20／20 舊路徑 HTTP 404。

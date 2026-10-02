@@ -6,15 +6,16 @@ function bfft_asset($path) {
 }
 
 add_action('after_setup_theme', function () {
+    add_theme_support('title-tag');
     add_theme_support('woocommerce');
     add_theme_support('post-thumbnails');
     add_theme_support('html5', array('search-form', 'comment-form', 'comment-list', 'gallery', 'caption', 'style', 'script'));
 });
 
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.10');
-    wp_enqueue_style('bfft-interactions', bfft_asset('public/interactions.css'), array('bfft-style'), '1.3.10');
-    wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.3.10', true);
+    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.11');
+    wp_enqueue_style('bfft-interactions', bfft_asset('public/interactions.css'), array('bfft-style'), '1.3.11');
+    wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.3.11', true);
 }, 100);
 
 // The companion plugin owns content types, URLs, forms, and admin features.

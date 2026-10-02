@@ -102,7 +102,7 @@ function bfnd_gallery($post_id) {
 
 function bfnd_work_query($args = array()) {
     return new WP_Query(array_merge(array(
-        'post_type' => 'bf_work', 'post_status' => current_user_can('edit_posts') ? array('publish', 'private') : 'publish',
+        'post_type' => 'bf_work', 'post_status' => empty($GLOBALS['bfnd_public_content_render']) && current_user_can('edit_posts') ? array('publish', 'private') : 'publish',
         'posts_per_page' => -1,
     ), $args));
 }
