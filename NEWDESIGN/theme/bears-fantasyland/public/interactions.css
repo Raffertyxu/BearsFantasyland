@@ -33,20 +33,22 @@ body.bfnd-body .bf-nav-school-toggle {
   min-height: 44px;
 }
 
-body.bfnd-body .bf-nav-school .bf-nav-course-menu {
-  display: grid;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 8px);
-  transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
-}
+@media (min-width: 1101px) {
+  body.bfnd-body .bf-nav-school .bf-nav-course-menu {
+    display: grid;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 8px);
+    transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
+  }
 
-body.bfnd-body .bf-nav-school.is-open .bf-nav-course-menu {
-  visibility: visible;
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
+  body.bfnd-body .bf-nav-school.is-open .bf-nav-course-menu {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
 }
 
 body.bfnd-body .bf-image-dialog {
@@ -82,7 +84,7 @@ body.bfnd-body .bf-image-dialog[open]::backdrop {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1100px) {
   body.bfnd-body .bf-nav {
     display: flex;
     visibility: hidden;
@@ -101,7 +103,20 @@ body.bfnd-body .bf-image-dialog[open]::backdrop {
 
   body.bfnd-body .bf-nav-school .bf-nav-course-menu,
   body.bfnd-body .bf-nav-school.is-open .bf-nav-course-menu {
+    display: none;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
     transform: none;
+    transition: none;
+  }
+
+  body.bfnd-body .bf-nav-school.is-open .bf-nav-course-menu {
+    display: grid;
+  }
+
+  body.bfnd-body .bf-nav-school.is-open .bf-nav-school-toggle {
+    transform: rotate(180deg);
   }
 }
 
