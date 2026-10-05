@@ -302,17 +302,15 @@ function bfnd_course_card($course) {
     if ($duration !== '') { echo '<span>' . bfnd_e($duration) . '</span>'; }
     if ($level !== '') { echo '<span>' . bfnd_e($level) . '</span>'; }
     echo '</div>';
-    $price = bfnd_meta($id, 'price'); if ($price !== '') { echo '<p class="bf-course-price">NT$ ' . bfnd_e(number_format((int) $price)) . '</p>'; }
+    $price_html = bfnd_course_price_html($id); if ($price_html !== '') { echo '<p class="bf-course-price">' . wp_kses_post($price_html) . '</p>'; }
     $features = trim((string) bfnd_meta($id, 'features'));
     if ($features !== '') { echo '<p class="bf-course-card-plans">' . nl2br(esc_html($features)) . '</p>'; }
     echo '<span class="bf-plain-link">查看課程詳情 ↗</span></div></a>';
-    $woo = absint(bfnd_meta($id, 'woo_id'));
-    $product = $woo && function_exists('wc_get_product') ? wc_get_product($woo) : false;
-    $button = trim((string) bfnd_meta($id, 'registration_button'));
-    if ($product && $product->is_purchasable()) {
-        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('add-to-cart', $woo, wc_get_cart_url())) . '">' . bfnd_e($button ?: '立即報名') . ' ↗</a>';
+    $action = bfnd_course_registration_action($id);
+    if ($action) {
+        echo '<a class="bf-course-card-action" href="' . esc_url($action['url']) . '">' . bfnd_e($action['label']) . ' ↗</a>';
     } else {
-        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry') . '">' . bfnd_e($button ?: '詢問課程') . ' ↗</a>';
+        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry') . '">詢問課程 ↗</a>';
     }
     echo '</article>';
 }
@@ -320,13 +318,11 @@ function bfnd_course_card($course) {
 function bfnd_render_course($id) {
     bfnd_simple_hero('WOODWORKING COURSE', get_the_title($id), get_the_excerpt($id), bfnd_work_image($id, 'full'));
     echo '<section class="bf-story-grid bf-wrap"><div><span class="bf-index">01 / ABOUT THE COURSE</span><h2>課程介紹</h2><div class="bf-prose">' . apply_filters('the_content', get_post_field('post_content', $id)) . '</div></div><div class="bf-course-facts"><dl><div><dt>課程形式</dt><dd>' . (bfnd_meta($id, 'mode') === 'online' ? '線上課程' : '實體課程') . '</dd></div>';
-    $facts = array('課程時數' => bfnd_meta($id, 'duration'), '課程費用' => bfnd_meta($id, 'price') !== '' ? 'NT$ ' . number_format((int) bfnd_meta($id, 'price')) : '', '程度' => bfnd_meta($id, 'level'), '適合對象' => bfnd_meta($id, 'audience') ?: bfnd_meta($id, 'level'), '開課梯次' => bfnd_meta($id, 'schedule'));
-    foreach ($facts as $label => $value) { if (trim((string) $value) !== '') { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . nl2br(bfnd_e($value)) . '</dd></div>'; } }
-    $woo = absint(bfnd_meta($id, 'woo_id'));
-    $product = $woo && function_exists('wc_get_product') ? wc_get_product($woo) : false;
-    $button = trim((string) bfnd_meta($id, 'registration_button'));
-    if ($product && $product->is_purchasable()) { bfnd_button($button ?: '立即報名', add_query_arg('add-to-cart', $woo, wc_get_cart_url())); }
-    else { bfnd_button($button ?: '詢問課程', add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry'); }
+    $facts = array('課程時數' => bfnd_meta($id, 'duration'), '課程費用' => bfnd_course_price_html($id), '程度' => bfnd_meta($id, 'level'), '適合對象' => bfnd_meta($id, 'audience') ?: bfnd_meta($id, 'level'), '開課梯次' => bfnd_meta($id, 'schedule'));
+    foreach ($facts as $label => $value) { if (trim(wp_strip_all_tags((string) $value)) !== '') { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . ($label === '課程費用' ? wp_kses_post($value) : nl2br(bfnd_e($value))) . '</dd></div>'; } }
+    $action = bfnd_course_registration_action($id);
+    if ($action) { bfnd_button($action['label'], $action['url']); }
+    else { bfnd_button('詢問課程', add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry'); }
     echo '</div></section>';
     bfnd_render_course_list($id, 'features', '課程特色', '02 / COURSE FEATURES');
     bfnd_render_course_list($id, 'learning', '學習內容', '03 / LEARNING');

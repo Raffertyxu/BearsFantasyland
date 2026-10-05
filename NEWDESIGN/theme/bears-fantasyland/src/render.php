@@ -3,6 +3,33 @@ if (!defined('ABSPATH')) { exit; }
 
 function bfnd_e($text) { return esc_html((string) $text); }
 function bfnd_meta($id, $name) { return get_post_meta($id, '_bfnd_' . $name, true); }
+if (!function_exists('bfnd_course_registration_action')) {
+    // Keep the theme safe during staggered updates; the companion plugin owns
+    // the full course product admin and checkout integration.
+    function bfnd_get_course_product($course_id) {
+        $id = absint(bfnd_meta($course_id, 'woo_id'));
+        if (!$id || !function_exists('wc_get_product')) { return false; }
+        $product = wc_get_product($id);
+        if (!$product || !in_array($product->get_type(), array('simple', 'variable'), true)
+            || !$product->is_virtual() || get_post_status($id) !== 'publish'
+            || get_post_meta($id, '_bfnd_course_product', true) !== 'yes') { return false; }
+        return $product;
+    }
+    function bfnd_course_registration_action($course_id) {
+        $product = bfnd_get_course_product($course_id);
+        if (!$product || !$product->is_purchasable() || !$product->is_in_stock()) { return false; }
+        if ($product->is_type('variable')) { return array('url' => get_permalink($product->get_id()), 'label' => '選擇梯次／方案'); }
+        return array('url' => add_query_arg('add-to-cart', $product->get_id(), wc_get_cart_url()),
+            'label' => trim((string) bfnd_meta($course_id, 'registration_button')) ?: '立即報名');
+    }
+    function bfnd_course_price_html($course_id) {
+        $product = bfnd_get_course_product($course_id);
+        if ($product) { return wp_kses_post($product->get_price_html()); }
+        if (absint(bfnd_meta($course_id, 'woo_id'))) { return ''; }
+        $price = bfnd_meta($course_id, 'price');
+        return $price !== '' ? 'NT$ ' . esc_html(number_format((int) $price)) : '';
+    }
+}
 function bfnd_work_by_seed($slug) {
     $statuses = empty($GLOBALS['bfnd_public_content_render']) ? array('publish', 'private') : array('publish');
     $items = get_posts(array('post_type' => 'bf_work', 'post_status' => $statuses, 'meta_key' => '_bfnd_seed', 'meta_value' => $slug, 'numberposts' => 1));
@@ -317,17 +344,15 @@ function bfnd_course_card($course) {
     if ($duration !== '') { echo '<span>' . bfnd_e($duration) . '</span>'; }
     if ($level !== '') { echo '<span>' . bfnd_e($level) . '</span>'; }
     echo '</div>';
-    $price = bfnd_meta($id, 'price'); if ($price !== '') { echo '<p class="bf-course-price">NT$ ' . bfnd_e(number_format((int) $price)) . '</p>'; }
+    $price_html = bfnd_course_price_html($id); if ($price_html !== '') { echo '<p class="bf-course-price">' . wp_kses_post($price_html) . '</p>'; }
     $features = trim((string) bfnd_meta($id, 'features'));
     if ($features !== '') { echo '<p class="bf-course-card-plans">' . nl2br(esc_html($features)) . '</p>'; }
     echo '<span class="bf-plain-link">查看課程詳情 ↗</span></div></a>';
-    $woo = absint(bfnd_meta($id, 'woo_id'));
-    $product = $woo && function_exists('wc_get_product') ? wc_get_product($woo) : false;
-    $button = trim((string) bfnd_meta($id, 'registration_button'));
-    if ($product && $product->is_purchasable()) {
-        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('add-to-cart', $woo, wc_get_cart_url())) . '">' . bfnd_e($button ?: '立即報名') . ' ↗</a>';
+    $action = bfnd_course_registration_action($id);
+    if ($action) {
+        echo '<a class="bf-course-card-action" href="' . esc_url($action['url']) . '">' . bfnd_e($action['label']) . ' ↗</a>';
     } else {
-        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry') . '">' . bfnd_e($button ?: '詢問課程') . ' ↗</a>';
+        echo '<a class="bf-course-card-action" href="' . esc_url(add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry') . '">詢問課程 ↗</a>';
     }
     echo '</article>';
 }
@@ -335,13 +360,11 @@ function bfnd_course_card($course) {
 function bfnd_render_course($id) {
     bfnd_simple_hero('WOODWORKING COURSE', get_the_title($id), get_the_excerpt($id), bfnd_work_image($id, 'full'));
     echo '<section class="bf-story-grid bf-wrap"><div><span class="bf-index">01 / ABOUT THE COURSE</span><h2>課程介紹</h2><div class="bf-prose">' . apply_filters('the_content', get_post_field('post_content', $id)) . '</div></div><div class="bf-course-facts"><dl><div><dt>課程形式</dt><dd>' . (bfnd_meta($id, 'mode') === 'online' ? '線上課程' : '實體課程') . '</dd></div>';
-    $facts = array('課程時數' => bfnd_meta($id, 'duration'), '課程費用' => bfnd_meta($id, 'price') !== '' ? 'NT$ ' . number_format((int) bfnd_meta($id, 'price')) : '', '程度' => bfnd_meta($id, 'level'), '適合對象' => bfnd_meta($id, 'audience') ?: bfnd_meta($id, 'level'), '開課梯次' => bfnd_meta($id, 'schedule'));
-    foreach ($facts as $label => $value) { if (trim((string) $value) !== '') { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . nl2br(bfnd_e($value)) . '</dd></div>'; } }
-    $woo = absint(bfnd_meta($id, 'woo_id'));
-    $product = $woo && function_exists('wc_get_product') ? wc_get_product($woo) : false;
-    $button = trim((string) bfnd_meta($id, 'registration_button'));
-    if ($product && $product->is_purchasable()) { bfnd_button($button ?: '立即報名', add_query_arg('add-to-cart', $woo, wc_get_cart_url())); }
-    else { bfnd_button($button ?: '詢問課程', add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry'); }
+    $facts = array('課程時數' => bfnd_meta($id, 'duration'), '課程費用' => bfnd_course_price_html($id), '程度' => bfnd_meta($id, 'level'), '適合對象' => bfnd_meta($id, 'audience') ?: bfnd_meta($id, 'level'), '開課梯次' => bfnd_meta($id, 'schedule'));
+    foreach ($facts as $label => $value) { if (trim(wp_strip_all_tags((string) $value)) !== '') { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . ($label === '課程費用' ? wp_kses_post($value) : nl2br(bfnd_e($value))) . '</dd></div>'; } }
+    $action = bfnd_course_registration_action($id);
+    if ($action) { bfnd_button($action['label'], $action['url']); }
+    else { bfnd_button('詢問課程', add_query_arg('course', $id, bfnd_page_url('collaboration')) . '#inquiry'); }
     echo '</div></section>';
     bfnd_render_course_list($id, 'features', '課程特色', '02 / COURSE FEATURES');
     bfnd_render_course_list($id, 'learning', '學習內容', '03 / LEARNING');
