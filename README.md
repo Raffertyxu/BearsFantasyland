@@ -19,7 +19,7 @@
 - 目前本機來源版本為外掛 `0.5.27`、主題 `1.3.23`。課程可綁專用 WooCommerce 虛擬商品；簡單商品加入購物車，變化商品可選梯次／方案，前台售價讀 WooCommerce 售價。客戶圖稿已確認 LEVEL 1／2／3 費用、36 小時方案優惠價 NT$ 15,800，以及會員 4／8／12 次價格；外掛遷移會建立新的私密課程內容並保留管理員自訂欄位。正式站尚未安裝，尚無課程商品或梯次。
 - 正式站在 2026-10-05 程式更新前即時檢查有 4 門課皆顯示詢問按鈕，公開 Store API 沒有課程商品。課程收款目前未在正式站接通；CNC 時數／費用及各課程開課梯次／名額仍未提供。來源版本不代表正式站狀態。
 - 品牌故事版面可在後台設定 YouTube 品牌影片網址；有網址時顯示 16:9 影片封面，訪客按播放後才載入播放器，留白時不顯示空區塊或佔位內容。頁尾 IG／FB／YouTube 圖示放大，LINE 為帶官方圖示的「加入官方 LINE」按鈕。
-- 前次 GitHub 推送已於 2026-10-05 成功，提交 `c384f9a`。客戶課程圖稿整理及 `0.5.27`／`1.3.23` 更新尚待提交／推送。部署 ZIP 由 Git LFS 管理；GitHub 同步不代表已安裝正式站。
+- 客戶課程圖稿整理及外掛 `0.5.27`／主題 `1.3.23`、兩個部署 ZIP 已於 2026-10-05 推送 GitHub `main`，提交 `4153b92`，目前 `main` 與 `origin/main` 同步。部署 ZIP 由 Git LFS 管理；GitHub 同步不代表已安裝正式站，正式站仍待更新。
 - 主題與外掛部署 ZIP 位於 `NEWDESIGN/theme/dist/`、`NEWDESIGN/website/dist/`，由 Git LFS 管理。正式站仍需透過 WordPress 後台安裝並即時核對頁尾 RWD、LINE 連結與手機導覽。
 - 路由稽核歷史結果為 12／12 新版主要路由 HTTP 200、20／20 已退休路徑 HTTP 404；不代表本次照片與舊版面值的逐頁即時驗收。
 - 部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`。ZIP 由 Git LFS 管理；新電腦若只看到 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
