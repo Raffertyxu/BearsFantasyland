@@ -56,13 +56,24 @@ function apply_filters($filter, $text) { return '<p>' . esc_html($text) . '</p>'
 function has_post_thumbnail($post) { return false; }
 function get_the_post_thumbnail_url($post, $size) { return ''; }
 function get_the_date($format, $post) { return date($format); }
+require_once __DIR__ . '/src/work-options.php';
 require_once __DIR__ . '/src/render.php';
 $page = $_GET['page'] ?? 'home';
 $post = null;
 if (in_array($page, array('work', 'lifestyle-work', 'course'))) {
     foreach ($preview_posts as $candidate) if (($candidate->data['slug'] ?? '') === ($_GET['slug'] ?? '')) $post = $candidate;
 }
-?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢 NEWDESIGN 預覽</title><link rel="stylesheet" href="/public/style.css"><link rel="stylesheet" href="/public/interactions.css"></head><body class="bfnd-body"><?php bfnd_render_header($page); ?><main id="bf-main"><?php
+if (isset($_GET['preview_options']) && $_GET['preview_options'] === '1') {
+    // Local-only UI fixture with generic labels, not production specifications.
+    $fixture_work_id = $page === 'work' && $post ? $post->ID : absint($_GET['work'] ?? 0);
+    if ($fixture_work_id && isset($preview_posts[$fixture_work_id]) && $preview_posts[$fixture_work_id]->post_type === 'bf_work') {
+        $fixture_work = $preview_posts[$fixture_work_id];
+        $fixture_work->data['material_options'] = "材質選項示範 A\n材質選項示範 B";
+        $fixture_work->data['size_options'] = "尺寸選項示範 A\n尺寸選項示範 B";
+        $fixture_work->data['size_confirmed'] = '1';
+    }
+}
+?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢 NEWDESIGN 預覽</title><link rel="stylesheet" href="/public/style.css"><link rel="stylesheet" href="/public/interactions.css"><link rel="stylesheet" href="/public/work-options.css"></head><body class="bfnd-body"><?php bfnd_render_header($page); ?><main id="bf-main"><?php
 if ($post && $page === 'work') bfnd_render_work($post->ID);
 elseif ($post && $page === 'lifestyle-work') bfnd_render_lifestyle_work($post->ID);
 elseif ($post && $page === 'course') bfnd_render_course($post->ID);
@@ -78,4 +89,4 @@ else {
         default: bfnd_render_home();
     }
 }
-?></main><?php bfnd_render_footer(); ?><script src="/public/site.js"></script></body></html>
+?></main><?php bfnd_render_footer(); ?><script src="/public/site.js"></script><script src="/public/work-options.js"></script></body></html>

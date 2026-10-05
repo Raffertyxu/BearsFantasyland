@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 飛熊入夢 NEWDESIGN 官網
  * Description: 飛熊入夢品牌頁、家具作品、生活木作、木作學堂、日誌與詢問管理。
- * Version: 0.5.9
+ * Version: 0.5.23
  * Author: Haotai Maker
  * Text Domain: bf-newdesign
  */
@@ -10,7 +10,9 @@ if (!defined('ABSPATH')) { exit; }
 
 define('BFND_DIR', plugin_dir_path(__FILE__));
 define('BFND_URL', plugin_dir_url(__FILE__));
+define('BFND_VERSION', '0.5.23');
 require_once BFND_DIR . 'src/content.php';
+require_once BFND_DIR . 'src/work-options.php';
 require_once BFND_DIR . 'src/admin.php';
 if (!bfnd_custom_theme_active()) {
     require_once BFND_DIR . 'src/render.php';
@@ -39,6 +41,7 @@ add_action('admin_post_bfnd_restore', 'bfnd_restore_action');
 add_action('admin_post_nopriv_bfnd_inquiry', 'bfnd_inquiry_action');
 add_action('admin_post_bfnd_inquiry', 'bfnd_inquiry_action');
 add_action('wp_enqueue_scripts', 'bfnd_enqueue', 100);
+add_action('wp_enqueue_scripts', 'bfnd_enqueue_work_options', 105);
 add_action('admin_enqueue_scripts', 'bfnd_admin_enqueue');
 add_action('admin_enqueue_scripts', 'bfnd_yoast_analysis_admin_assets', 20);
 add_action('enqueue_block_editor_assets', function () {
@@ -72,6 +75,16 @@ function bfnd_enqueue() {
     wp_enqueue_style('bfnd-style', bfnd_asset('public/style.css'), array(), '0.5.9');
     wp_enqueue_style('bfnd-interactions', bfnd_asset('public/interactions.css'), array('bfnd-style'), '0.5.9');
     wp_enqueue_script('bfnd-site', bfnd_asset('public/site.js'), array(), '0.5.9', true);
+}
+
+function bfnd_enqueue_work_options() {
+    $is_collaboration_page = is_page() && (
+        get_post_meta(get_queried_object_id(), '_bfnd_page', true) === 'collaboration'
+        || is_page('collaboration')
+    );
+    if (!is_singular('bf_work') && !$is_collaboration_page) { return; }
+    wp_enqueue_style('bfnd-work-options', bfnd_asset('public/work-options.css'), array(), BFND_VERSION);
+    wp_enqueue_script('bfnd-work-options', bfnd_asset('public/work-options.js'), array(), BFND_VERSION, true);
 }
 
 function bfnd_is_commerce_page() {

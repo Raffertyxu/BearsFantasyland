@@ -154,9 +154,18 @@ function bfnd_render_work($id) {
     }
     $series = wp_get_post_terms($id, 'bf_series', array('fields' => 'names'));
     $size = bfnd_public_size($id);
-    $specs = array('系列' => $series ? $series[0] : '', '作品類型' => bfnd_meta($id, 'type'), '木材／材質' => bfnd_public_material($id), '參考尺寸' => $size, '表面處理' => bfnd_meta($id, 'finish'), '設計製作' => '飛熊入夢 Bear’s Fantasyland');
-    echo '<section class="bf-spec-section"><div class="bf-wrap"><span class="bf-index">02 / SPECIFICATION</span><h2>作品規格</h2><div class="bf-spec-grid">';
+    $size_options = bfnd_work_option_values($id, 'size');
+    $specs = array('系列' => $series ? $series[0] : '', '作品類型' => bfnd_meta($id, 'type'), '表面處理' => bfnd_meta($id, 'finish'), '設計製作' => '飛熊入夢 Bear’s Fantasyland');
+    echo '<section class="bf-spec-section" data-bf-work-choice-detail data-work-id="' . esc_attr($id) . '"><div class="bf-wrap"><span class="bf-index">02 / SPECIFICATION</span><h2>作品規格</h2><div class="bf-spec-grid">';
     foreach ($specs as $label => $value) { if ($value) { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . bfnd_e($value) . '</dd></div>'; } }
+    echo '<div><dt>木材／材質</dt><dd>';
+    if (!bfnd_render_work_choice_group($id, 'material', '木材／材質')) { echo bfnd_e(bfnd_public_material($id)); }
+    echo '</dd></div>';
+    if ($size_options) {
+        echo '<div><dt>尺寸</dt><dd>';
+        bfnd_render_work_choice_group($id, 'size', '尺寸');
+        echo '</dd></div>';
+    } elseif ($size) { echo '<div><dt>參考尺寸</dt><dd>' . bfnd_e($size) . '</dd></div>'; }
     echo '</div></div></section>';
     $detail_images = array_slice($gallery, 2, 6);
     echo '<section class="bf-section bf-wrap"><div class="bf-section-head"><div><span class="bf-index">03 / DETAILS</span><h2>工藝細節</h2></div></div>';
@@ -181,7 +190,8 @@ function bfnd_render_work($id) {
     }
     echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">WORKS INQUIRY</span><h2>喜歡這件作品？</h2><p>歡迎詢問作品尺寸、木種、製作方式與現有規格。</p>';
     if (bfnd_meta($id, 'size_adjustable') === '1') { echo '<p>部分作品可依空間需求調整尺寸，實際製作方式歡迎與我們討論。</p>'; }
-    bfnd_button('作品諮詢', add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry'); echo '</div></section>';
+    $inquiry_url = add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry';
+    echo '<a class="bf-button" data-bf-work-inquiry data-bf-work-id="' . esc_attr($id) . '" href="' . esc_url($inquiry_url) . '"><span>作品諮詢</span><span aria-hidden="true">↗</span></a></div></section>';
     echo '<dialog id="bf-image-dialog" class="bf-image-dialog" aria-label="作品照片放大檢視"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="作品照片放大檢視"></dialog>';
 }
 
@@ -382,17 +392,26 @@ function bfnd_render_collaboration() {
 function bfnd_render_inquiry_form() {
     $work_id = isset($_GET['work']) ? absint($_GET['work']) : 0;
     if (!$work_id || get_post_type($work_id) !== 'bf_work') { $work_id = 0; }
+    $selected_material = bfnd_requested_work_option($work_id, 'material');
+    $selected_size = bfnd_requested_work_option($work_id, 'size');
     $course_id = isset($_GET['course']) ? absint($_GET['course']) : 0;
     $course_title = $course_id && get_post_type($course_id) === 'bf_course' ? get_the_title($course_id) : '';
     $online_interest = isset($_GET['interest']) && sanitize_key(wp_unslash($_GET['interest'])) === 'online-course';
     echo '<section id="inquiry" class="bf-inquiry-section"><div class="bf-wrap bf-inquiry-grid"><div><span class="bf-kicker">START A CONVERSATION</span><h2>聊聊你的想法。</h2><p>告訴我們你正在尋找什麼，我們會從材質、尺寸與使用情境，與你一起找到合適的木作方式。</p><p class="bf-form-note">表單資料會保存到飛熊入夢後台供回覆使用。請勿填寫身分證、付款資訊或其他敏感資料；如需提供參考圖片，請先於說明欄描述，我們會另行確認傳送方式。</p></div><div class="bf-form-shell">';
     if (isset($_GET['sent']) && $_GET['sent'] === '1') { echo '<div class="bf-success" role="status"><h3>已收到你的詢問。</h3><p>我們會依留下的聯絡方式回覆你。</p></div>'; }
-    echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_inquiry">'; wp_nonce_field('bfnd_inquiry', 'bfnd_inquiry_nonce'); echo '<label class="bf-honeypot">網站<input type="text" name="website" autocomplete="off" tabindex="-1"></label>';
+    echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '" data-bf-inquiry-form><input type="hidden" name="action" value="bfnd_inquiry">'; wp_nonce_field('bfnd_inquiry', 'bfnd_inquiry_nonce'); echo '<label class="bf-honeypot">網站<input type="text" name="website" autocomplete="off" tabindex="-1"></label>';
     echo '<div class="bf-form-row"><label>姓名 <span aria-hidden="true">*</span><input required maxlength="80" name="name" autocomplete="name"></label><label>聯絡方式 <span aria-hidden="true">*</span><input required maxlength="150" name="contact" placeholder="Email 或電話" autocomplete="email"></label></div>';
-    echo '<label>詢問作品<select name="work_id"><option value="">一般合作／其他需求</option>';
+    echo '<label>詢問作品<select name="work_id" data-bf-inquiry-work><option value="">一般合作／其他需求</option>';
     $works = bfnd_work_query(array('orderby' => 'title', 'order' => 'ASC'));
-    foreach ($works->posts as $post) { echo '<option value="' . esc_attr($post->ID) . '"' . selected($work_id, $post->ID, false) . '>' . bfnd_e(get_the_title($post)) . '</option>'; }
-    echo '</select></label><div class="bf-form-row"><label>需求尺寸<input name="dimension" maxlength="150" placeholder="例如 W180 × D80 × H75 cm"></label><label>使用空間<input name="space" maxlength="150" placeholder="例如住宅餐廳、商業空間"></label></div>';
+    foreach ($works->posts as $post) {
+        $material_json = bfnd_work_option_json($post->ID, 'material');
+        $size_json = bfnd_work_option_json($post->ID, 'size');
+        echo '<option value="' . esc_attr($post->ID) . '" data-material-options="' . esc_attr($material_json) . '" data-size-options="' . esc_attr($size_json) . '"' . selected($work_id, $post->ID, false) . '>' . bfnd_e(get_the_title($post)) . '</option>';
+    }
+    echo '</select></label><div class="bf-inquiry-option-grid">';
+    bfnd_render_inquiry_option_field($work_id, 'material', '選擇木材／材質', $selected_material);
+    bfnd_render_inquiry_option_field($work_id, 'size', '選擇尺寸', $selected_size);
+    echo '</div><div class="bf-form-row"><label>其他尺寸需求（選填）<input name="dimension" maxlength="150" placeholder="例如希望再加長 10 公分"></label><label>使用空間<input name="space" maxlength="150" placeholder="例如住宅餐廳、商業空間"></label></div>';
     echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : '')) . '</textarea></label>';
     echo '<button class="bf-submit" type="submit">送出詢問 <span aria-hidden="true">↗</span></button></form></div></div></section>';
 }

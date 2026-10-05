@@ -1,0 +1,185 @@
+/* Inquiry-only material and size choices; shared by the theme and plugin fallback. */
+body.bfnd-body .bf-work-choice-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+body.bfnd-body .bf-spec-grid dd {
+  min-width: 0;
+}
+
+body.bfnd-body .bf-work-choice-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .625rem;
+  min-width: 0;
+}
+
+body.bfnd-body .bf-work-choice {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+body.bfnd-body .bf-work-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.bfnd-body .bf-work-choice > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  max-width: 100%;
+  padding: .625rem 1rem;
+  border: 1px solid var(--bf-rule);
+  background: var(--bf-white);
+  color: var(--bf-ink);
+  line-height: 1.45;
+  text-align: center;
+  overflow-wrap: anywhere;
+  transition: color var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1)),
+    background-color var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1)),
+    border-color var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1)),
+    box-shadow var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1)),
+    transform var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1));
+}
+
+body.bfnd-body .bf-work-choice input:checked + span {
+  border-color: var(--bf-wood);
+  background: var(--bf-warm);
+  box-shadow: inset 0 -2px 0 var(--bf-wood);
+  color: var(--bf-ink);
+}
+
+body.bfnd-body .bf-work-choice input:focus-visible + span {
+  outline: 2px solid var(--bf-focus);
+  outline-offset: 2px;
+}
+
+body.bfnd-body .bf-work-choice input:active + span {
+  transform: translateY(1px);
+}
+
+body.bfnd-body .bf-work-choice input:disabled + span {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+body.bfnd-body .bf-work-choice-feedback {
+  min-height: 1lh;
+  margin: .5rem 0 0;
+  color: var(--bf-muted);
+  font-family: var(--bf-sans);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+body.bfnd-body .bf-work-choice-group.is-selected .bf-work-choice-feedback,
+body.bfnd-body .bf-inquiry-option-field.is-selected > small {
+  color: #48634a;
+}
+
+body.bfnd-body .bf-work-choice-group.is-error .bf-work-choice-feedback,
+body.bfnd-body .bf-inquiry-option-field.is-error > small {
+  color: #963a2d;
+}
+
+body.bfnd-body .bf-work-choice-group.is-error .bf-work-choice > span {
+  border-color: #963a2d;
+}
+
+body.bfnd-body .bf-inquiry-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(.875rem, 2vw, 1.5rem);
+  min-width: 0;
+}
+
+body.bfnd-body .bf-form-shell .bf-inquiry-option-field {
+  min-width: 0;
+  color: var(--bf-ink);
+}
+
+body.bfnd-body .bf-inquiry-option-field > select {
+  min-width: 0;
+  border-width: 1px;
+  outline: 2px solid transparent;
+  outline-offset: 1px;
+  transition: background-color var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1)),
+    box-shadow var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1));
+}
+
+body.bfnd-body .bf-inquiry-option-field > select:focus-visible {
+  outline-color: var(--bf-focus, #69482f);
+}
+
+body.bfnd-body .bf-inquiry-option-field > select[aria-invalid="true"] {
+  border-color: #963a2d;
+}
+
+body.bfnd-body .bf-inquiry-option-field > select:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+body.bfnd-body .bf-form-shell .bf-inquiry-option-field > small {
+  display: block;
+  min-height: 1lh;
+  margin-top: .375rem;
+  color: var(--bf-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+body.bfnd-body [data-bf-inquiry-option-field][hidden] {
+  display: none !important;
+}
+
+body.bfnd-body .bf-submit[aria-busy="true"],
+body.bfnd-body [data-bf-work-inquiry][aria-busy="true"] {
+  cursor: progress;
+  opacity: .72;
+}
+
+@media (hover: hover) {
+  body.bfnd-body .bf-work-choice:hover > span {
+    border-color: var(--bf-wood);
+    background: var(--bf-paper);
+  }
+  body.bfnd-body .bf-work-choice input:checked:hover + span {
+    background: var(--bf-warm);
+  }
+  body.bfnd-body .bf-inquiry-option-field > select:not(:disabled):hover {
+    background-color: var(--bf-paper);
+  }
+}
+
+@media (max-width: 760px) {
+  body.bfnd-body .bf-inquiry-option-grid {
+    grid-template-columns: 1fr;
+  }
+  body.bfnd-body .bf-work-choice > span {
+    min-height: 48px;
+    padding-inline: .875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.bfnd-body .bf-work-choice > span,
+  body.bfnd-body .bf-inquiry-option-field > select {
+    transition-duration: .01ms;
+  }
+}
