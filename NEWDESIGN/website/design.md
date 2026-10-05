@@ -17,7 +17,8 @@
 
 ## Token
 
-- Paper `#f8f6f2`、warm paper `#eee9e2`、ink `#342b25`、muted `#75685e`、wood `#775640`、rule `#d8d0c7`、white `#fff`。
+- Paper `#f8f6f2`、warm paper `#eee9e2`、ink `#342b25`、muted `#75685e`、wood `#775640`、rule `#d8d0c7`、white `#fff`；官方 LINE 綠 `#06c755`、深綠文字／hover `#075e32`／`#087a3a`。
+- 社群連結採 44px 以上的點擊區與清楚對比；官方 LINE 使用品牌綠色圖示及「加入官方 LINE」文字，hover 時以短促位移／色彩變化提示可點，不使用持續閃爍。
 - Display 使用 Noto Serif TC 與 Georgia；正文使用 Noto Sans TC 與系統黑體。
 - 導覽與按鈕保持方角、細線與 140–220ms 輕量回饋；首頁／頁面主視覺文字只做一次短促淡入上移，不做逐段捲動顯示或視差。選單與照片對話框使用短暫開合過場；篩選狀態、鍵盤焦點需清楚可見。
 - 遵守 `prefers-reduced-motion`：停用主視覺進場並將轉場縮至近乎即時。主視覺與作品照片不套濾鏡改色。

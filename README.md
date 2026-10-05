@@ -15,9 +15,9 @@
 
 ## 目前版本與部署狀態
 
-- 正式站最後一次成功即時確認（2026-10-02）為外掛 `0.5.9` 已啟用、主題 `1.3.16` 正在載入；之後未完成新的正式站安裝確認，目前線上版本狀態須重新核對。
-- 主題 `1.3.19` 修正手機選單收合留白、加入主導覽分隔線與課程子選單格線，並包含前一版的合作頁版面修正。部署 ZIP 已提交並推送至 GitHub `main`（`1aee0bc`）；本次正式站後台操作在辨識瀏覽器網址時中止，沒有執行上傳，因此不可視為已部署。
-- 目前本機主題 ZIP：`NEWDESIGN/theme/dist/bears-fantasyland.zip`。GitHub `main` 已與本機同步至 `1aee0bceb55a7e285391c715f58ae395e0009829`；正式站仍需透過 WordPress 後台安裝並即時核對手機選單及合作提案頁。
+- 正式站最後一次成功即時確認（2026-10-02）為外掛 `0.5.9` 已啟用、主題 `1.3.16` 正在載入；後續沒有新的正式站版本確認，線上狀態需重新核對。
+- 目前來源版本為外掛 `0.5.24`、主題 `1.3.20`。主題 `1.3.20` 延續手機選單與合作頁修正，並放大頁尾 IG／FB／YouTube 圖示，將 LINE 做成帶官方圖示的「加入官方 LINE」按鈕。部署 ZIP 需與來源一併同步；程式與套件版本不代表已安裝正式站。
+- 主題與外掛部署 ZIP 位於 `NEWDESIGN/theme/dist/`、`NEWDESIGN/website/dist/`，由 Git LFS 管理。正式站仍需透過 WordPress 後台安裝並即時核對頁尾 RWD、LINE 連結與手機導覽。
 - 路由稽核歷史結果為 12／12 新版主要路由 HTTP 200、20／20 已退休路徑 HTTP 404；不代表本次照片與舊版面值的逐頁即時驗收。
 - 部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`。ZIP 由 Git LFS 管理；新電腦若只看到 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。
 
