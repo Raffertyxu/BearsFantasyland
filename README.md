@@ -16,7 +16,8 @@
 ## 目前版本與部署狀態
 
 - 正式站最後一次成功即時確認（2026-10-02）為外掛 `0.5.9` 已啟用、主題 `1.3.16` 正在載入；後續沒有新的正式站版本確認，線上狀態需重新核對。
-- 目前來源版本為外掛 `0.5.24`、主題 `1.3.20`。主題 `1.3.20` 延續手機選單與合作頁修正，並放大頁尾 IG／FB／YouTube 圖示，將 LINE 做成帶官方圖示的「加入官方 LINE」按鈕。部署 ZIP 需與來源一併同步；程式與套件版本不代表已安裝正式站。
+- 目前來源版本為外掛 `0.5.25`、主題 `1.3.21`。品牌故事版面可在後台設定 YouTube 品牌影片網址；有網址時顯示 16:9 影片封面，訪客按播放後才載入播放器，留白時不顯示空區塊或佔位內容。頁尾 IG／FB／YouTube 圖示放大，LINE 為帶官方圖示的「加入官方 LINE」按鈕。
+- 本機 `main` 有尚未推送的版本更新。2026-10-05 推送遇到 DNS 錯誤 `Could not resolve host: github.com`；GitHub 仍未包含頁尾／品牌影片更新，網路恢復後需推送本機提交。部署 ZIP 已由目前來源重建；程式與套件版本不代表已安裝正式站。
 - 主題與外掛部署 ZIP 位於 `NEWDESIGN/theme/dist/`、`NEWDESIGN/website/dist/`，由 Git LFS 管理。正式站仍需透過 WordPress 後台安裝並即時核對頁尾 RWD、LINE 連結與手機導覽。
 - 路由稽核歷史結果為 12／12 新版主要路由 HTTP 200、20／20 已退休路徑 HTTP 404；不代表本次照片與舊版面值的逐頁即時驗收。
 - 部署包：`NEWDESIGN/website/dist/bears-fantasyland-newdesign.zip`、`NEWDESIGN/theme/dist/bears-fantasyland.zip`。ZIP 由 Git LFS 管理；新電腦若只看到 LFS 指標，執行 `git lfs install` 和 `git lfs pull`。

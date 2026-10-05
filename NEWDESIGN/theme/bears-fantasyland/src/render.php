@@ -361,6 +361,13 @@ function bfnd_story_row($number, $en, $title, $text, $image, $image_alt, $link =
 function bfnd_render_story() {
     $brand_hero = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
     echo '<section class="bf-brand-hero"><div class="bf-brand-hero-copy"><span class="bf-kicker">BRAND STORY / BEAR’S FANTASYLAND</span><h1>飛熊入夢<br><em>木，讓生活更美好。</em></h1><p>從一雙木工的手，<br>到一個新的世代。<br>我們相信，木不只是材料，<br>而是一種更好的生活方式。</p></div><div class="bf-brand-hero-image">'; bfnd_image($brand_hero, '飛熊入夢實木家具', '', false); echo '</div></section>';
+    $story_settings = function_exists('bfnd_template_settings') ? bfnd_template_settings('story') : array();
+    $video_id = function_exists('bfnd_youtube_video_id') ? bfnd_youtube_video_id($story_settings['youtube_url'] ?? '') : '';
+    if ($video_id) {
+        $video_url = 'https://www.youtube.com/watch?v=' . rawurlencode($video_id);
+        $poster_url = 'https://i.ytimg.com/vi/' . rawurlencode($video_id) . '/hqdefault.jpg';
+        echo '<section class="bf-brand-film" data-bfnd-design-ignore aria-labelledby="bf-brand-film-title"><div class="bf-wrap bf-brand-film-inner"><div class="bf-brand-film-copy"><span class="bf-kicker">BRAND FILM</span><h2 id="bf-brand-film-title">品牌影片</h2><p>透過影像，認識飛熊入夢的木作與日常。</p></div><div class="bf-brand-film-frame" data-bf-youtube-id="' . esc_attr($video_id) . '"><img src="' . esc_url($poster_url) . '" alt="飛熊入夢品牌影片封面" loading="lazy"><a class="bf-brand-film-play" data-bf-youtube-play href="' . esc_url($video_url) . '" target="_blank" rel="noopener noreferrer" aria-label="播放飛熊入夢品牌影片"><span class="bf-brand-film-play-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"></path></svg></span><span class="bf-brand-film-play-label">播放品牌影片</span></a></div></div></section>';
+    }
     bfnd_story_row('01', 'OUR ORIGIN', '源於熱愛', "飛熊入夢源自對木工的熱愛。我們從傳統木工出發，結合現代設計與數位製造，在手作的溫度與科技的精準之間，尋找屬於這個時代的木作方式。\n\n我們希望，木作不只是被保存的技藝，而能真正走進更多人的生活。", bfft_asset('assets/brand/real-lecture.webp'), '飛熊入夢木作教學現場', '', '', false, true);
     bfnd_story_row('02', 'FURNITURE', '實木家具', "我們設計並製作實木家具。從木材的選擇、比例、結構到使用方式，回到家具最單純的本質——自然、耐用，並且能長久陪伴生活。\n\n每件作品都能隨著時間與使用，慢慢留下屬於生活的痕跡。", bfft_asset('assets/works/muyo/02.webp'), '木韻 MUYO 胡桃木桌椅結構細節', bfnd_page_url('furniture'), '探索家具作品', true);
     $wood_ring = bfnd_brand_photo('bfnd_manifesto_id', 'large', 'assets/works/muyo/02.webp');

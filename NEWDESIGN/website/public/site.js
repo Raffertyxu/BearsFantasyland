@@ -1,4 +1,22 @@
 (() => {
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-bf-youtube-play]');
+    if (!trigger) return;
+    const frame = trigger.closest('[data-bf-youtube-id]');
+    const videoId = frame?.dataset.bfYoutubeId || '';
+    if (!frame || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) return;
+    event.preventDefault();
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0`;
+    iframe.title = '飛熊入夢品牌影片';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; web-share';
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.allowFullscreen = true;
+    frame.replaceChildren(iframe);
+    frame.classList.add('is-playing');
+    iframe.focus();
+  });
+
   const schoolMenu = document.querySelector('.bf-nav-school');
   const schoolToggle = schoolMenu?.querySelector('.bf-nav-school-toggle');
   const menu = document.querySelector('.bf-menu-button');

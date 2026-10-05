@@ -134,6 +134,12 @@ function bfnd_template_editor($key) {
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_save_template"><input type="hidden" name="page_key" value="' . esc_attr($key) . '">';
     wp_nonce_field('bfnd_save_template_' . $key);
     bfnd_template_seo_fields($page);
+    if ($key === 'story') {
+        $youtube_url = isset($saved['youtube_url']) ? (string) $saved['youtube_url'] : '';
+        echo '<details class="bfnd-design-section" open><summary>品牌影片｜YouTube</summary>';
+        echo '<p class="bfnd-design-field"><label for="bfnd_story_youtube_url"><strong>YouTube 品牌影片連結</strong></label><input id="bfnd_story_youtube_url" name="bfnd_story_youtube_url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=..." value="' . esc_attr($youtube_url) . '"></p>';
+        echo '<p class="description">貼上 YouTube 一般影片、Shorts 或 youtu.be 分享連結並儲存。影片會顯示在品牌故事上方；訪客按下播放後才載入播放器。欄位留白時不公開影片區塊，也不會顯示空白或預告內容。</p></details>';
+    }
     if ($key === 'lifestyle') {
         echo '<p class="bfnd-design-field"><label><input type="checkbox" name="bfnd_show_lifestyle_works" value="1"' . checked(!empty($saved['show_works']), true, false) . '> 顯示已發布的生活木作作品</label><small>未勾選時依客戶手稿顯示「持續製作中」。</small></p>';
     }
@@ -167,11 +173,22 @@ function bfnd_save_template_action() {
     if (!bfnd_template_page_is_shortcode_only($page, $key)) { wp_die('請先將頁面轉為單行短代碼，再儲存版面。'); }
     $sections = bfnd_template_sections($key, $page->ID);
     $old = bfnd_template_settings($key);
+    $youtube_url = isset($old['youtube_url']) ? (string) $old['youtube_url'] : '';
+    if ($key === 'story' && isset($_POST['bfnd_story_youtube_url']) && is_string($_POST['bfnd_story_youtube_url'])) {
+        $youtube_url = esc_url_raw(trim(wp_unslash($_POST['bfnd_story_youtube_url'])));
+        if ($youtube_url !== '' && !bfnd_youtube_video_id($youtube_url)) {
+            wp_die('請貼上有效的 YouTube 影片連結（一般影片、Shorts 或 youtu.be 分享網址），或清空欄位儲存。');
+        }
+        if ($youtube_url !== '') {
+            $youtube_url = 'https://www.youtube.com/watch?v=' . rawurlencode(bfnd_youtube_video_id($youtube_url));
+        }
+    }
     $text = isset($_POST['bfnd_design_text']) && is_array($_POST['bfnd_design_text']) ? wp_unslash($_POST['bfnd_design_text']) : array();
     $images = isset($_POST['bfnd_design_image']) && is_array($_POST['bfnd_design_image']) ? wp_unslash($_POST['bfnd_design_image']) : array();
     $resets = isset($_POST['bfnd_design_image_reset']) && is_array($_POST['bfnd_design_image_reset']) ? wp_unslash($_POST['bfnd_design_image_reset']) : array();
     $hidden = isset($_POST['bfnd_design_hidden']) && is_array($_POST['bfnd_design_hidden']) ? wp_unslash($_POST['bfnd_design_hidden']) : array();
     $save = array('text' => array(), 'image' => array(), 'image_url' => array(), 'hidden' => array(), 'show_works' => $key === 'lifestyle' && isset($_POST['bfnd_show_lifestyle_works']) ? 1 : 0);
+    if ($key === 'story') { $save['youtube_url'] = $youtube_url; }
     foreach ($sections as $section_key => $section) {
         if (!empty($hidden[$section_key])) { $save['hidden'][$section_key] = 1; }
         foreach ($section['fields'] as $field_key => $field) {

@@ -16,6 +16,28 @@ function bfnd_page_layout_renderer($key) {
     return isset($renderers[$key]) && function_exists($renderers[$key]) ? $renderers[$key] : '';
 }
 
+function bfnd_youtube_video_id($url) {
+    $parts = wp_parse_url(trim((string) $url));
+    if (!is_array($parts)) { return ''; }
+    $scheme = strtolower($parts['scheme'] ?? '');
+    if (!in_array($scheme, array('http', 'https'), true)) { return ''; }
+    $host = strtolower($parts['host'] ?? '');
+    $host = preg_replace('/^(?:www|m)\./', '', $host);
+    $path = trim((string) ($parts['path'] ?? ''), '/');
+    $video_id = '';
+
+    if ($host === 'youtu.be') {
+        $video_id = explode('/', $path)[0] ?? '';
+    } elseif ($host === 'youtube.com') {
+        $query = array();
+        parse_str((string) ($parts['query'] ?? ''), $query);
+        if (!empty($query['v'])) { $video_id = (string) $query['v']; }
+        elseif (preg_match('~^(?:embed|shorts|live)/([A-Za-z0-9_-]{11})(?:/|$)~', $path, $match)) { $video_id = $match[1]; }
+    }
+
+    return preg_match('/^[A-Za-z0-9_-]{11}$/', $video_id) ? $video_id : '';
+}
+
 function bfnd_page_layout_html($key, $post_id = 0) {
     $renderer = bfnd_page_layout_renderer($key);
     if (!$renderer) { return ''; }
@@ -157,6 +179,7 @@ function bfnd_page_design_document($html, $post_id, $apply = true, &$sections = 
     $hidden = array();
     foreach ($root->childNodes as $child) {
         if (!$child instanceof DOMElement) { continue; }
+        if ($child->hasAttribute('data-bfnd-design-ignore')) { continue; }
         $index++;
         $key = 'section_' . $index;
         $fields = array();

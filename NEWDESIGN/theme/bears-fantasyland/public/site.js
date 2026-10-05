@@ -1,4 +1,22 @@
 (() => {
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-bf-youtube-play]');
+    if (!trigger) return;
+    const frame = trigger.closest('[data-bf-youtube-id]');
+    const videoId = frame?.dataset.bfYoutubeId || '';
+    if (!frame || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) return;
+    event.preventDefault();
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?autoplay=1&rel=0`;
+    iframe.title = '飛熊入夢品牌影片';
+    iframe.allow = 'autoplay; encrypted-media; picture-in-picture; web-share';
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    iframe.allowFullscreen = true;
+    frame.replaceChildren(iframe);
+    frame.classList.add('is-playing');
+    iframe.focus();
+  });
+
   // Keep the published phone contact visible if an older server-rendered
   // template is still cached after a theme update.
   document.querySelectorAll('.bf-inquiry-grid').forEach((section) => {
