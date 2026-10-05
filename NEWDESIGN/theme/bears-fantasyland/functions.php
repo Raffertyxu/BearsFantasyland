@@ -13,9 +13,9 @@ add_action('after_setup_theme', function () {
 });
 
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.28');
-    wp_enqueue_style('bfft-interactions', bfft_asset('public/interactions.css'), array('bfft-style'), '1.3.28');
-    wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.3.28', true);
+    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.32');
+    wp_enqueue_style('bfft-interactions', bfft_asset('public/interactions.css'), array('bfft-style'), '1.3.32');
+    wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.3.32', true);
 }, 100);
 
 // The companion plugin owns content types, URLs, forms, and admin features.
