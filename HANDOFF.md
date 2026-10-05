@@ -7,7 +7,7 @@
 - 依 2026-10-05 會議需求新增 WooCommerce 線上課程付款後寄送 YouTube 連結；課程網址只給已付款且模式為 online 的訂單，支援後台重寄並記錄 WordPress 郵件程序狀態。YouTube 私人影片仍須由業主授權學員帳號。
 - 新增自取地址設定與地址快照；地址未填時隱藏本地取貨方式。新增一次性商品分類遷移：兩張指定實木桌歸入「生活木作」，線鋸留在「手工具」；主題將商品呈現在生活木作／木作學堂頁。
 - 作品木材／尺寸詢價欄位沿用現有來源並包含於本候選包；學堂四格路徑改顯示 LEVEL 1、2、3 及 36 小時完整方案。課程商品與梯次未建立，私密課程不會自動發布。
-- 外掛候選 `0.5.34`、主題候選 `1.3.33` 已通過 JavaScript／PHP 語法檢查、ZIP CRC／版本標記檢查；新版主題 11 個主要頁面在 10 個 viewport 共 110 組無水平溢位或 PHP 錯誤。套件為 `NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.34.zip`、`NEWDESIGN/theme/dist/bears-fantasyland-1.3.33.zip`。正式站最後記錄為外掛 `0.5.33`／主題 `1.3.32`；WordPress 後台要求重新登入，候選版尚未部署。業主仍需提供 YouTube 影片、實際取貨地址、宅配規則、課程梯次／名額、缺少的實拍照及退款／取消條款。
+- 外掛候選 `0.5.35`、主題候選 `1.3.34` 已通過 JavaScript／PHP 語法檢查、ZIP CRC／版本標記檢查；新版主題 11 個主要頁面在 10 個一般 viewport 共 110 組無水平溢位或 PHP 錯誤，並在 25% 縮放模擬視窗 11 頁均無水平溢位或 PHP 錯誤。套件為 `NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.35.zip`、`NEWDESIGN/theme/dist/bears-fantasyland-1.3.34.zip`。正式站最後記錄為外掛 `0.5.33`／主題 `1.3.32`；WordPress 後台要求重新登入，候選版尚未部署。業主仍需提供 YouTube 影片、實際取貨地址、宅配規則、課程梯次／名額、缺少的實拍照及退款／取消條款。
 - 完整需求與未完成項見 [`NEWDESIGN/website/MEETING-2026-10-05-IMPLEMENTATION.md`](NEWDESIGN/website/MEETING-2026-10-05-IMPLEMENTATION.md)。
 
 ## 2026-10-05 合作提案永續與售後區重排（正式站已更新）

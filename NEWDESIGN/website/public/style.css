@@ -617,3 +617,62 @@ body.bfnd-body .bf-collab-sustain .bf-button-light { border-color: var(--bf-wood
 .bfnd-pickup-confirmation p { margin: 0; line-height: 1.8; }
 @media(max-width:980px) { .bf-commerce-content.bf-inline-products-grid .woocommerce ul.products { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media(max-width:760px) { .bf-commerce-content.bf-inline-products-grid .woocommerce ul.products.columns-1 { grid-template-columns: minmax(0,1fr); max-width: none; } .bfnd-pickup-confirmation { padding: 18px; } }
+/* Keep content readable when browser zoom creates an ultra-wide CSS viewport (for example 25% on a 2K display). */
+@media (min-width: 6000px) {
+  body.bfnd-body {
+    --bfnd-wide-copy: clamp(42px, .72vw, 58px);
+    --bfnd-wide-meta: clamp(36px, .58vw, 48px);
+    --bfnd-wide-control: clamp(42px, .62vw, 52px);
+    --bfnd-wide-h3: clamp(72px, .96vw, 90px);
+    --bfnd-wide-h2: clamp(104px, 1.35vw, 128px);
+    line-height: 1.65;
+  }
+
+  body.bfnd-body .bf-wrap,
+  body.bfnd-body .bf-header-inner,
+  body.bfnd-body .bf-collab-sustain,
+  body.bfnd-body .bf-collab-after {
+    width: min(calc(100% - clamp(320px, 10vw, 800px)), 86vw, 9000px);
+  }
+
+  body.bfnd-body .bf-header-inner {
+    height: auto;
+    min-height: 160px;
+    gap: clamp(48px, .9vw, 80px);
+    padding-block: 24px;
+  }
+  body.bfnd-body .bf-logo { width: clamp(360px, 4.7vw, 500px); }
+  body.bfnd-body .bf-nav { gap: clamp(34px, .7vw, 72px); }
+  body.bfnd-body .bf-header :is(a, button, small, strong, span, p) {
+    font-size: var(--bfnd-wide-meta) !important;
+  }
+  body.bfnd-body .bf-header .bf-nav a,
+  body.bfnd-body .bf-header .bf-menu-button {
+    font-size: var(--bfnd-wide-control) !important;
+  }
+
+  body.bfnd-body #bf-main :is(p, li, dt, dd, label, blockquote, figcaption, strong, b, em) {
+    max-width: 68ch;
+    font-size: var(--bfnd-wide-copy) !important;
+    line-height: 1.65;
+  }
+  body.bfnd-body #bf-main :is(small, span, .bf-kicker, .bf-index) {
+    font-size: var(--bfnd-wide-meta) !important;
+    line-height: 1.5;
+  }
+  body.bfnd-body #bf-main :is(button, input, select, textarea, .bf-button, .bf-text-link, .bf-plain-link, .bf-course-card-action, .bf-filter-list button) {
+    font-size: var(--bfnd-wide-control) !important;
+    line-height: 1.4;
+  }
+  body.bfnd-body #bf-main h1 { font-size: clamp(168px, 2.2vw, 220px) !important; }
+  body.bfnd-body #bf-main h2 { font-size: var(--bfnd-wide-h2) !important; }
+  body.bfnd-body #bf-main :is(h3, h4, h5, h6) { font-size: var(--bfnd-wide-h3) !important; }
+  body.bfnd-body #bf-main .woocommerce-loop-product__title { font-size: var(--bfnd-wide-h3) !important; }
+  body.bfnd-body #bf-main .bf-learning-path-steps li > strong { font-size: var(--bfnd-wide-h3) !important; }
+
+  body.bfnd-body .bf-footer :is(p, a, small, strong, span, h3, nav) {
+    font-size: var(--bfnd-wide-meta) !important;
+    line-height: 1.5;
+  }
+  body.bfnd-body .bf-footer-main { gap: clamp(80px, 1.2vw, 140px); }
+}

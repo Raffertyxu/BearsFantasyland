@@ -1,5 +1,12 @@
 <?php
 /** Local visual preview only. Production reads all content from WordPress. */
+if (isset($_GET['preview_zoom']) && $_GET['preview_zoom'] === '25') {
+    $frame_query = array_intersect_key($_GET, array_flip(array('page', 'slug', 'work', 'material_choice', 'size_choice', 'preview_options')));
+    $frame_query['preview_theme'] = '1';
+    $frame_src = 'preview.php?' . http_build_query($frame_query);
+    ?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢｜25% 縮放預覽</title><style>html,body{width:100%;height:100%;margin:0;overflow:hidden}iframe{display:block;width:400vw;height:400vh;border:0;transform:scale(.25);transform-origin:top left}</style></head><body><iframe title="25% 縮放網站預覽" src="<?php echo htmlspecialchars($frame_src, ENT_QUOTES, 'UTF-8'); ?>"></iframe></body></html><?php
+    exit;
+}
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 define('ABSPATH', __DIR__ . '/');
