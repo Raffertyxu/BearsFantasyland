@@ -40,7 +40,7 @@ function bfnd_migrate_native_journal_categories() {
 function bfnd_fields($type) {
     $shared = array('english' => '英文名稱', 'tagline' => '一句話介紹', 'seo_title' => 'SEO Title', 'seo_description' => 'SEO Description');
     if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
-    if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
+    if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / program / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price_label' => '價格標籤（例如：優惠價）', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
     if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'size' => '參考尺寸', 'gallery_ids' => '作品照片')); }
     return array();
 }
@@ -291,6 +291,59 @@ function bfnd_migrate_course_editor_fields() {
     update_option('bfnd_course_editor_fields_v1', 1, false);
 }
 
+function bfnd_migrate_course_catalog_v2() {
+    if (get_option('bfnd_course_catalog_v2')) { return; }
+    $courses = bfnd_manifest()['courses'];
+    $slugs = array_column($courses, 'slug');
+    $complete = true;
+    foreach ($courses as $course) {
+        $id = bfnd_find_seed($course['slug'], 'bf_course');
+        if (!$id) {
+            $matches = get_posts(array('post_type' => 'bf_course', 'post_status' => 'any', 'title' => $course['title'], 'numberposts' => 1));
+            if ($matches) {
+                $id = $matches[0]->ID;
+                update_post_meta($id, '_bfnd_seed', $course['slug']);
+            } else {
+                bfnd_import_course($course, false);
+                $id = bfnd_find_seed($course['slug'], 'bf_course');
+            }
+        }
+        if (!$id) { $complete = false; continue; }
+        $fields = array('track', 'features', 'audience', 'learning', 'tools', 'outcomes', 'duration', 'price_label', 'price', 'level', 'notices');
+        foreach ($fields as $field) {
+            $value = isset($course[$field]) ? trim((string) $course[$field]) : '';
+            if ($value === '') { continue; }
+            $current = trim((string) get_post_meta($id, '_bfnd_' . $field, true));
+            $legacy_membership_plans = $course['slug'] === 'open-studio'
+                && $field === 'features'
+                && preg_replace('/\s+/u', '', $current) === '4次方案8次方案12次方案';
+            $legacy_membership_audience = $course['slug'] === 'open-studio'
+                && $field === 'audience'
+                && $current === '適合已完成基礎課程或具相應木工能力者';
+            $legacy_beginner_level = $course['slug'] === 'beginner'
+                && $field === 'level'
+                && $current === '初學者適合';
+            $legacy_membership_level = $course['slug'] === 'open-studio'
+                && $field === 'level'
+                && $current === '進階創作';
+            if ($current === '' || $legacy_membership_plans || $legacy_membership_audience || $legacy_beginner_level || $legacy_membership_level) {
+                update_post_meta($id, '_bfnd_' . $field, $value);
+            }
+        }
+        if (!empty($course['summary']) && get_post_field('post_excerpt', $id) === '從一堂課開始，親手理解木作。') {
+            wp_update_post(array('ID' => $id, 'post_excerpt' => $course['summary']));
+        }
+        if (!empty($course['content']) && get_post_field('post_content', $id) === '課程內容、開課日期與報名方式請以品牌公告為準。') {
+            wp_update_post(array('ID' => $id, 'post_content' => $course['content']));
+        }
+        $order = array_search($course['slug'], $slugs, true);
+        if ($order !== false && (int) get_post_field('menu_order', $id) !== $order) {
+            wp_update_post(array('ID' => $id, 'menu_order' => $order));
+        }
+    }
+    if ($complete) { update_option('bfnd_course_catalog_v2', 1, false); }
+}
+
 function bfnd_import_work($work, $with_media = true) {
     $id = bfnd_find_seed($work['slug'], 'bf_work');
     if (!$id) {
@@ -349,10 +402,12 @@ function bfnd_import_course($course, $with_media = true) {
     $id = bfnd_find_seed($course['slug'], 'bf_course');
     if (!$id) {
         $id = wp_insert_post(array('post_type' => 'bf_course', 'post_status' => 'private', 'post_name' => $course['slug'],
-            'post_title' => $course['title'], 'post_excerpt' => '從一堂課開始，親手理解木作。',
-            'post_content' => '課程內容、開課日期與報名方式請以品牌公告為準。',
+            'post_title' => $course['title'], 'post_excerpt' => $course['summary'] ?? '從一堂課開始，親手理解木作。',
+            'post_content' => $course['content'] ?? '課程內容、開課日期與報名方式請以品牌公告為準。',
+            'menu_order' => array_search($course['slug'], array_column(bfnd_manifest()['courses'], 'slug'), true),
             'meta_input' => array('_bfnd_seed' => $course['slug'], '_bfnd_mode' => $course['mode'],
-                '_bfnd_duration' => $course['duration'], '_bfnd_price' => $course['price'], '_bfnd_level' => $course['level'],
+                '_bfnd_duration' => $course['duration'], '_bfnd_price_label' => $course['price_label'] ?? '',
+                '_bfnd_price' => $course['price'], '_bfnd_level' => $course['level'],
                 '_bfnd_track' => $course['track'] ?? '', '_bfnd_features' => $course['features'] ?? '',
                 '_bfnd_audience' => $course['audience'] ?? '', '_bfnd_learning' => $course['learning'] ?? '',
                 '_bfnd_tools' => $course['tools'] ?? '', '_bfnd_outcomes' => $course['outcomes'] ?? '',

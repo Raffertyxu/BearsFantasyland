@@ -57,11 +57,15 @@ function bfnd_course_price_html($course_id) {
     $product = bfnd_get_course_product($course_id);
     if ($product) {
         $price_html = trim((string) $product->get_price_html());
-        if ($price_html !== '') { return wp_kses_post($price_html); }
+        if ($price_html !== '') {
+            $label = trim((string) get_post_meta($course_id, '_bfnd_price_label', true));
+            return ($label !== '' ? esc_html($label) . ' ' : '') . wp_kses_post($price_html);
+        }
     }
     if ($linked_id) { return ''; }
     $price = get_post_meta($course_id, '_bfnd_price', true);
-    return $price !== '' ? 'NT$ ' . esc_html(number_format((int) $price)) : '';
+    $label = trim((string) get_post_meta($course_id, '_bfnd_price_label', true));
+    return $price !== '' ? ($label !== '' ? esc_html($label) . ' ' : '') . 'NT$ ' . esc_html(number_format((int) $price)) : '';
 }
 
 function bfnd_course_product_meta_box() {

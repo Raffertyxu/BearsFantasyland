@@ -400,19 +400,85 @@
       "title": "木工基礎入門班",
       "duration": "6 小時",
       "price": "3680",
-      "level": "初學者適合",
+      "level": "LEVEL 1｜基礎",
       "track": "level1",
       "mode": "onsite",
+      "summary": "從零開始認識木工，建立安全、量測與基本加工的基礎。",
+      "content": "從零開始認識木工，學習工具使用、機具安全、量測、基本加工與組裝，並完成基礎實作作品。",
+      "audience": "適合完全沒有經驗、想先體驗木工的人。",
+      "learning": "認識木工與工具使用\n機具安全操作\n量測、基本加工與組裝",
+      "outcomes": "完成一件基礎實作作品。",
       "image": "/assets/courses/beginner.webp"
+    },
+    {
+      "slug": "level-2-practical",
+      "title": "木工實作養成",
+      "duration": "12 小時",
+      "price": "6280",
+      "level": "LEVEL 2｜進階",
+      "track": "level2",
+      "mode": "onsite",
+      "summary": "跟著老師完成較完整的木作，逐步累積獨立實作經驗。",
+      "content": "老師帶著你完成一件較完整的木作，從跟著老師做，逐步練習自己判斷並獨立完成。",
+      "audience": "適合想多練習、希望更熟悉加工流程的人。",
+      "learning": "跟著老師完成較完整的木作\n熟悉木材加工流程\n逐步練習判斷與獨立完成",
+      "outcomes": "完成一件較完整的木作，累積實作經驗。",
+      "image": ""
+    },
+    {
+      "slug": "level-3-independent",
+      "title": "自主製作養成",
+      "duration": "18 小時",
+      "price": "7800",
+      "level": "LEVEL 3｜養成",
+      "track": "level3",
+      "mode": "onsite",
+      "summary": "從圖面規劃、備料與加工順序到組裝，培養獨立完成作品的能力。",
+      "content": "從圖面規劃、備料、加工順序到組裝完成，老師逐步減少介入，讓你練習獨立思考與解決問題，具備獨立創作階段的能力。",
+      "audience": "適合想真正把木工學起來，並能獨立完成作品的人。",
+      "learning": "圖面規劃與備料\n安排加工順序\n獨立思考與解決製作問題",
+      "outcomes": "完成一件自主規劃與製作的作品。",
+      "image": ""
+    },
+    {
+      "slug": "open-studio",
+      "title": "自由創作會員",
+      "duration": "彈性時段",
+      "price": "",
+      "level": "自由創作｜持續精進",
+      "track": "membership",
+      "mode": "onsite",
+      "features": "4 次｜NT$ 4,800\n8 次｜NT$ 8,800\n12 次｜NT$ 12,000",
+      "audience": "適合具備基礎能力、想持續創作並挑戰更多作品的人。",
+      "learning": "自由創作，不限主題\n每次前 1 小時老師教學\n老師依作品提供技術指導與協助\n使用完整工坊設備",
+      "notices": "適合具備木工基礎能力者。",
+      "image": "/assets/courses/open-studio.webp"
+    },
+    {
+      "slug": "foundation-pathway",
+      "title": "木工基礎養成方案",
+      "duration": "36 小時",
+      "price_label": "優惠價",
+      "price": "15800",
+      "level": "LEVEL 1 + LEVEL 2 + LEVEL 3",
+      "track": "program",
+      "mode": "onsite",
+      "summary": "從基礎到獨立製作，完成 LEVEL 1、LEVEL 2 與 LEVEL 3 的完整學習路徑。",
+      "content": "完整學習 LEVEL 1 木工基礎入門、LEVEL 2 木工實作養成與 LEVEL 3 自主製作養成，共 36 小時。",
+      "audience": "適合希望依循完整學習路徑，從基礎走向獨立製作的人。",
+      "learning": "LEVEL 1｜木工基礎入門\nLEVEL 2｜木工實作養成\nLEVEL 3｜自主製作養成",
+      "outcomes": "完成基礎、進階實作與自主製作三階段學習。",
+      "image": ""
     },
     {
       "slug": "cnc",
       "title": "CNC 數位木工",
       "duration": "",
       "price": "",
-      "level": "有基礎佳",
+      "level": "專項技能｜有基礎佳",
       "track": "specialist",
       "mode": "onsite",
+      "audience": "建議具備木工基礎。",
       "image": "/assets/courses/cnc.webp"
     },
     {
@@ -420,22 +486,49 @@
       "title": "磨刀實戰班",
       "duration": "6 小時",
       "price": "3680",
-      "level": "工具保養",
+      "level": "專項技能｜工具保養",
       "track": "specialist",
       "mode": "onsite",
+      "summary": "學習磨刀基礎與進階技巧，讓工具回到順手狀態。",
+      "content": "磨刀實戰班為專項技能課程，從認識刀具、建立正確磨刀角度，到實作測試切削表現。",
+      "audience": "適合希望保養木工工具並精進磨刀技巧的人。",
       "image": "/assets/courses/sharpening.webp"
+    }
+  ],
+  "program_bundles": [
+    {
+      "slug": "foundation-pathway",
+      "title": "木工基礎養成方案",
+      "duration": "36 小時",
+      "price_label": "優惠價",
+      "price": "15800",
+      "includes": [
+        "木工基礎入門班",
+        "木工實作養成",
+        "自主製作養成"
+      ]
+    }
+  ],
+  "learning_path": [
+    {
+      "step": "LEVEL 1",
+      "title": "木工基礎入門班",
+      "course": "beginner"
     },
     {
-      "slug": "open-studio",
-      "title": "自由創作會員",
-      "duration": "彈性時段",
-      "price": "",
-      "level": "進階創作",
-      "track": "membership",
-      "features": "4 次方案\n8 次方案\n12 次方案",
-      "audience": "適合已完成基礎課程或具相應木工能力者",
-      "mode": "onsite",
-      "image": "/assets/courses/open-studio.webp"
+      "step": "LEVEL 2",
+      "title": "木工實作養成",
+      "course": "level-2-practical"
+    },
+    {
+      "step": "LEVEL 3",
+      "title": "自主製作養成",
+      "course": "level-3-independent"
+    },
+    {
+      "step": "自由創作",
+      "title": "木工創作會員",
+      "course": "open-studio"
     }
   ],
   "source": "NEWDESIGN customer Excel and original photos"

@@ -298,7 +298,10 @@ function bfnd_course_card($course) {
     $duration = trim((string) bfnd_meta($id, 'duration'));
     $level = trim((string) bfnd_meta($id, 'level'));
     $image = bfnd_work_image($id, 'medium_large');
-    echo '<article class="bf-course-card"><a class="bf-course-card-main" href="' . esc_url(get_permalink($id)) . '">'; if ($image) { echo '<div class="bf-course-image">'; bfnd_image($image, get_the_title($id) . '課程'); echo '</div>'; } echo '<div class="bf-course-card-body"><span class="bf-kicker">' . (bfnd_meta($id, 'mode') === 'online' ? 'ONLINE COURSE' : (bfnd_course_track($id) === 'specialist' ? 'SPECIALIST SKILLS' : 'ON-SITE COURSE')) . '</span><h3>' . bfnd_e(get_the_title($id)) . '</h3><div class="bf-course-meta">';
+    $track = bfnd_course_track($id);
+    $course_label = $track === 'specialist' ? 'SPECIALIST SKILLS' : ($track === 'program' ? 'COMPLETE LEARNING PATH' : 'ON-SITE COURSE');
+    if (bfnd_meta($id, 'mode') === 'online') { $course_label = 'ONLINE COURSE'; }
+    echo '<article class="bf-course-card"><a class="bf-course-card-main" href="' . esc_url(get_permalink($id)) . '">'; if ($image) { echo '<div class="bf-course-image">'; bfnd_image($image, get_the_title($id) . '課程'); echo '</div>'; } echo '<div class="bf-course-card-body"><span class="bf-kicker">' . bfnd_e($course_label) . '</span><h3>' . bfnd_e(get_the_title($id)) . '</h3><div class="bf-course-meta">';
     if ($duration !== '') { echo '<span>' . bfnd_e($duration) . '</span>'; }
     if ($level !== '') { echo '<span>' . bfnd_e($level) . '</span>'; }
     echo '</div>';

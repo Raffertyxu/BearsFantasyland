@@ -92,16 +92,89 @@ tray = [web_copy(p, ASSET_ROOT / "lifestyle" / f"tray-{i:02d}.webp") for i, p in
 workshop = ROOT / "照片" / "工作照" / "IMG_1712.JPG"
 web_copy(workshop, ASSET_ROOT / "brand" / "real-lecture.webp")
 poster_root = ROOT / "網頁分層圖示及文字" / "木作學堂頁面" / "課程簡章_海報"
-course_sources = [
-    ("beginner", "木工基礎入門班", "1初階木工精華班.png", "6 小時", "3680", "初學者適合"),
-    ("cnc", "CNC 數位木工", "3ＣＮＣ數位木工.png", "依最新公告", "", "有基礎佳"),
-    ("sharpening", "磨刀實戰班", "2木工磨刀實戰班.png", "6 小時", "3680", "工具保養"),
-    ("open-studio", "自由創作會員", "4.會員自由創作.png", "彈性時段", "", "進階創作"),
+course_catalog = [
+    {
+        "slug": "beginner", "title": "木工基礎入門班", "duration": "6 小時", "price": "3680",
+        "level": "LEVEL 1｜基礎", "track": "level1", "mode": "onsite",
+        "summary": "從零開始認識木工，建立安全、量測與基本加工的基礎。",
+        "content": "從零開始認識木工，學習工具使用、機具安全、量測、基本加工與組裝，並完成基礎實作作品。",
+        "audience": "適合完全沒有經驗、想先體驗木工的人。",
+        "learning": "認識木工與工具使用\n機具安全操作\n量測、基本加工與組裝",
+        "outcomes": "完成一件基礎實作作品。",
+    },
+    {
+        "slug": "level-2-practical", "title": "木工實作養成", "duration": "12 小時", "price": "6280",
+        "level": "LEVEL 2｜進階", "track": "level2", "mode": "onsite",
+        "summary": "跟著老師完成較完整的木作，逐步累積獨立實作經驗。",
+        "content": "老師帶著你完成一件較完整的木作，從跟著老師做，逐步練習自己判斷並獨立完成。",
+        "audience": "適合想多練習、希望更熟悉加工流程的人。",
+        "learning": "跟著老師完成較完整的木作\n熟悉木材加工流程\n逐步練習判斷與獨立完成",
+        "outcomes": "完成一件較完整的木作，累積實作經驗。",
+    },
+    {
+        "slug": "level-3-independent", "title": "自主製作養成", "duration": "18 小時", "price": "7800",
+        "level": "LEVEL 3｜養成", "track": "level3", "mode": "onsite",
+        "summary": "從圖面規劃、備料與加工順序到組裝，培養獨立完成作品的能力。",
+        "content": "從圖面規劃、備料、加工順序到組裝完成，老師逐步減少介入，讓你練習獨立思考與解決問題，具備獨立創作階段的能力。",
+        "audience": "適合想真正把木工學起來，並能獨立完成作品的人。",
+        "learning": "圖面規劃與備料\n安排加工順序\n獨立思考與解決製作問題",
+        "outcomes": "完成一件自主規劃與製作的作品。",
+    },
+    {
+        "slug": "cnc", "title": "CNC 數位木工", "duration": "", "price": "",
+        "level": "專項技能｜有基礎佳", "track": "specialist", "mode": "onsite",
+        "audience": "建議具備木工基礎。",
+    },
+    {
+        "slug": "sharpening", "title": "磨刀實戰班", "duration": "6 小時", "price": "3680",
+        "level": "專項技能｜工具保養", "track": "specialist", "mode": "onsite",
+        "summary": "學習磨刀基礎與進階技巧，讓工具回到順手狀態。",
+        "content": "磨刀實戰班為專項技能課程，從認識刀具、建立正確磨刀角度，到實作測試切削表現。",
+        "audience": "適合希望保養木工工具並精進磨刀技巧的人。",
+    },
+    {
+        "slug": "open-studio", "title": "自由創作會員", "duration": "彈性時段", "price": "",
+        "level": "自由創作｜持續精進", "track": "membership", "mode": "onsite",
+        "features": "4 次｜NT$ 4,800\n8 次｜NT$ 8,800\n12 次｜NT$ 12,000",
+        "audience": "適合具備基礎能力、想持續創作並挑戰更多作品的人。",
+        "learning": "自由創作，不限主題\n每次前 1 小時老師教學\n老師依作品提供技術指導與協助\n使用完整工坊設備",
+        "notices": "適合具備木工基礎能力者。",
+    },
+    {
+        "slug": "foundation-pathway", "title": "木工基礎養成方案", "duration": "36 小時", "price_label": "優惠價", "price": "15800",
+        "level": "LEVEL 1 + LEVEL 2 + LEVEL 3", "track": "program", "mode": "onsite",
+        "summary": "從基礎到獨立製作，完成 LEVEL 1、LEVEL 2 與 LEVEL 3 的完整學習路徑。",
+        "content": "完整學習 LEVEL 1 木工基礎入門、LEVEL 2 木工實作養成與 LEVEL 3 自主製作養成，共 36 小時。",
+        "audience": "適合希望依循完整學習路徑，從基礎走向獨立製作的人。",
+        "learning": "LEVEL 1｜木工基礎入門\nLEVEL 2｜木工實作養成\nLEVEL 3｜自主製作養成",
+        "outcomes": "完成基礎、進階實作與自主製作三階段學習。",
+    },
 ]
+course_order = ["beginner", "level-2-practical", "level-3-independent", "open-studio", "foundation-pathway", "cnc", "sharpening"]
+course_catalog.sort(key=lambda course: course_order.index(course["slug"]))
+
+course_photos = {
+    "beginner": "1初階木工精華班.png",
+    "cnc": "3ＣＮＣ數位木工.png",
+    "sharpening": "2木工磨刀實戰班.png",
+    "open-studio": "4.會員自由創作.png",
+}
 courses = []
-for slug, title, source_name, duration, price, level in course_sources:
-    photo = web_copy(poster_root / source_name, ASSET_ROOT / "courses" / f"{slug}.webp", width=1200)
-    courses.append({"slug": slug, "title": title, "duration": duration, "price": price, "level": level, "mode": "onsite", "image": photo})
+for course in course_catalog:
+    course = dict(course, image="")
+    if course["slug"] in course_photos:
+        photo = web_copy(poster_root / course_photos[course["slug"]], ASSET_ROOT / "courses" / f"{course['slug']}.webp", width=1200)
+        course["image"] = photo
+    courses.append(course)
+
+program_bundles = [{
+    "slug": "foundation-pathway",
+    "title": "木工基礎養成方案",
+    "duration": "36 小時",
+    "price_label": "優惠價",
+    "price": "15800",
+    "includes": ["木工基礎入門班", "木工實作養成", "自主製作養成"],
+}]
 for i, p in enumerate(sorted((ROOT / "照片" / "最新消息").glob("*")), 1):
     if p.suffix.lower() in {".jpg", ".png"}:
         web_copy(p, ASSET_ROOT / "journal" / f"journal-{i:02d}.webp")
@@ -110,6 +183,13 @@ manifest = {
     "works": works,
     "lifestyle": {"title": "晨露圓境托盤", "english": "Alba Canvas", "gallery": tray},
     "courses": courses,
+    "program_bundles": program_bundles,
+    "learning_path": [
+        {"step": "LEVEL 1", "title": "木工基礎入門班", "course": "beginner"},
+        {"step": "LEVEL 2", "title": "木工實作養成", "course": "level-2-practical"},
+        {"step": "LEVEL 3", "title": "自主製作養成", "course": "level-3-independent"},
+        {"step": "自由創作", "title": "木工創作會員", "course": "open-studio"},
+    ],
     "source": "NEWDESIGN customer Excel and original photos",
 }
 (OUT / "data").mkdir(exist_ok=True)
