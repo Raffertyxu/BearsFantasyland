@@ -215,6 +215,7 @@ body.bfnd-body .bf-footer-social > a:not(.bf-footer-line):hover {
 
 body.bfnd-body .bf-footer-social > .bf-footer-line {
   flex: 0 0 auto;
+  width: auto;
   gap: 8px;
   min-width: 44px;
   padding: 0 12px;

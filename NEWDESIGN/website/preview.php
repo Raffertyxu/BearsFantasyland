@@ -5,6 +5,15 @@ ini_set('display_errors', '1');
 define('ABSPATH', __DIR__ . '/');
 define('BFND_DIR', __DIR__ . '/');
 define('BFND_URL', '/');
+$preview_asset_map = array(
+    'theme-style' => __DIR__ . '/../theme/bears-fantasyland/public/style.css',
+    'theme-interactions' => __DIR__ . '/../theme/bears-fantasyland/public/interactions.css',
+);
+if (isset($_GET['preview_asset'], $preview_asset_map[$_GET['preview_asset']])) {
+    header('Content-Type: text/css; charset=utf-8');
+    readfile($preview_asset_map[$_GET['preview_asset']]);
+    exit;
+}
 $preview_data = json_decode(file_get_contents(__DIR__ . '/data/content.json'), true);
 $preview_posts = array();
 $id = 1;
@@ -29,6 +38,7 @@ function esc_url($s) { return esc_html($s); }
 function esc_textarea($s) { return esc_html($s); }
 function absint($value) { return abs((int) $value); }
 function bfnd_asset($s) { return '/' . ltrim($s, '/'); }
+function bfft_asset($s) { return '/' . ltrim($s, '/'); }
 function bfnd_page_url($s) { return '/preview.php?page=' . rawurlencode($s); }
 function bfnd_shop_url() { return bfnd_page_url('shop'); }
 function get_post_meta($id, $key, $single = true) { global $preview_posts; $p = $preview_posts[$id] ?? null; if (!$p) return ''; $k = substr($key, 6); return $p->data[$k] ?? ''; }
@@ -56,8 +66,23 @@ function apply_filters($filter, $text) { return '<p>' . esc_html($text) . '</p>'
 function has_post_thumbnail($post) { return false; }
 function get_the_post_thumbnail_url($post, $size) { return ''; }
 function get_the_date($format, $post) { return date($format); }
+function get_terms($args = array()) { return array(); }
+function bfnd_page_post($key) { return null; }
+function has_shortcode($content, $tag) { return false; }
+function get_term_by($field, $value, $taxonomy) { return false; }
+function is_wp_error($value) { return false; }
+function wp_kses_post($value) { return (string) $value; }
+function wp_strip_all_tags($value) { return strip_tags((string) $value); }
+function bfnd_course_registration_action($course_id) { return false; }
+function bfnd_course_price_html($course_id) {
+    $price = get_post_meta($course_id, '_bfnd_price', true);
+    $label = trim((string) get_post_meta($course_id, '_bfnd_price_label', true));
+    return $price !== '' ? ($label !== '' ? esc_html($label) . ' ' : '') . 'NT$ ' . esc_html(number_format((int) $price)) : '';
+}
 require_once __DIR__ . '/src/work-options.php';
-require_once __DIR__ . '/src/render.php';
+$preview_theme = isset($_GET['preview_theme']) && $_GET['preview_theme'] === '1';
+if ($preview_theme) { require_once __DIR__ . '/../theme/bears-fantasyland/src/render.php'; }
+else { require_once __DIR__ . '/src/render.php'; }
 $page = $_GET['page'] ?? 'home';
 $post = null;
 if (in_array($page, array('work', 'lifestyle-work', 'course'))) {
@@ -73,7 +98,7 @@ if (isset($_GET['preview_options']) && $_GET['preview_options'] === '1') {
         $fixture_work->data['size_confirmed'] = '1';
     }
 }
-?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢 NEWDESIGN 預覽</title><link rel="stylesheet" href="/public/style.css"><link rel="stylesheet" href="/public/interactions.css"><link rel="stylesheet" href="/public/work-options.css"></head><body class="bfnd-body"><?php bfnd_render_header($page); ?><main id="bf-main"><?php
+?><!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>飛熊入夢 NEWDESIGN 預覽</title><link rel="stylesheet" href="<?php echo esc_url($preview_theme ? '/preview.php?preview_asset=theme-style' : '/public/style.css'); ?>"><link rel="stylesheet" href="<?php echo esc_url($preview_theme ? '/preview.php?preview_asset=theme-interactions' : '/public/interactions.css'); ?>"><link rel="stylesheet" href="/public/work-options.css"></head><body class="bfnd-body"><?php bfnd_render_header($page); ?><main id="bf-main"><?php
 if ($post && $page === 'work') bfnd_render_work($post->ID);
 elseif ($post && $page === 'lifestyle-work') bfnd_render_lifestyle_work($post->ID);
 elseif ($post && $page === 'course') bfnd_render_course($post->ID);

@@ -963,3 +963,16 @@ body.bfnd-body .bf-collab-sustain .bf-button-light { border-color: var(--bf-wood
   body.bfnd-body .bf-collab-after-grid article h3,
   body.bfnd-body .bf-collab-after-grid article p { grid-column: 2; }
 }
+
+/* WooCommerce items surfaced inside the lifestyle and woodworking-school pages. */
+.bf-commerce-content.bf-inline-products-grid .woocommerce ul.products { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px 18px; }
+.bf-commerce-content.bf-inline-products-grid .woocommerce ul.products.columns-2 { grid-template-columns: repeat(2,minmax(0,1fr)); max-width: 980px; }
+.bf-commerce-content.bf-inline-products-grid .woocommerce ul.products.columns-1 { grid-template-columns: minmax(0,380px); }
+.bf-learning-path-steps li>small { color: var(--bf-muted); font-size: 12px; line-height: 1.45; }
+.bf-shop-category-group { align-self: center; margin: 0 3px 0 12px; padding: 8px 0; color: var(--bf-muted); font-size: 11px; letter-spacing: .12em; white-space: nowrap; }
+.bfnd-pickup-address { margin: 8px 0 4px; padding-left: 28px; color: var(--bf-muted); font-size: 13px; line-height: 1.7; }
+.bfnd-pickup-confirmation { margin-top: 28px; padding: 22px 26px; border: 1px solid var(--bf-rule); background: #fff; }
+.bfnd-pickup-confirmation h2 { margin: 0 0 10px; font-family: var(--bf-serif); font-size: 21px; }
+.bfnd-pickup-confirmation p { margin: 0; line-height: 1.8; }
+@media(max-width:980px) { .bf-commerce-content.bf-inline-products-grid .woocommerce ul.products { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .bf-commerce-content.bf-inline-products-grid .woocommerce ul.products.columns-1 { grid-template-columns: minmax(0,1fr); max-width: none; } .bfnd-pickup-confirmation { padding: 18px; } }

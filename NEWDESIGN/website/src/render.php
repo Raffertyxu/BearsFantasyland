@@ -239,6 +239,23 @@ function bfnd_lifestyle_icon($kind) {
     return '<svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . ($paths[$kind] ?? '') . '</svg>';
 }
 
+function bfnd_render_commerce_category_section($category, $kicker, $title, $columns = 3) {
+    if (!function_exists('wc_get_products')) { return false; }
+    $term = is_object($category) ? $category : get_term_by('slug', (string) $category, 'product_cat');
+    if (!$term || is_wp_error($term)) { return false; }
+    $products = wc_get_products(array('status' => 'publish', 'limit' => 8, 'category' => array($term->slug), 'orderby' => 'menu_order', 'order' => 'ASC'));
+    $ids = array();
+    foreach ($products as $product) {
+        if ($product->is_visible() && get_post_meta($product->get_id(), '_bfnd_course_product', true) !== 'yes') { $ids[] = $product->get_id(); }
+    }
+    if (!$ids) { return false; }
+    echo '<section class="bf-section bf-wrap bf-inline-products" data-bfnd-page-design-skip="1"><div class="bf-tab-head">';
+    $category_url = get_term_link($term);
+    bfnd_section_head($kicker, $title, is_wp_error($category_url) ? '' : $category_url, '瀏覽分類');
+    echo '</div><div class="bf-commerce-content bf-inline-products-grid">' . do_shortcode('[products ids="' . esc_attr(implode(',', $ids)) . '" columns="' . absint($columns) . '" limit="8"]') . '</div></section>';
+    return true;
+}
+
 function bfnd_render_lifestyle() {
     $hero = bfnd_brand_photo('bfnd_lifestyle_hero_id', 'full', 'assets/lifestyle/tray-01.webp');
     echo '<section class="bf-lifestyle-hero" data-bfnd-carousel data-bfnd-interval="6000"><div class="bf-lifestyle-hero-image" data-bfnd-reserved-image="1">'; $hero_slides = bfnd_render_banner_images('lifestyle', 'bfnd_lifestyle_hero_id', 'assets/lifestyle/tray-01.webp');
@@ -260,8 +277,9 @@ function bfnd_render_lifestyle() {
         ? has_shortcode($lifestyle_page->post_content, 'bfnd_show_works')
         : get_post_meta($lifestyle_page->ID, '_bfnd_show_lifestyle_works', true) === '1')));
     $items = $show_works ? get_posts(array('post_type' => 'bf_lifestyle', 'post_status' => 'publish', 'numberposts' => -1)) : array();
+    $has_store_products = bfnd_render_commerce_category_section('lifestyle-woodwork', 'LIFESTYLE SHOP', '生活木作選購', 2);
     if ($items) { echo '<section class="bf-section bf-wrap">'; bfnd_section_head('LIFESTYLE WORKS', '生活木作作品'); echo '<div class="bf-work-grid">'; foreach ($items as $item) { bfnd_work_card($item); } echo '</div></section>'; }
-    else { echo '<section class="bf-lifestyle-coming bf-wrap"><span aria-hidden="true">♧</span><h2>生活木作系列持續製作中</h2><p>更多作品，正從工坊走向生活。敬請期待。</p></section>'; }
+    elseif (!$has_store_products) { echo '<section class="bf-lifestyle-coming bf-wrap"><span aria-hidden="true">♧</span><h2>生活木作系列持續製作中</h2><p>更多作品，正從工坊走向生活。敬請期待。</p></section>'; }
     echo '<section class="bf-lifestyle-cta" style="background-image:linear-gradient(#1c120aa8,#1c120aa8),url(' . esc_url($hero) . ')"><div class="bf-wrap"><h2>想合作開發木製生活用品？</h2><p>歡迎與我們聯繫，一起讓木作走進更多人的日常。</p>'; bfnd_button('合作詢問', bfnd_page_url('collaboration') . '#inquiry', true); echo '</div></section>';
 }
 
@@ -283,7 +301,7 @@ function bfnd_render_school() {
     bfnd_button('實體課程', '#onsite-courses', true);
     echo '<a class="bf-button bf-button-light" href="#online-courses"><span>線上課程</span><span aria-hidden="true">↗</span></a></div></div><span class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></section>';
     echo '<div class="bf-values bf-wrap"><div><b>01</b><span>專業師資</span><small>來自實務現場的教學</small></div><div><b>02</b><span>完整設備</span><small>手工具、木工機械與 CNC</small></div><div><b>03</b><span>小班教學</span><small>實作為主，安全有保障</small></div><div><b>04</b><span>從興趣到創作</span><small>陪你完成自己的作品</small></div></div>';
-    echo '<section class="bf-learning-path bf-wrap" aria-labelledby="bf-learning-path-title"><div class="bf-learning-path-heading"><span class="bf-kicker">LEARNING PATH</span><h2 id="bf-learning-path-title">木作學習路徑</h2></div><ol class="bf-learning-path-steps"><li><span>LEVEL 1</span><strong>基礎</strong></li><li><span>LEVEL 2</span><strong>進階</strong></li><li><span>LEVEL 3</span><strong>養成</strong></li><li><span>自由創作</span><strong>會員</strong></li></ol></section>';
+    echo '<section class="bf-learning-path bf-wrap" aria-labelledby="bf-learning-path-title"><div class="bf-learning-path-heading"><span class="bf-kicker">LEARNING PATH</span><h2 id="bf-learning-path-title">木作學習路徑</h2></div><ol class="bf-learning-path-steps"><li><span>LEVEL 1</span><strong>基礎入門</strong></li><li><span>LEVEL 2</span><strong>實作養成</strong></li><li><span>LEVEL 3</span><strong>自主製作</strong></li><li><span>36 HOURS</span><strong>完整方案</strong><small>優惠價 NT$ 15,800</small></li></ol></section>';
     echo '<section class="bf-section bf-wrap bf-school-courses" id="onsite-courses"><div class="bf-tab-head">'; bfnd_section_head('LEARN BY MAKING', '實體課程', '#online-courses', '查看線上課程'); echo '</div>';
     $course_statuses = empty($GLOBALS['bfnd_public_content_render']) && current_user_can('edit_posts') ? array('publish', 'private') : 'publish';
     $courses = get_posts(array('post_type' => 'bf_course', 'post_status' => $course_statuses, 'numberposts' => -1, 'orderby' => 'menu_order', 'order' => 'ASC'));
@@ -300,6 +318,8 @@ function bfnd_render_school() {
         echo '<article class="bf-course-preview-panel"><span class="bf-kicker">ONLINE COURSES</span><h3>線上課程資訊近期公布</h3><p>正式課綱與開課資訊確認後，將於此頁更新。</p></article>';
     }
     echo '</div></section>';
+    $hand_tools = get_term_by('name', '手工具', 'product_cat');
+    if ($hand_tools) { bfnd_render_commerce_category_section($hand_tools, 'TOOLS FOR MAKING', '木作學堂・手工具', 3); }
     $school_cta = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
     echo '<section class="bf-school-cta" style="background-image:linear-gradient(90deg,#24180dcc,#24180d22),url(' . esc_url($school_cta) . ')"><div class="bf-wrap"><h2>不知道哪一堂課適合你？</h2><p>歡迎與我們聊聊，找到最適合你的學習路徑。</p><div class="bf-actions">'; bfnd_button('課程選擇指南', '#onsite-courses', true); bfnd_button('聯絡我們', bfnd_page_url('collaboration') . '#inquiry', true); echo '</div></div></section>';
 }
@@ -501,7 +521,11 @@ function bfnd_render_commerce() {
         $terms = get_terms(array('taxonomy' => 'product_cat', 'hide_empty' => true));
         if (!is_wp_error($terms) && $terms) {
             echo '<nav class="bf-shop-categories" aria-label="商品分類"><a aria-current="page" href="' . esc_url($shop) . '">全部商品</a>';
-            foreach ($terms as $term) { if ($term->slug !== 'uncategorized') { echo '<a href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>'; } }
+            foreach ($terms as $term) {
+                if ($term->slug === 'uncategorized') { continue; }
+                if ($term->name === '手工具') { echo '<span class="bf-shop-category-group">木作學堂</span>'; }
+                echo '<a href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>';
+            }
             echo '</nav>';
         }
         echo do_shortcode('[products limit="12" columns="4" paginate="true"]');

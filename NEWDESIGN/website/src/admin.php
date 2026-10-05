@@ -40,7 +40,7 @@ function bfnd_migrate_native_journal_categories() {
 function bfnd_fields($type) {
     $shared = array('english' => '英文名稱', 'tagline' => '一句話介紹', 'seo_title' => 'SEO Title', 'seo_description' => 'SEO Description');
     if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
-    if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / program / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price_label' => '價格標籤（例如：優惠價）', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
+    if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / program / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price_label' => '價格標籤（例如：優惠價）', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'course_access_url' => '線上課程 YouTube 連結（付款後寄給購買者）', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
     if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'size' => '參考尺寸', 'gallery_ids' => '作品照片')); }
     return array();
 }
@@ -79,6 +79,12 @@ function bfnd_meta_box($post) {
                 }
                 echo '</select><p class="description">先到「商品」編輯簡單或變化商品，勾選「木作課程／會員方案商品」並儲存；系統會自動設為虛擬商品及隱藏於一般商店清單。變化商品可設定不同梯次、方案及名額；單一商品採 WooCommerce 售價與庫存。每個商品只能綁一堂課。</p></div>';
             }
+            continue;
+        }
+        if ($post->post_type === 'bf_course' && $key === 'course_access_url') {
+            echo '<p><label for="bfnd_course_access_url"><strong>' . esc_html($label) . '</strong></label><br>';
+            echo '<input style="width:100%;max-width:780px" type="url" id="bfnd_course_access_url" name="bfnd[course_access_url]" value="' . esc_attr((string) $value) . '" placeholder="https://www.youtube.com/watch?v=...">';
+            echo '<br><span class="description">僅「線上」課程會在訂單付款完成後寄到訂單 Email，不會公開顯示。若 YouTube 設為「私人」，還需由業主將購買者 Google 帳號加入觀看權限；只寄網址不會自動授權。若設為「不公開」，持有連結者可觀看。</span></p>';
             continue;
         }
         if ($key === 'gallery_ids') {
@@ -131,6 +137,7 @@ function bfnd_save_meta($post_id) {
             ? sanitize_textarea_field($raw_value)
             : sanitize_text_field($raw_value);
         if ($type === 'bf_course' && $key === 'woo_id') { $value = absint($raw_value); }
+        if ($type === 'bf_course' && $key === 'course_access_url') { $value = bfnd_sanitize_course_access_url($raw_value); }
         if ($key === 'gallery_ids' || $key === 'related_ids') { $value = array_values(array_filter(array_map('absint', explode(',', $value)))); }
         if ($key === 'featured') { $value = $value === '1' ? '1' : '0'; }
         if ($key === 'size_adjustable' || $key === 'size_confirmed') { $value = $value === '1' ? '1' : '0'; }
@@ -522,7 +529,7 @@ function bfnd_inquiry_action() {
     foreach ($fields as $key => $value) {
         update_post_meta($id, '_bfnd_' . $key, $value);
     }
-    $mail_body = "收到新的訂製與合作詢問。\n請登入 WordPress 後台查看：" . admin_url('post.php?post=' . $id . '&action=edit');
+    $mail_body = "收到新的作品、課程與合作詢問。\n請登入 WordPress 後台查看：" . admin_url('post.php?post=' . $id . '&action=edit');
     $mail_sent = wp_mail(get_option('admin_email'), '飛熊入夢｜新詢問通知', $mail_body);
     update_post_meta($id, '_bfnd_mail_status', $mail_sent ? 'accepted' : 'failed');
     wp_safe_redirect(add_query_arg('sent', '1', bfnd_page_url('collaboration')));
