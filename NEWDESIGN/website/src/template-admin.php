@@ -27,11 +27,74 @@ function bfnd_template_sections($key, $post_id) {
 
 function bfnd_template_menu() {
     add_menu_page('網站版面', '網站版面', 'edit_pages', 'bfnd-layout-overview', 'bfnd_template_dashboard', 'dashicons-layout', 24);
+    add_submenu_page('bfnd-layout-overview', 'Banner 輪播', 'Banner 輪播', 'edit_pages', 'bfnd-banner-manager', 'bfnd_banner_manager');
     foreach (bfnd_pages() as $key => $info) {
         add_submenu_page('bfnd-layout-overview', $info[0], $info[0], 'edit_pages', 'bfnd-layout-' . $key, function () use ($key) {
             bfnd_template_editor($key);
         });
     }
+}
+
+function bfnd_banner_pages() {
+    return array(
+        'home' => '首頁主視覺',
+        'furniture' => '家具作品',
+        'lifestyle' => '生活木作',
+        'school' => '木作學堂',
+        'collaboration' => '合作提案',
+    );
+}
+
+function bfnd_banner_manager() {
+    if (!current_user_can('edit_pages')) { wp_die('權限不足'); }
+    echo '<div class="wrap bfnd-banner-admin"><h1>Banner 輪播管理</h1><p>為各頁 Banner 選取多張正式照片並調整順序。前台每 6 秒切換，可手動切換或暫停。每組至少保留 1 張；推薦放 2–5 張，避免同一頁重複照片。</p>';
+    if (isset($_GET['updated'])) { echo '<div class="notice notice-success is-dismissible"><p>Banner 圖片與順序已儲存。</p></div>'; }
+    echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_save_banners">';
+    wp_nonce_field('bfnd_save_banners');
+    echo '<div class="bfnd-banner-admin-grid">';
+    foreach (bfnd_banner_pages() as $key => $label) {
+        $ids = get_option('bfnd_banner_slides_' . $key, array());
+        if (!is_array($ids)) { $ids = array(); }
+        echo '<section class="bfnd-banner-panel" data-bfnd-banner-gallery><div class="bfnd-banner-panel-head"><h2>' . esc_html($label) . '</h2><span>' . count($ids) . ' 張</span></div>';
+        echo '<input type="hidden" name="bfnd_banner_slides[' . esc_attr($key) . ']" value="' . esc_attr(implode(',', array_map('absint', $ids))) . '">';
+        echo '<div class="bfnd-banner-items">';
+        foreach ($ids as $id) {
+            $id = absint($id);
+            if (!$id || !wp_attachment_is_image($id)) { continue; }
+            $url = wp_get_attachment_image_url($id, 'medium');
+            $alt = (string) get_post_meta($id, '_wp_attachment_image_alt', true);
+            if (!$url || bfnd_nonfinal_photo($url, $id, $alt)) { continue; }
+            echo '<article class="bfnd-banner-item" data-id="' . esc_attr($id) . '"><img src="' . esc_url($url) . '" alt=""><div class="bfnd-banner-item-actions"><button type="button" class="button" data-move="-1" aria-label="圖片往前">←</button><button type="button" class="button" data-move="1" aria-label="圖片往後">→</button><button type="button" class="button-link-delete" data-remove>移除</button></div></article>';
+        }
+        echo '</div><button type="button" class="button button-secondary" data-pick-banner>從媒體庫選取照片</button><p class="description">可以多選；左右按鈕調整順序。每頁獨立管理。</p></section>';
+    }
+    echo '</div>';
+    submit_button('儲存全部 Banner');
+    echo '</form></div>';
+}
+
+function bfnd_save_banners_action() {
+    if (!current_user_can('edit_pages')) { wp_die('權限不足'); }
+    check_admin_referer('bfnd_save_banners');
+    $posted = isset($_POST['bfnd_banner_slides']) && is_array($_POST['bfnd_banner_slides']) ? wp_unslash($_POST['bfnd_banner_slides']) : array();
+    $save = array();
+    foreach (bfnd_banner_pages() as $key => $label) {
+        $raw = isset($posted[$key]) && is_string($posted[$key]) ? $posted[$key] : '';
+        $ids = preg_split('/[\s,]+/', trim($raw), -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($ids as $candidate) {
+            $id = absint($candidate);
+            if (!$id || !wp_attachment_is_image($id)) { continue; }
+            $url = wp_get_attachment_image_url($id, 'full');
+            $alt = (string) get_post_meta($id, '_wp_attachment_image_alt', true);
+            if (!$url || bfnd_nonfinal_photo($url, $id, $alt) || in_array($id, $save[$key] ?? array(), true)) { continue; }
+            $save[$key][] = $id;
+            if (count($save[$key]) >= 10) { break; }
+        }
+        if (empty($save[$key])) { wp_die(esc_html($label . '至少需要保留 1 張正式圖片。')); }
+    }
+    foreach ($save as $key => $ids) { update_option('bfnd_banner_slides_' . $key, $ids, false); }
+    wp_safe_redirect(add_query_arg('updated', '1', admin_url('admin.php?page=bfnd-banner-manager')));
+    exit;
 }
 
 function bfnd_template_shared_layout_notice() {
@@ -281,6 +344,12 @@ function bfnd_install_template_pages_action() {
 }
 
 function bfnd_template_admin_assets($hook) {
+    if (strpos($hook, 'bfnd-banner-manager') !== false) {
+        wp_enqueue_media();
+        wp_enqueue_style('bfnd-banner-admin', bfnd_asset('public/banner-admin.css'), array(), BFND_VERSION);
+        wp_enqueue_script('bfnd-banner-admin', bfnd_asset('public/banner-admin.js'), array('jquery'), BFND_VERSION, true);
+        return;
+    }
     if (strpos($hook, 'bfnd-layout-') === false) { return; }
     wp_enqueue_media();
     wp_enqueue_style('bfnd-page-design', bfnd_asset('public/page-design.css'), array(), '0.5.2');
@@ -308,6 +377,7 @@ function bfnd_template_page_row_action($actions, $post) {
 
 add_action('admin_menu', 'bfnd_template_menu');
 add_action('admin_post_bfnd_save_template', 'bfnd_save_template_action');
+add_action('admin_post_bfnd_save_banners', 'bfnd_save_banners_action');
 add_action('admin_post_bfnd_install_template_pages', 'bfnd_install_template_pages_action');
 add_action('admin_enqueue_scripts', 'bfnd_template_admin_assets');
 add_action('admin_bar_menu', 'bfnd_template_admin_bar', 1000);

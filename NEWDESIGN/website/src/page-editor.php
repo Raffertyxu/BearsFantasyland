@@ -49,6 +49,7 @@ function bfnd_page_layout_html($key, $post_id = 0) {
 
 function bfnd_page_design_skip($node) {
     if (!$node instanceof DOMElement) { return false; }
+    if ($node->hasAttribute('data-bfnd-page-design-skip')) { return true; }
     $class = ' ' . $node->getAttribute('class') . ' ';
     foreach (array('bf-work-grid', 'bf-course-grid', 'bf-journal-grid', 'bf-catalog-toolbar', 'bf-form-shell') as $excluded) {
         if (strpos($class, ' ' . $excluded . ' ') !== false) { return true; }

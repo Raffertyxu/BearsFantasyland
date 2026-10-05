@@ -92,3 +92,14 @@ body.bfnd-body .bf-collab-sustain-inner .bf-kicker{color:var(--bf-wood)}
 body.bfnd-body .bf-collab-sustain-inner h2,body.bfnd-body .bf-collab-sustain-inner p{color:var(--bf-ink)}
 body.bfnd-body .bf-collab-after-inner{grid-template-columns:minmax(240px,.65fr) minmax(0,1.35fr);padding-left:0}
 @media(max-width:760px){body.bfnd-body .bf-collab-sustain-inner{display:block;padding-block:52px}body.bfnd-body .bf-collab-sustain-inner>div:first-child{min-height:0;margin-bottom:26px}body.bfnd-body .bf-collab-after-inner{display:block;padding:35px 0 40px}}
+/* Landing page hero carousels */
+body.bfnd-body [data-bfnd-banner-slide]{position:absolute;inset:0;z-index:0;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .65s ease}
+body.bfnd-body [data-bfnd-banner-slide].is-active{opacity:1;pointer-events:auto}
+body.bfnd-body [data-bfnd-banner-slide] img{display:block;width:100%;height:100%;object-fit:cover}
+body.bfnd-body .bfnd-banner-controls{position:absolute;right:clamp(18px,4vw,64px);bottom:22px;z-index:8;display:flex;align-items:center;gap:2px;padding:4px 6px;color:#fff;background:rgba(38,27,20,.72);border:1px solid rgba(255,255,255,.52);box-shadow:0 3px 14px rgba(0,0,0,.12);backdrop-filter:blur(5px)}
+body.bfnd-body .bfnd-banner-controls[hidden],body.bfnd-body .bfnd-banner-controls button[hidden]{display:none}
+body.bfnd-body .bfnd-banner-controls button{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;background:transparent;color:inherit;font:inherit;font-size:20px;line-height:1;transition:background .2s ease}
+body.bfnd-body .bfnd-banner-controls button:hover,body.bfnd-body .bfnd-banner-controls button:focus-visible{background:rgba(255,255,255,.18);outline:1px solid rgba(255,255,255,.72);outline-offset:-2px}
+body.bfnd-body .bfnd-banner-count{display:flex;align-items:center;justify-content:center;min-width:58px;gap:5px;font:12px/1 Georgia,serif;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+@media(max-width:760px){body.bfnd-body .bfnd-banner-controls{right:16px;bottom:16px;gap:0;padding:3px}.bfnd-banner-controls button{width:44px;height:44px}}
+@media(prefers-reduced-motion:reduce){body.bfnd-body [data-bfnd-banner-slide]{transition:none}}

@@ -252,6 +252,57 @@ function bfnd_import_attachment($path, $parent, $alt) {
     return (int) $id;
 }
 
+function bfnd_migrate_banner_carousels() {
+    if (get_option('bfnd_banner_carousels_v1')) { return; }
+    $defaults = array(
+        'home' => array(
+            array('/assets/works/muyo/01.webp', '木韻 MUYO 胡桃木餐桌椅'),
+            array('/assets/works/muwi/01.webp', '木翼 MUWI 胡桃木長桌'),
+            array('/assets/works/musu/01.webp', '木序 MUSU 硬楓木長桌'),
+        ),
+        'furniture' => array(
+            array('/assets/works/muyo/01.webp', '木韻 MUYO 胡桃木餐桌椅'),
+            array('/assets/works/ridge-table/01.webp', '稜 RIDGE 實木餐桌'),
+            array('/assets/works/muju/01.webp', '木聚 MUJU 栓木餐桌'),
+        ),
+        'lifestyle' => array(
+            array('/assets/lifestyle/tray-01.webp', '晨露圓境托盤・木款'),
+            array('/assets/lifestyle/tray-06.webp', '晨露圓境托盤・藍色款'),
+            array('/assets/lifestyle/tray-13.webp', '晨露圓境托盤・作品細節'),
+        ),
+        'school' => array(
+            array('/assets/brand/real-lecture.webp', '飛熊入夢木作教學現場'),
+            array('/assets/works/warm/01.webp', '暖 WARM 實木圓凳作品'),
+            array('/assets/works/muju/01.webp', '木聚 MUJU 栓木餐桌作品'),
+        ),
+        'collaboration' => array(
+            array('/assets/works/muyo/01.webp', '木韻 MUYO 胡桃木餐桌椅作品'),
+            array('/assets/works/ridge-table/01.webp', '稜 RIDGE 實木餐桌作品'),
+            array('/assets/brand/real-lecture.webp', '飛熊入夢木作教學現場'),
+        ),
+    );
+    $legacy_options = array(
+        'home' => 'bfnd_home_hero_id',
+        'furniture' => '',
+        'lifestyle' => 'bfnd_lifestyle_hero_id',
+        'school' => 'bfnd_school_hero_id',
+        'collaboration' => 'bfnd_home_hero_id',
+    );
+    foreach ($defaults as $key => $sources) {
+        $option = 'bfnd_banner_slides_' . $key;
+        if (is_array(get_option($option, null))) { continue; }
+        $ids = array();
+        $legacy_id = !empty($legacy_options[$key]) ? absint(get_option($legacy_options[$key])) : 0;
+        if ($legacy_id && wp_attachment_is_image($legacy_id)) { $ids[] = $legacy_id; }
+        foreach ($sources as $source) {
+            $id = bfnd_import_attachment($source[0], 0, $source[1]);
+            if ($id && !in_array($id, $ids, true)) { $ids[] = $id; }
+        }
+        if ($ids) { update_option($option, $ids, false); }
+    }
+    update_option('bfnd_banner_carousels_v1', 1, false);
+}
+
 function bfnd_find_seed($slug, $type) {
     $posts = get_posts(array('post_type' => $type, 'post_status' => 'any', 'meta_key' => '_bfnd_seed', 'meta_value' => $slug, 'numberposts' => 1));
     return $posts ? $posts[0]->ID : 0;

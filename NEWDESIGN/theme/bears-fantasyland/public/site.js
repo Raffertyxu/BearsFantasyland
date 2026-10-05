@@ -196,4 +196,64 @@
       lastTrigger = null;
     });
   }
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-bfnd-carousel]').forEach((carousel) => {
+    const slides = [...carousel.querySelectorAll('[data-bfnd-banner-slide]')];
+    const controls = carousel.querySelector('[data-bfnd-banner-controls]');
+    if (slides.length < 2 || !controls) return;
+    const counter = controls.querySelector('[data-bfnd-banner-current]');
+    const previous = controls.querySelector('[data-bfnd-banner-prev]');
+    const next = controls.querySelector('[data-bfnd-banner-next]');
+    const pause = controls.querySelector('[data-bfnd-banner-pause]');
+    let current = 0;
+    let timer;
+    let pointerInside = false;
+    let focusInside = false;
+    let manuallyPaused = reducedMotion;
+
+    const stop = () => { if (timer) window.clearInterval(timer); timer = undefined; };
+    const schedule = () => {
+      stop();
+      if (manuallyPaused || pointerInside || focusInside || document.hidden) return;
+      const delay = Math.max(4000, Number(carousel.dataset.bfndInterval) || 6000);
+      timer = window.setInterval(() => show(current + 1), delay);
+    };
+    const show = (index) => {
+      current = (index + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        const selected = slideIndex === current;
+        slide.classList.toggle('is-active', selected);
+        slide.setAttribute('aria-hidden', String(!selected));
+      });
+      if (counter) counter.textContent = String(current + 1).padStart(2, '0');
+      schedule();
+    };
+    const updatePauseControl = () => {
+      if (!pause) return;
+      pause.textContent = manuallyPaused ? '▶' : 'Ⅱ';
+      pause.setAttribute('aria-label', manuallyPaused ? '繼續輪播' : '暫停輪播');
+      pause.setAttribute('aria-pressed', String(manuallyPaused));
+    };
+
+    previous?.addEventListener('click', () => show(current - 1));
+    next?.addEventListener('click', () => show(current + 1));
+    pause?.addEventListener('click', () => {
+      manuallyPaused = !manuallyPaused;
+      updatePauseControl();
+      schedule();
+    });
+    carousel.addEventListener('pointerenter', () => { pointerInside = true; stop(); });
+    carousel.addEventListener('pointerleave', () => { pointerInside = false; schedule(); });
+    carousel.addEventListener('focusin', () => { focusInside = true; stop(); });
+    carousel.addEventListener('focusout', () => window.setTimeout(() => {
+      focusInside = carousel.contains(document.activeElement);
+      schedule();
+    }, 0));
+    document.addEventListener('visibilitychange', schedule);
+    controls.hidden = false;
+    if (reducedMotion && pause) pause.hidden = true;
+    updatePauseControl();
+    schedule();
+  });
 })();

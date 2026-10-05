@@ -22,6 +22,29 @@ function bfnd_selected_photo($option, $size = 'large') {
 function bfnd_brand_photo($option, $size, $fallback) {
     return bfnd_selected_photo($option, $size) ?: bfnd_asset($fallback);
 }
+function bfnd_render_banner_images($key, $legacy_option, $fallback) {
+    $ids = get_option('bfnd_banner_slides_' . $key, array());
+    if (!is_array($ids) || !$ids) { $ids = array(absint(get_option($legacy_option))); }
+    $slides = array();
+    foreach (array_unique(array_map('absint', $ids)) as $id) {
+        if (!$id || !wp_attachment_is_image($id)) { continue; }
+        $url = wp_get_attachment_image_url($id, 'full');
+        $image_alt = (string) get_post_meta($id, '_wp_attachment_image_alt', true);
+        if (!$url || bfnd_nonfinal_photo($url, $id, $image_alt)) { continue; }
+        $slides[] = $url;
+    }
+    if (!$slides) { $slides[] = bfnd_brand_photo($legacy_option, 'full', $fallback); }
+    foreach ($slides as $index => $url) {
+        echo '<div class="bfnd-banner-slide' . ($index === 0 ? ' is-active' : '') . '" data-bfnd-banner-slide aria-hidden="' . ($index === 0 ? 'false' : 'true') . '">';
+        bfnd_image($url, '', '', $index !== 0);
+        echo '</div>';
+    }
+    return count($slides);
+}
+function bfnd_render_banner_controls($count, $label) {
+    if ($count < 2) { return; }
+    echo '<div class="bfnd-banner-controls" data-bfnd-banner-controls data-bfnd-page-design-skip="1" aria-label="' . esc_attr($label . '圖片輪播控制') . '" hidden><button type="button" data-bfnd-banner-prev aria-label="上一張圖片">←</button><span class="bfnd-banner-count" aria-live="off"><span data-bfnd-banner-current>01</span><span aria-hidden="true"> / ' . esc_html(sprintf('%02d', $count)) . '</span></span><button type="button" data-bfnd-banner-next aria-label="下一張圖片">→</button><button type="button" data-bfnd-banner-pause aria-label="暫停輪播">Ⅱ</button></div>';
+}
 function bfnd_button($label, $url, $light = false) {
     echo '<a class="bf-button' . ($light ? ' bf-button-light' : '') . '" href="' . esc_url($url) . '"><span>' . bfnd_e($label) . '</span><span aria-hidden="true">↗</span></a>';
 }
@@ -79,10 +102,11 @@ function bfnd_public_size($id) {
 }
 function bfnd_render_home() {
     $hero = bfnd_work_by_seed('muyo');
-    $hero_image = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
-    echo '<section class="bf-home-hero"><div class="bf-home-hero-image">';
-    bfnd_image($hero_image, '木韻 MUYO 胡桃木餐桌椅', '', false);
-    echo '</div><div class="bf-home-hero-shade"></div><div class="bf-home-hero-content bf-wrap"><span class="bf-kicker">BEAR’S FANTASYLAND / TAIWAN</span><h1>讓木，<br>成為生活的<br class="bf-mobile-break">一部分。</h1><p>從一件家具，到一堂木工課。<br>我們用傳統工藝 × 數位製造，<br>延續台灣木作的下一個世代。</p><div class="bf-actions">';
+    echo '<section class="bf-home-hero" data-bfnd-carousel data-bfnd-interval="6000"><div class="bf-home-hero-image" data-bfnd-reserved-image="1">';
+    $hero_slides = bfnd_render_banner_images('home', 'bfnd_home_hero_id', 'assets/works/muyo/01.webp');
+    echo '</div><div class="bf-home-hero-shade"></div>';
+    bfnd_render_banner_controls($hero_slides, '首頁');
+    echo '<div class="bf-home-hero-content bf-wrap"><span class="bf-kicker">BEAR’S FANTASYLAND / TAIWAN</span><h1>讓木，<br>成為生活的<br class="bf-mobile-break">一部分。</h1><p>從一件家具，到一堂木工課。<br>我們用傳統工藝 × 數位製造，<br>延續台灣木作的下一個世代。</p><div class="bf-actions">';
     bfnd_button('探索家具作品', bfnd_page_url('furniture'), true); bfnd_button('開始學木工', bfnd_page_url('school'), true);
     echo '</div></div><span class="bf-vertical-note">GOOD WOOD<br>BETTER LIVING.</span><span class="bf-hero-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></section>';
     echo '<div class="bf-values bf-home-values bf-wrap"><div><b aria-hidden="true">♧</b><span>嚴選木材</span><small>來自永續森林・天然・安心</small></div><div><b aria-hidden="true">⚙</b><span>工藝 × 數位製造</span><small>傳統工藝結合 CNC 技術</small></div><div><b aria-hidden="true">⌂</b><span>在地製造</span><small>台中工坊・品質把關</small></div><div><b aria-hidden="true">∞</b><span>耐久設計</span><small>陪伴生活・延長使用年限</small></div><div><b aria-hidden="true">♧</b><span>永續理念</span><small>友善環境・珍惜資源</small></div></div>';
@@ -112,7 +136,7 @@ function bfnd_render_home() {
     bfnd_render_journal_teaser();
 }
 function bfnd_render_furniture() {
-    echo '<section class="bf-page-hero bf-page-hero-photo"><div class="bf-page-hero-image">'; bfnd_image(bfnd_asset('assets/works/muyo/01.webp'), '飛熊入夢胡桃木餐桌椅', '', false); echo '</div><div class="bf-page-hero-overlay"></div><div class="bf-wrap bf-page-hero-copy"><span class="bf-kicker">FURNITURE / OUR WORKS</span><h1>家具</h1><p>從木材、結構到生活，<br>每件作品都有自己的故事。</p></div></section>';
+    echo '<section class="bf-page-hero bf-page-hero-photo" data-bfnd-carousel data-bfnd-interval="6000"><div class="bf-page-hero-image" data-bfnd-reserved-image="1">'; $hero_slides = bfnd_render_banner_images('furniture', 'bfnd_home_hero_id', 'assets/works/muyo/01.webp'); echo '</div><div class="bf-page-hero-overlay"></div>'; bfnd_render_banner_controls($hero_slides, '家具作品'); echo '<div class="bf-wrap bf-page-hero-copy"><span class="bf-kicker">FURNITURE / OUR WORKS</span><h1>家具</h1><p>從木材、結構到生活，<br>每件作品都有自己的故事。</p></div></section>';
     echo '<section class="bf-section bf-wrap"><div class="bf-catalog-toolbar"><div class="bf-filter-list" role="group" aria-label="家具分類"><button class="is-active" data-filter="all" type="button">全部</button>';
     $terms = get_terms(array('taxonomy' => 'bf_work_cat', 'hide_empty' => false));
     if (!is_wp_error($terms)) {
@@ -217,8 +241,8 @@ function bfnd_lifestyle_icon($kind) {
 
 function bfnd_render_lifestyle() {
     $hero = bfnd_brand_photo('bfnd_lifestyle_hero_id', 'full', 'assets/lifestyle/tray-01.webp');
-    echo '<section class="bf-lifestyle-hero"><div class="bf-lifestyle-hero-image">'; bfnd_image($hero, '晨露圓境托盤・木款', '', false);
-    echo '</div><div class="bf-lifestyle-hero-shade"></div><div class="bf-wrap bf-lifestyle-hero-copy"><h1>生活木作</h1><span>WOODEN LIVING</span><p>讓木作，走進每一天的生活。<br>從家具，到生活中的每一件小物，<br>我們相信，木頭不只是材料，更是一種陪伴日常的溫度。</p></div><small class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></section>';
+    echo '<section class="bf-lifestyle-hero" data-bfnd-carousel data-bfnd-interval="6000"><div class="bf-lifestyle-hero-image" data-bfnd-reserved-image="1">'; $hero_slides = bfnd_render_banner_images('lifestyle', 'bfnd_lifestyle_hero_id', 'assets/lifestyle/tray-01.webp');
+    echo '</div><div class="bf-lifestyle-hero-shade"></div>'; bfnd_render_banner_controls($hero_slides, '生活木作'); echo '<div class="bf-wrap bf-lifestyle-hero-copy"><h1>生活木作</h1><span>WOODEN LIVING</span><p>讓木作，走進每一天的生活。<br>從家具，到生活中的每一件小物，<br>我們相信，木頭不只是材料，更是一種陪伴日常的溫度。</p></div><small class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></section>';
     echo '<section class="bf-lifestyle-intro-grid"><div class="bf-lifestyle-intro-copy"><span class="bf-kicker">A LITTLE WOOD, A BETTER DAY</span><h2>生活木作的<br>可能性</h2><p>木作不只存在於大件家具，也能出現在餐桌、書桌、廚房、孩子的房間，甚至是旅途中的風景。我們持續探索木頭在生活中的各種可能，用手作的溫度，連結人與物、日常與自然。</p></div><div class="bf-lifestyle-intro-image">'; bfnd_image(bfnd_asset('assets/lifestyle/tray-01.webp'), '晨露圓境托盤・木款'); echo '<span data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></div></section>';
     echo '<section class="bf-lifestyle-directions bf-wrap"><div class="bf-center-head"><span class="bf-kicker">COMING DIRECTIONS</span><h2>未來將發展的系列方向</h2><p>從生活出發，讓木作走進更多日常場景。</p></div><div class="bf-lifestyle-direction-grid"><article><b aria-hidden="true">' . bfnd_lifestyle_icon('table') . '</b><h3>餐桌器物</h3><p>木盤・餐具・托盤<br>讓飲食時光更溫暖</p></article><article><b aria-hidden="true">' . bfnd_lifestyle_icon('home') . '</b><h3>居家小物</h3><p>燈具・時鐘・掛勾<br>生活裡的小小木作</p></article><article><b aria-hidden="true">' . bfnd_lifestyle_icon('storage') . '</b><h3>收納擺飾</h3><p>收納盒・書架・擺飾<br>有秩序的美感</p></article><article><b aria-hidden="true">' . bfnd_lifestyle_icon('culture') . '</b><h3>文化木作</h3><p>兒童木作・體驗延伸品<br>讓木作走進更多人群</p></article></div></section>';
     echo '<section class="bf-lifestyle-process"><div class="bf-wrap"><div class="bf-center-head"><span class="bf-kicker">OUR MAKING PROCESS</span><h2>製作中的生活木作</h2><p>從一塊木頭，慢慢成為生活的一部分。</p></div><div class="bf-lifestyle-process-grid">';
@@ -251,9 +275,11 @@ function bfnd_render_lifestyle_work($id) {
 
 function bfnd_render_school() {
     $hero = bfnd_brand_photo('bfnd_school_hero_id', 'full', 'assets/brand/real-lecture.webp');
-    echo '<section class="bf-school-hero"><div class="bf-school-hero-image">';
-    bfnd_image($hero, '木作學堂實際授課照片', '', false);
-    echo '</div><div class="bf-school-hero-shade"></div><div class="bf-school-hero-content bf-wrap"><span class="bf-kicker">WOODWORKING SCHOOL</span><h1>木作學堂</h1><p>從一堂課開始，<br>用雙手創造屬於自己的作品。</p><div class="bf-actions">';
+    echo '<section class="bf-school-hero" data-bfnd-carousel data-bfnd-interval="6000"><div class="bf-school-hero-image" data-bfnd-reserved-image="1">';
+    $hero_slides = bfnd_render_banner_images('school', 'bfnd_school_hero_id', 'assets/brand/real-lecture.webp');
+    echo '</div><div class="bf-school-hero-shade"></div>';
+    bfnd_render_banner_controls($hero_slides, '木作學堂');
+    echo '<div class="bf-school-hero-content bf-wrap"><span class="bf-kicker">WOODWORKING SCHOOL</span><h1>木作學堂</h1><p>從一堂課開始，<br>用雙手創造屬於自己的作品。</p><div class="bf-actions">';
     bfnd_button('實體課程', '#onsite-courses', true);
     echo '<a class="bf-button bf-button-light" href="#online-courses"><span>線上課程</span><span aria-hidden="true">↗</span></a></div></div><span class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></span></section>';
     echo '<div class="bf-values bf-wrap"><div><b>01</b><span>專業師資</span><small>來自實務現場的教學</small></div><div><b>02</b><span>完整設備</span><small>手工具、木工機械與 CNC</small></div><div><b>03</b><span>小班教學</span><small>實作為主，安全有保障</small></div><div><b>04</b><span>從興趣到創作</span><small>陪你完成自己的作品</small></div></div>';
@@ -377,7 +403,7 @@ function bfnd_render_story() {
 
 function bfnd_render_collaboration() {
     $hero = bfnd_brand_photo('bfnd_home_hero_id', 'full', 'assets/works/muyo/01.webp');
-    echo '<section class="bf-collab-hero"><div class="bf-collab-hero-image">'; bfnd_image($hero, '木韻 MUYO 胡桃木餐桌椅', '', false); echo '</div><div class="bf-collab-hero-copy bf-wrap"><span class="bf-kicker">COLLABORATION</span><h1>與木一起，<br>創造更好的空間。</h1><p>飛熊入夢以家具設計為核心，<br>結合木工技藝、數位製造與木工教育，<br>與企業、設計單位、學校及文化組織，<br>共同發展更美好的空間與生活。</p>'; bfnd_button('與我們談合作', '#inquiry'); echo '</div><small class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></section>';
+    echo '<section class="bf-collab-hero" data-bfnd-carousel data-bfnd-interval="6000"><div class="bf-collab-hero-image" data-bfnd-reserved-image="1">'; $hero_slides = bfnd_render_banner_images('collaboration', 'bfnd_home_hero_id', 'assets/works/muyo/01.webp'); echo '</div>'; bfnd_render_banner_controls($hero_slides, '合作提案'); echo '<div class="bf-collab-hero-copy bf-wrap"><span class="bf-kicker">COLLABORATION</span><h1>與木一起，<br>創造更好的空間。</h1><p>飛熊入夢以家具設計為核心，<br>結合木工技藝、數位製造與木工教育，<br>與企業、設計單位、學校及文化組織，<br>共同發展更美好的空間與生活。</p>'; bfnd_button('與我們談合作', '#inquiry'); echo '</div><small class="bf-school-disclosure" data-bfnd-reserved-text="1" hidden aria-hidden="true"></small></section>';
     echo '<section class="bf-collab-possibilities bf-wrap"><div><span class="bf-index">01</span><h2>我們可以怎麼合作？</h2><p>不同的空間，一樣的木作溫度。<br>從家具到教育，與你一起創造更多可能。</p></div><div class="bf-collab-possibilities-grid"><article><b aria-hidden="true">▰</b><h3>家具採購</h3><p>飛熊入夢<br>既有家具系列</p></article><article><b aria-hidden="true">⌂</b><h3>企業／空間合作</h3><p>辦公・商業・公共<br>及教育空間</p></article><article><b aria-hidden="true">♧</b><h3>永續合作</h3><p>材料・耐久設計<br>維修延壽・減少浪費</p></article><article><b aria-hidden="true">◇</b><h3>教育／文化合作</h3><p>木工教育・工藝體驗<br>文化及企業活動</p></article></div></section>';
     echo '<section class="bf-collab-design"><div class="bf-collab-design-image">'; bfnd_image(bfnd_asset('assets/works/ridge-table/01.webp'), '稜 RIDGE 實木餐桌'); echo '</div><div class="bf-collab-design-copy"><span class="bf-kicker">FROM OUR DESIGN TO YOUR SPACE</span><h2>從我們的設計，<br>走進你的空間。</h2><p>我們以飛熊入夢的設計語言與既有作品為基礎，依不同空間需求，在尺寸、木材與使用情境上進行適度調整，讓家具真正融入生活。</p></div><div class="bf-collab-design-image">'; bfnd_image(bfnd_asset('assets/works/muyo/01.webp'), '木韻 MUYO 胡桃木餐桌椅'); echo '</div></section>';
     echo '<section id="process" class="bf-collab-process bf-wrap"><div class="bf-collab-process-head"><span class="bf-index">03</span><h2>合作流程</h2><p>簡單透明，讓合作更順利。</p></div><ol class="bf-collab-process-list">';
