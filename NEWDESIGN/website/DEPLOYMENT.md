@@ -2,7 +2,15 @@
 
 初次上線日期：2026-09-18
 正式站：https://a1.haotaimaker.com/  
-正式站於 2026-10-05 即時確認外掛「飛熊入夢 NEWDESIGN 官網」`0.5.27` 持續啟用，主題已從 `1.3.24` 更新至 `1.3.25`。WordPress 後台回報主題成功更新；木作學堂 `/woodworking-school/` 回應 HTTP 200，管理員頁面可見完整方案「36 小時／優惠價 NT$ 15,800」。匿名訪客即時檢查未顯示仍為私密的 LEVEL 2、LEVEL 3 與完整方案。新課程 WooCommerce 商品、梯次及付款流程尚未建立或測試。
+正式站於 2026-10-05 即時確認外掛「飛熊入夢 NEWDESIGN 官網」`0.5.27` 持續啟用，主題已更新至 `1.3.26`。WordPress 後台回報主題成功更新；木作學堂 `/woodworking-school/` 回應 HTTP 200，管理員頁面可見完整方案「36 小時／優惠價 NT$ 15,800」。匿名訪客即時檢查未顯示仍為私密的 LEVEL 2、LEVEL 3 與完整方案。新課程 WooCommerce 商品、梯次及付款流程尚未建立或測試。
+
+## 2026-10-05 木作學堂課程卡詢問鈕高度修正（正式站已更新）
+
+- 正式站課程卡內的 CSS `.bf-course-card a{height:100%}` 同時命中主連結及詢問 CTA，導致按鈕被拉成卡片高度並溢出卡片。
+- 主題 CSS 將此規則限定為 `.bf-course-card a.bf-course-card-main`；詢問 CTA 按鈕回到 56px 高。主題版本由 `1.3.25` 升至 `1.3.26`，更新套件已由 WordPress 後台覆蓋安裝成功。
+- 即時頁面載入 `public/style.css?ver=1.3.26`。瀏覽器視窗寬 320／389／768／1440px 均無橫向溢位；所有卡片 CTA 計算高度為 56px 且位於卡片框內；可視畫面破圖數為 0。
+- 驗證：`npm run check`、`php -l NEWDESIGN/theme/bears-fantasyland/functions.php`、ZIP 版本與修正選擇器核對均通過。這是瀏覽器尺寸驗收，沒有代表真實手機硬體測試。
+- 回復 ZIP：`NEWDESIGN/theme/dist/bears-fantasyland-1.3.25-backup.zip`。此修正不涉及訂單、付款或物流設定。
 
 ## 2026-10-05 客戶正式課程路徑與費用（來源及正式站資料已更新）
 
