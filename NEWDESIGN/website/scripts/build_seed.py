@@ -129,7 +129,7 @@ course_catalog = [
         "slug": "sharpening", "title": "磨刀實戰班", "duration": "6 小時", "price": "3680",
         "level": "專項技能｜工具保養", "track": "specialist", "mode": "onsite",
         "summary": "學習磨刀基礎與進階技巧，讓工具回到順手狀態。",
-        "content": "磨刀實戰班為專項技能課程，從認識刀具、建立正確磨刀角度，到實作測試切削表現。",
+        "content": "磨刀實戰班為專項技能課程，從認識刀具、建立正確磨刀角度，到實際切削確認磨刀效果。",
         "audience": "適合希望保養木工工具並精進磨刀技巧的人。",
     },
     {
