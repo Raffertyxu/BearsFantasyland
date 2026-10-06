@@ -648,19 +648,19 @@ function bfnd_render_product_assurance() {
     echo '<ul class="bf-product-assurance"><li><a href="' . esc_url(bfnd_page_url('service')) . '"><span>購買、配送與售後說明</span><span aria-hidden="true">↗</span></a></li><li><a data-bf-product-inquiry href="' . esc_url(bfnd_product_inquiry_url(get_the_ID())) . '"><span>商品諮詢與客製需求</span><span aria-hidden="true">↗</span></a></li></ul>';
 }
 
-// Inquiry link for a product; site.js appends &variation= once a WooCommerce variation is chosen.
+// Inquiry link for a product; site.js appends &bf_variation= once a WooCommerce variation is chosen.
 function bfnd_product_inquiry_url($id) {
-    return add_query_arg('product', absint($id), bfnd_page_url('collaboration')) . '#inquiry';
+    return add_query_arg('bf_product', absint($id), bfnd_page_url('collaboration')) . '#inquiry';
 }
 
-// "我想詢問商品｜name（木種: 胡桃木）" plus the product URL, from ?product=&variation= on the inquiry page.
+// "我想詢問商品｜name（木種: 胡桃木）" plus the product URL, from ?bf_product=&bf_variation= on the inquiry page (plain product/variation are WordPress query vars and 404).
 // Only published, visible products and their own variations are accepted.
 function bfnd_inquiry_product_line() {
-    if (!function_exists('wc_get_product') || empty($_GET['product'])) { return ''; }
-    $product = wc_get_product(absint($_GET['product']));
+    if (!function_exists('wc_get_product') || empty($_GET['bf_product'])) { return ''; }
+    $product = wc_get_product(absint($_GET['bf_product']));
     if (!$product || $product->is_type('variation') || get_post_status($product->get_id()) !== 'publish' || !$product->is_visible()) { return ''; }
     $line = '我想詢問商品｜' . $product->get_name();
-    $variation = !empty($_GET['variation']) ? wc_get_product(absint($_GET['variation'])) : null;
+    $variation = !empty($_GET['bf_variation']) ? wc_get_product(absint($_GET['bf_variation'])) : null;
     if ($variation && $variation->is_type('variation') && $variation->get_parent_id() === $product->get_id()) {
         $spec = trim(html_entity_decode(wp_strip_all_tags(wc_get_formatted_variation($variation, true, true)), ENT_QUOTES, 'UTF-8'));
         if ($spec !== '') { $line .= '（' . $spec . '）'; }

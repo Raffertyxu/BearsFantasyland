@@ -289,7 +289,7 @@
   if (!links.length || !$) return;
   const setVariation = (id) => links.forEach((link) => {
     const url = new URL(link.href, window.location.href);
-    if (id) url.searchParams.set('variation', id); else url.searchParams.delete('variation');
+    if (id) url.searchParams.set('bf_variation', id); else url.searchParams.delete('bf_variation');
     link.href = url.toString();
   });
   $('form.variations_form')
