@@ -1,7 +1,10 @@
+/* Scale unit (design.md 2026-10-06): 1px up to the 1920px reference design, proportional above it. Write every size as calc(N*var(--bfnd-px)); never raw px. */
+:root{--bfnd-px:1px}
+@media (min-width:1921px){:root{--bfnd-px:max(1px,min(calc(100vw / 1920),calc(100vh / 940)))}}
 /* Quiet, useful motion for navigation, actions, and visual feedback. */
 body.bfnd-body :where(a, button, input, select, textarea, summary):focus-visible {
-  outline: 2px solid #775640;
-  outline-offset: 3px;
+  outline: calc(2*var(--bfnd-px)) solid #775640;
+  outline-offset: calc(3*var(--bfnd-px));
 }
 
 body.bfnd-body :is(.bf-button, .bf-course-card-action, .bf-filter-list button,
@@ -15,7 +18,7 @@ body.bfnd-body :is(.bf-button, .bf-course-card-action, .bf-filter-list button,
 body.bfnd-body :is(.bf-button, .bf-course-card-action, .bf-filter-list button,
   .bf-tabs button, .bf-menu-button, .bf-nav-school-toggle, button,
   input[type="submit"], .button):active {
-  transform: translateY(1px) scale(.99);
+  transform: translateY(calc(1*var(--bfnd-px))) scale(.99);
 }
 
 body.bfnd-body .bf-filter-list button::after {
@@ -29,8 +32,8 @@ body.bfnd-body .bf-filter-list button.is-active::after {
 }
 
 body.bfnd-body .bf-nav-school-toggle {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: calc(44*var(--bfnd-px));
+  min-height: calc(44*var(--bfnd-px));
 }
 
 @media (min-width: 1101px) {
@@ -39,7 +42,7 @@ body.bfnd-body .bf-nav-school-toggle {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, 8px);
+    transform: translate(-50%, calc(8*var(--bfnd-px)));
     transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
   }
 
@@ -90,7 +93,7 @@ body.bfnd-body .bf-image-dialog[open]::backdrop {
     visibility: hidden;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-8px);
+    transform: translateY(calc(-8*var(--bfnd-px)));
     transition: opacity 180ms ease, transform 180ms ease, visibility 180ms;
   }
 
@@ -122,7 +125,7 @@ body.bfnd-body .bf-image-dialog[open]::backdrop {
 
 @media (hover: hover) and (pointer: fine) {
   body.bfnd-body .bf-work-card:is(:hover, :focus-visible) .bf-card-line span {
-    transform: translateX(3px);
+    transform: translateX(calc(3*var(--bfnd-px)));
   }
 
   body.bfnd-body .bf-work-card .bf-card-line span {
@@ -131,13 +134,13 @@ body.bfnd-body .bf-image-dialog[open]::backdrop {
   }
 
   body.bfnd-body .bf-footer-social a:hover {
-    transform: translateY(-2px);
+    transform: translateY(calc(-2*var(--bfnd-px)));
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   @keyframes bf-hero-arrive {
-    from { opacity: 0; transform: translateY(9px); }
+    from { opacity: 0; transform: translateY(calc(9*var(--bfnd-px))); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -192,21 +195,21 @@ body.bfnd-body .bf-footer-social {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: calc(8*var(--bfnd-px));
   min-width: 0;
 }
 
 body.bfnd-body .bf-footer-social > a {
   box-sizing: border-box;
   display: inline-flex;
-  flex: 0 0 44px;
+  flex: 0 0 calc(44*var(--bfnd-px));
   align-items: center;
   justify-content: center;
-  width: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: calc(44*var(--bfnd-px));
+  min-width: calc(44*var(--bfnd-px));
+  min-height: calc(44*var(--bfnd-px));
   padding: 0;
-  border: 1px solid transparent;
+  border: calc(1*var(--bfnd-px)) solid transparent;
   background: transparent;
   color: var(--bf-ink);
   line-height: 1;
@@ -217,12 +220,12 @@ body.bfnd-body .bf-footer-social > a {
 
 body.bfnd-body .bf-footer-social > a:not(.bf-footer-line) svg {
   display: block;
-  width: 24px;
-  height: 24px;
+  width: calc(24*var(--bfnd-px));
+  height: calc(24*var(--bfnd-px));
 }
 
 body.bfnd-body .bf-footer-social > a:not(.bf-footer-line):hover {
-  transform: translateY(-2px);
+  transform: translateY(calc(-2*var(--bfnd-px)));
   border-color: var(--bf-rule);
   background: var(--bf-warm);
   color: var(--bf-wood);
@@ -231,43 +234,43 @@ body.bfnd-body .bf-footer-social > a:not(.bf-footer-line):hover {
 body.bfnd-body .bf-footer-social > .bf-footer-line {
   flex: 0 0 auto;
   width: auto;
-  gap: 8px;
-  min-width: 44px;
-  padding: 0 12px;
+  gap: calc(8*var(--bfnd-px));
+  min-width: calc(44*var(--bfnd-px));
+  padding: 0 calc(12*var(--bfnd-px));
   border-color: var(--bf-line-green);
   background: var(--bf-white);
   color: var(--bf-line-ink);
   font-family: var(--bf-sans);
-  font-size: 12px;
+  font-size: calc(12*var(--bfnd-px));
   font-weight: 700;
   letter-spacing: .02em;
   white-space: nowrap;
 }
 
 body.bfnd-body .bf-footer-social > .bf-footer-line img {
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  border-radius: 2px;
+  flex: 0 0 calc(22*var(--bfnd-px));
+  width: calc(22*var(--bfnd-px));
+  height: calc(22*var(--bfnd-px));
+  border-radius: calc(2*var(--bfnd-px));
   object-fit: contain;
 }
 
 body.bfnd-body .bf-footer-line .bf-social-arrow {
   display: inline-block;
-  font-size: 14px;
+  font-size: calc(14*var(--bfnd-px));
   transition: transform 180ms ease;
 }
 
 body.bfnd-body .bf-footer-social > .bf-footer-line:hover {
-  transform: translateY(-2px);
+  transform: translateY(calc(-2*var(--bfnd-px)));
   border-color: var(--bf-line-deep);
   background: var(--bf-line-deep);
-  box-shadow: 0 5px 14px rgb(8 122 58 / 22%);
+  box-shadow: 0 calc(5*var(--bfnd-px)) calc(14*var(--bfnd-px)) rgb(8 122 58 / 22%);
   color: var(--bf-white);
 }
 
 body.bfnd-body .bf-footer-line:hover .bf-social-arrow {
-  transform: translate(2px, -2px);
+  transform: translate(calc(2*var(--bfnd-px)), calc(-2*var(--bfnd-px)));
 }
 
 body.bfnd-body .bf-footer-social > a:active {
@@ -280,12 +283,12 @@ body.bfnd-body .bf-footer-social > .bf-footer-line:focus-visible {
 
 @media (max-width: 760px) {
   body.bfnd-body .bf-footer-social {
-    gap: 6px;
+    gap: calc(6*var(--bfnd-px));
   }
 
   body.bfnd-body .bf-footer-social > .bf-footer-line {
-    gap: 7px;
-    padding-inline: 10px;
+    gap: calc(7*var(--bfnd-px));
+    padding-inline: calc(10*var(--bfnd-px));
   }
 }
 
@@ -297,25 +300,25 @@ body.bfnd-body .bf-footer-social > .bf-footer-line:focus-visible {
 }
 
 body.bfnd-body .bf-brand-film {
-  padding-block: clamp(56px, 8vw, 112px);
-  border-block: 1px solid var(--bf-rule);
+  padding-block: clamp(calc(56*var(--bfnd-px)), 8vw, calc(112*var(--bfnd-px)));
+  border-block: calc(1*var(--bfnd-px)) solid var(--bf-rule);
   background: var(--bf-warm);
 }
 
 body.bfnd-body .bf-brand-film-inner {
   display: grid;
-  grid-template-columns: minmax(190px, .62fr) minmax(0, 1.38fr);
+  grid-template-columns: minmax(calc(190*var(--bfnd-px)), .62fr) minmax(0, 1.38fr);
   align-items: center;
-  gap: clamp(28px, 6vw, 92px);
+  gap: clamp(calc(28*var(--bfnd-px)), 6vw, calc(92*var(--bfnd-px)));
 }
 
 body.bfnd-body .bf-brand-film-copy h2 {
-  margin: 13px 0 12px;
-  font-size: clamp(31px, 3.2vw, 46px);
+  margin: calc(13*var(--bfnd-px)) 0 calc(12*var(--bfnd-px));
+  font-size: clamp(calc(31*var(--bfnd-px)), 3.2vw, calc(46*var(--bfnd-px)));
 }
 
 body.bfnd-body .bf-brand-film-copy p {
-  max-width: 300px;
+  max-width: calc(300*var(--bfnd-px));
   margin: 0;
   line-height: 1.9;
 }
@@ -325,7 +328,7 @@ body.bfnd-body .bf-brand-film-frame {
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #211a15;
-  box-shadow: 0 18px 42px rgb(52 43 37 / 13%);
+  box-shadow: 0 calc(18*var(--bfnd-px)) calc(42*var(--bfnd-px)) rgb(52 43 37 / 13%);
 }
 
 body.bfnd-body .bf-brand-film-frame > img,
@@ -350,7 +353,7 @@ body.bfnd-body .bf-brand-film-play {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: calc(15*var(--bfnd-px));
   color: #fff;
   background: linear-gradient(0deg, rgb(24 18 14 / 43%), transparent 58%);
   text-decoration: none;
@@ -359,34 +362,34 @@ body.bfnd-body .bf-brand-film-play {
 body.bfnd-body .bf-brand-film-play-icon {
   position: relative;
   display: grid;
-  width: 72px;
-  height: 72px;
+  width: calc(72*var(--bfnd-px));
+  height: calc(72*var(--bfnd-px));
   place-items: center;
-  border: 1px solid rgb(255 255 255 / 88%);
+  border: calc(1*var(--bfnd-px)) solid rgb(255 255 255 / 88%);
   border-radius: 50%;
   background: rgb(52 43 37 / 47%);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(calc(4*var(--bfnd-px)));
   transition: transform 220ms ease, background-color 220ms ease;
 }
 
 body.bfnd-body .bf-brand-film-play-icon::after {
   position: absolute;
-  inset: -9px;
-  border: 1px solid rgb(255 255 255 / 70%);
+  inset: calc(-9*var(--bfnd-px));
+  border: calc(1*var(--bfnd-px)) solid rgb(255 255 255 / 70%);
   border-radius: inherit;
   content: "";
   animation: bf-brand-film-pulse 1.8s ease-out .6s 1 both;
 }
 
 body.bfnd-body .bf-brand-film-play-icon svg {
-  width: 25px;
-  height: 25px;
+  width: calc(25*var(--bfnd-px));
+  height: calc(25*var(--bfnd-px));
   fill: currentColor;
-  transform: translateX(2px);
+  transform: translateX(calc(2*var(--bfnd-px)));
 }
 
 body.bfnd-body .bf-brand-film-play-label {
-  font-size: 13px;
+  font-size: calc(13*var(--bfnd-px));
   font-weight: 600;
   letter-spacing: .12em;
 }
@@ -403,8 +406,8 @@ body.bfnd-body .bf-brand-film-play:focus-visible .bf-brand-film-play-icon {
 }
 
 body.bfnd-body .bf-brand-film-play:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: -7px;
+  outline: calc(3*var(--bfnd-px)) solid #fff;
+  outline-offset: calc(-7*var(--bfnd-px));
 }
 
 @keyframes bf-brand-film-pulse {
@@ -414,21 +417,21 @@ body.bfnd-body .bf-brand-film-play:focus-visible {
 
 @media (max-width: 760px) {
   body.bfnd-body .bf-brand-film {
-    padding-block: 54px;
+    padding-block: calc(54*var(--bfnd-px));
   }
 
   body.bfnd-body .bf-brand-film-inner {
     grid-template-columns: minmax(0, 1fr);
-    gap: 22px;
+    gap: calc(22*var(--bfnd-px));
   }
 
   body.bfnd-body .bf-brand-film-copy h2 {
-    font-size: 34px;
+    font-size: calc(34*var(--bfnd-px));
   }
 
   body.bfnd-body .bf-brand-film-play-icon {
-    width: 60px;
-    height: 60px;
+    width: calc(60*var(--bfnd-px));
+    height: calc(60*var(--bfnd-px));
   }
 }
 

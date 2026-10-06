@@ -1,4 +1,28 @@
 (() => {
+  // Break Chinese headings between phrases instead of mid-phrase: each run of
+  // text ending in ，、：；。！？ (and any trailing remainder) becomes an
+  // inline-block .bf-phrase. A phrase wider than the heading still wraps inside
+  // its own box. Only direct text nodes are touched; child elements stay as-is.
+  const phrasePattern = /[^，、：；。！？]*[，、：；。！？]+|[^，、：；。！？]+/g;
+  document.querySelectorAll('#bf-main :is(h1, h2, h3)').forEach((heading) => {
+    if (heading.dataset.bfPhrased || heading.hasAttribute('data-no-phrase')) return;
+    heading.dataset.bfPhrased = '1';
+    Array.from(heading.childNodes).forEach((node) => {
+      if (node.nodeType !== Node.TEXT_NODE) return;
+      const parts = node.nodeValue.match(phrasePattern) || [];
+      if (parts.filter((part) => part.trim()).length < 2) return;
+      const fragment = document.createDocumentFragment();
+      parts.forEach((part) => {
+        if (!part.trim()) { fragment.append(part); return; }
+        const span = document.createElement('span');
+        span.className = 'bf-phrase';
+        span.textContent = part;
+        fragment.append(span);
+      });
+      node.replaceWith(fragment);
+    });
+  });
+
   document.addEventListener('click', (event) => {
     const trigger = event.target.closest('[data-bf-youtube-play]');
     if (!trigger) return;

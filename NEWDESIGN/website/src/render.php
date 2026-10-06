@@ -81,12 +81,20 @@ function bfnd_section_head($en, $title, $link = '', $link_label = '') {
     if ($link) { echo '<a class="bf-text-link" href="' . esc_url($link) . '">' . bfnd_e($link_label) . ' <span aria-hidden="true">↗</span></a>'; }
     echo '</div>';
 }
+if (!function_exists('bfnd_join_parts')) {
+    function bfnd_join_parts($parts, $separator) {
+        $parts = array_filter(array_map(function ($part) { return trim((string) $part); }, (array) $parts), 'strlen');
+        return implode($separator, $parts);
+    }
+}
 function bfnd_work_card($post) {
     $id = $post->ID;
     $series = wp_get_post_terms($id, 'bf_series', array('fields' => 'names'));
+    // Join only the parts that exist so an empty field never leaves a dangling separator.
+    $meta = bfnd_join_parts(array($series ? $series[0] : '', bfnd_meta($id, 'type')), ' / ');
     echo '<a class="bf-work-card" href="' . esc_url(get_permalink($id)) . '"><div class="bf-work-image">';
-    bfnd_image(bfnd_work_image($id, 'large'), get_the_title($id) . '・' . bfnd_meta($id, 'type') . '・' . bfnd_public_material($id));
-    echo '</div><div class="bf-card-line"><h3>' . bfnd_e(get_the_title($id)) . '</h3><span aria-hidden="true">↗</span></div><p>' . bfnd_e(bfnd_meta($id, 'english')) . '</p><small>' . bfnd_e($series ? $series[0] : '') . ' / ' . bfnd_e(bfnd_meta($id, 'type')) . '</small></a>';
+    bfnd_image(bfnd_work_image($id, 'large'), bfnd_join_parts(array(get_the_title($id), bfnd_meta($id, 'type'), bfnd_public_material($id)), '・'));
+    echo '</div><div class="bf-card-line"><h3>' . bfnd_e(get_the_title($id)) . '</h3><span aria-hidden="true">↗</span></div><p>' . bfnd_e(bfnd_meta($id, 'english')) . '</p>' . ($meta !== '' ? '<small>' . bfnd_e($meta) . '</small>' : '') . '</a>';
 }
 function bfnd_public_material($id) {
     $material = trim((string) bfnd_meta($id, 'material'));

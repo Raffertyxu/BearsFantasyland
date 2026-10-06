@@ -3,3 +3,7 @@
 .DS_Store
 **/.DS_Store
 
+
+# Local QA tooling
+NEWDESIGN/website/node_modules/
+NEWDESIGN/website/qa-screenshots/

@@ -1,3 +1,6 @@
+/* Scale unit (design.md 2026-10-06): 1px up to the 1920px reference design, proportional above it. Write every size as calc(N*var(--bfnd-px)); never raw px. */
+:root{--bfnd-px:1px}
+@media (min-width:1921px){:root{--bfnd-px:max(1px,min(calc(100vw / 1920),calc(100vh / 940)))}}
 /* Inquiry-only material and size choices; shared by the theme and plugin fallback. */
 body.bfnd-body .bf-work-choice-group {
   min-width: 0;
@@ -13,7 +16,7 @@ body.bfnd-body .bf-spec-grid dd {
 body.bfnd-body .bf-work-choice-list {
   display: flex;
   flex-wrap: wrap;
-  gap: .625rem;
+  gap: calc(10*var(--bfnd-px));
   min-width: 0;
 }
 
@@ -23,14 +26,14 @@ body.bfnd-body .bf-work-choice {
   min-width: 0;
   margin: 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(14*var(--bfnd-px));
   font-weight: 400;
 }
 
 body.bfnd-body .bf-work-choice input {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: calc(1*var(--bfnd-px));
+  height: calc(1*var(--bfnd-px));
   margin: 0;
   opacity: 0;
   pointer-events: none;
@@ -40,10 +43,10 @@ body.bfnd-body .bf-work-choice > span {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 46px;
+  min-height: calc(46*var(--bfnd-px));
   max-width: 100%;
-  padding: .625rem 1rem;
-  border: 1px solid var(--bf-rule);
+  padding: calc(10*var(--bfnd-px)) calc(16*var(--bfnd-px));
+  border: calc(1*var(--bfnd-px)) solid var(--bf-rule);
   background: var(--bf-white);
   color: var(--bf-ink);
   line-height: 1.45;
@@ -59,17 +62,17 @@ body.bfnd-body .bf-work-choice > span {
 body.bfnd-body .bf-work-choice input:checked + span {
   border-color: var(--bf-wood);
   background: var(--bf-warm);
-  box-shadow: inset 0 -2px 0 var(--bf-wood);
+  box-shadow: inset 0 calc(-2*var(--bfnd-px)) 0 var(--bf-wood);
   color: var(--bf-ink);
 }
 
 body.bfnd-body .bf-work-choice input:focus-visible + span {
-  outline: 2px solid var(--bf-focus);
-  outline-offset: 2px;
+  outline: calc(2*var(--bfnd-px)) solid var(--bf-focus);
+  outline-offset: calc(2*var(--bfnd-px));
 }
 
 body.bfnd-body .bf-work-choice input:active + span {
-  transform: translateY(1px);
+  transform: translateY(calc(1*var(--bfnd-px)));
 }
 
 body.bfnd-body .bf-work-choice input:disabled + span {
@@ -79,10 +82,10 @@ body.bfnd-body .bf-work-choice input:disabled + span {
 
 body.bfnd-body .bf-work-choice-feedback {
   min-height: 1lh;
-  margin: .5rem 0 0;
+  margin: calc(8*var(--bfnd-px)) 0 0;
   color: var(--bf-muted);
   font-family: var(--bf-sans);
-  font-size: 12px;
+  font-size: calc(12*var(--bfnd-px));
   line-height: 1.6;
 }
 
@@ -103,7 +106,7 @@ body.bfnd-body .bf-work-choice-group.is-error .bf-work-choice > span {
 body.bfnd-body .bf-inquiry-option-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(.875rem, 2vw, 1.5rem);
+  gap: clamp(calc(14*var(--bfnd-px)), 2vw, calc(24*var(--bfnd-px)));
   min-width: 0;
 }
 
@@ -114,9 +117,9 @@ body.bfnd-body .bf-form-shell .bf-inquiry-option-field {
 
 body.bfnd-body .bf-inquiry-option-field > select {
   min-width: 0;
-  border-width: 1px;
-  outline: 2px solid transparent;
-  outline-offset: 1px;
+  border-width: calc(1*var(--bfnd-px));
+  outline: calc(2*var(--bfnd-px)) solid transparent;
+  outline-offset: calc(1*var(--bfnd-px));
   transition: background-color var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1)),
     box-shadow var(--bf-motion-fast, 160ms) var(--bf-ease, cubic-bezier(.2, .7, .2, 1));
 }
@@ -137,9 +140,9 @@ body.bfnd-body .bf-inquiry-option-field > select:disabled {
 body.bfnd-body .bf-form-shell .bf-inquiry-option-field > small {
   display: block;
   min-height: 1lh;
-  margin-top: .375rem;
+  margin-top: calc(6*var(--bfnd-px));
   color: var(--bf-muted);
-  font-size: 12px;
+  font-size: calc(12*var(--bfnd-px));
   font-weight: 400;
   line-height: 1.55;
 }
@@ -172,8 +175,8 @@ body.bfnd-body [data-bf-work-inquiry][aria-busy="true"] {
     grid-template-columns: 1fr;
   }
   body.bfnd-body .bf-work-choice > span {
-    min-height: 48px;
-    padding-inline: .875rem;
+    min-height: calc(48*var(--bfnd-px));
+    padding-inline: calc(14*var(--bfnd-px));
   }
 }
 
