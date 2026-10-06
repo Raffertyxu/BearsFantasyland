@@ -668,7 +668,7 @@ function bfnd_inquiry_product_line() {
         $spec = trim(html_entity_decode(wp_strip_all_tags(wc_get_formatted_variation($variation, true, true)), ENT_QUOTES, 'UTF-8'));
         if ($spec !== '') { $line .= '（' . $spec . '）'; }
     }
-    return $line . "\n商品頁：" . get_permalink($product->get_id());
+    return $line . "\n商品頁：" . rawurldecode(get_permalink($product->get_id()));
 }
 
 // Visible WooCommerce attributes plus dimensions/weight, as label => value pairs.

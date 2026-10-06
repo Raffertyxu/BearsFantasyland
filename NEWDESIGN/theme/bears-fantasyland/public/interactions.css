@@ -445,3 +445,28 @@ body.bfnd-body .bf-brand-film-play:focus-visible {
     animation: none;
   }
 }
+
+/* Readability (CONTRAST-AUDIT-2026-10-06.md): every fix below reaches WCAG AA.
+   body.bfnd-body prefixes are required: plain class rules lose to body.bfnd-body p / a
+   and the footer LINE colors also lose to the WordPress 額外 CSS block. */
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > a.bf-footer-line{color:var(--bf-line-ink)}
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > a.bf-footer-line:hover{color:var(--bf-white)}
+body.bfnd-body .bf-index,body.bfnd-body .bf-story-number{color:var(--bf-wood)}
+body.bfnd-body .bf-school-cta{position:relative}
+body.bfnd-body .bf-school-cta::before{content:'';position:absolute;inset:0;background:rgba(36,24,13,.35)}
+body.bfnd-body .bf-school-cta .bf-wrap{position:relative}
+body.bfnd-body .bf-school-cta p{color:var(--bf-white)}
+body.bfnd-body .bf-vertical-note{background:rgba(26,18,13,.78);padding:calc(12*var(--bfnd-px)) calc(10*var(--bfnd-px));width:max-content;max-width:none}
+body.bfnd-body .bf-home-hero .bf-kicker,body.bfnd-body .bf-page-hero .bf-kicker,body.bfnd-body .bf-promo-copy .bf-kicker{color:var(--bf-white)}
+body.bfnd-body .bf-home-hero-shade{background:linear-gradient(90deg,rgba(26,18,13,.78) 0%,rgba(26,18,13,.62) 50%,rgba(26,18,13,.2) 100%)}
+body.bfnd-body .bf-page-hero-overlay{background:linear-gradient(90deg,#1d140dcc,#1d140d80 80%)}
+body.bfnd-body .bf-promo-image img{filter:brightness(.55)}
+body.bfnd-body .bf-manifesto:before{background:linear-gradient(90deg,#170e09b3 0%,#170e09a6 55%,#170e09b3 100%)}
+body.bfnd-body .bf-manifesto-inner>span{color:var(--bf-white)}
+body.bfnd-body .bf-collab-hero p{color:var(--bf-ink)}
+body.bfnd-body .bf-collab-hero .bf-button:hover{background:var(--bf-white)}
+body.bfnd-body .bf-home-hero .bf-actions .bf-button:first-child:hover{background:var(--bf-white);color:var(--bf-ink)!important}
+body.bfnd-body .bf-direct-contact-row>a{color:var(--bf-wood)}
+body.bfnd-body .bf-direct-contact-row>a:hover{color:var(--bf-ink)}
+body.bfnd-body .bf-form-shell input::placeholder,body.bfnd-body .bf-form-shell textarea::placeholder{color:var(--bf-muted);opacity:1}
+@media (max-width:768px){body.bfnd-body .bf-home-hero-shade{background:rgba(26,18,13,.68)}}
