@@ -48,6 +48,17 @@ function bfnd_page_url($key) {
     return $page ? get_permalink($page) : home_url('/');
 }
 
+/** One-time data migrations run on an administrator's admin request, never on visitor requests. */
+function bfnd_run_pending_migrations() {
+    if (!current_user_can('manage_options') || wp_doing_ajax()) { return; }
+    bfnd_migrate_page_slugs();
+    bfnd_migrate_native_journal_categories();
+    bfnd_migrate_course_editor_fields();
+    bfnd_migrate_course_catalog_v2();
+    bfnd_migrate_banner_carousels();
+    bfnd_migrate_meeting_product_categories();
+}
+
 function bfnd_migrate_page_slugs() {
     if (get_option('bfnd_clean_slugs_v1')) { return; }
     bfnd_create_preview_pages();
@@ -151,7 +162,7 @@ function bfnd_gallery($post_id) {
 
 function bfnd_work_query($args = array()) {
     return new WP_Query(array_merge(array(
-        'post_type' => 'bf_work', 'post_status' => empty($GLOBALS['bfnd_public_content_render']) && current_user_can('edit_posts') ? array('publish', 'private') : 'publish',
+        'post_type' => 'bf_work', 'post_status' => empty($GLOBALS['bfnd_public_content_render']) && current_user_can('read_private_posts') ? array('publish', 'private') : 'publish',
         'posts_per_page' => -1,
     ), $args));
 }

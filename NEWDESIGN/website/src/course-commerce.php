@@ -182,6 +182,11 @@ function bfnd_send_course_access_for_order($order_id, $force = false) {
         if ($force) { $order->add_order_note('線上課程連結尚未寄送：訂單尚未完成付款。'); }
         return;
     }
+    // Offline methods reach "processing" before money arrives; staff confirm and resend manually.
+    if (!$force && in_array($order->get_payment_method(), array('cod', 'bacs', 'cheque'), true)) {
+        $order->add_order_note('線上課程連結未自動寄送：此付款方式需人工確認入帳，確認後請使用「重新寄送線上課程連結」訂單動作。');
+        return;
+    }
 
     $recipient = sanitize_email($order->get_billing_email());
     if (!$recipient || !is_email($recipient)) {

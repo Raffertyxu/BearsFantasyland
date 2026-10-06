@@ -175,7 +175,6 @@ function bfnd_import_page() {
         echo '<input type="hidden" name="action" value="bfnd_import"><input type="hidden" name="step" value="' . esc_attr($step) . '">';
         wp_nonce_field('bfnd_import_' . $step);
         echo '<button class="button button-primary" type="submit">' . ($step ? '繼續匯入' : '開始匯入') . '</button></form>';
-        if (!empty($_GET['run'])) { echo '<script>document.getElementById("bfnd-import-form").submit();</script>'; }
     }
     $ready = bfnd_launch_readiness();
     echo '<hr><h2>發布新版網站</h2>';
@@ -238,7 +237,7 @@ function bfnd_import_action() {
     elseif ($step === count($data['works'])) { bfnd_import_lifestyle($data['lifestyle']); }
     elseif ($step < count($data['works']) + 1 + count($data['courses'])) { bfnd_import_course($data['courses'][$step - count($data['works']) - 1]); }
     elseif ($step === count($data['works']) + 1 + count($data['courses'])) { bfnd_import_brand_image(); }
-    wp_safe_redirect(admin_url('tools.php?page=bfnd-import&step=' . ($step + 1) . '&run=1'));
+    wp_safe_redirect(admin_url('tools.php?page=bfnd-import&step=' . ($step + 1)));
     exit;
 }
 

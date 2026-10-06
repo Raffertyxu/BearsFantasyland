@@ -51,6 +51,7 @@ function bfnd_page_url($s) { return '/preview.php?page=' . rawurlencode($s); }
 function bfnd_shop_url() { return bfnd_page_url('shop'); }
 function get_post_meta($id, $key, $single = true) { global $preview_posts; $p = $preview_posts[$id] ?? null; if (!$p) return ''; $k = substr($key, 6); return $p->data[$k] ?? ''; }
 function get_post_type($id) { global $preview_posts; return $preview_posts[$id]->post_type ?? ''; }
+function get_post_status($id) { global $preview_posts; return isset($preview_posts[$id]) ? ($preview_posts[$id]->post_status ?? 'publish') : false; }
 function get_the_title($post) { global $preview_posts; return is_object($post) ? $post->post_title : ($preview_posts[$post]->post_title ?? ''); }
 function get_the_excerpt($post) { global $preview_posts; return is_object($post) ? $post->post_excerpt : ($preview_posts[$post]->post_excerpt ?? ''); }
 function get_post_field($field, $id) { global $preview_posts; return $preview_posts[$id]->$field ?? ''; }

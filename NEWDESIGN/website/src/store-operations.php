@@ -58,7 +58,6 @@ function bfnd_migrate_meeting_product_categories() {
     if (is_wp_error($assigned_tool) || $assigned_tool === false) { return; }
     update_option('bfnd_meeting_product_categories_v1', 1, false);
 }
-add_action('init', 'bfnd_migrate_meeting_product_categories', 30);
 
 function bfnd_store_settings_menu() {
     if (!function_exists('WC')) { return; }
@@ -72,6 +71,7 @@ function bfnd_register_store_settings() {
     add_settings_field('bfnd_pickup_address', '自取地址與取貨說明', 'bfnd_pickup_address_field', 'bfnd-store-settings', 'bfnd_pickup_section');
 }
 add_action('admin_init', 'bfnd_register_store_settings');
+add_filter('option_page_capability_bfnd_store_settings', function () { return 'manage_woocommerce'; });
 
 function bfnd_sanitize_pickup_address($value) {
     $value = sanitize_textarea_field((string) $value);

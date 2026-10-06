@@ -362,7 +362,7 @@ function bfnd_render_school() {
     echo '<div class="bf-values bf-wrap"><div><b>01</b><span>專業師資</span><small>來自實務現場的教學</small></div><div><b>02</b><span>完整設備</span><small>手工具、木工機械與 CNC</small></div><div><b>03</b><span>小班教學</span><small>實作為主，安全有保障</small></div><div><b>04</b><span>從興趣到創作</span><small>陪你完成自己的作品</small></div></div>';
     echo '<section class="bf-learning-path bf-wrap" aria-labelledby="bf-learning-path-title"><div class="bf-learning-path-heading"><span class="bf-kicker">LEARNING PATH</span><h2 id="bf-learning-path-title">木作學習路徑</h2></div><ol class="bf-learning-path-steps"><li><span>LEVEL 1</span><strong>基礎入門</strong></li><li><span>LEVEL 2</span><strong>實作養成</strong></li><li><span>LEVEL 3</span><strong>自主製作</strong></li><li><span>36 HOURS</span><strong>完整方案</strong><small>優惠價 NT$ 15,800</small></li></ol></section>';
     echo '<section class="bf-section bf-wrap bf-school-courses" id="onsite-courses"><div class="bf-tab-head">'; bfnd_section_head('LEARN BY MAKING', '實體課程', '#online-courses', '查看線上課程'); echo '</div>';
-    $course_statuses = empty($GLOBALS['bfnd_public_content_render']) && current_user_can('edit_posts') ? array('publish', 'private') : 'publish';
+    $course_statuses = empty($GLOBALS['bfnd_public_content_render']) && current_user_can('read_private_posts') ? array('publish', 'private') : 'publish';
     $courses = get_posts(array('post_type' => 'bf_course', 'post_status' => $course_statuses, 'numberposts' => -1, 'orderby' => 'menu_order', 'order' => 'ASC'));
     echo '<div class="bf-course-grid" data-course-group="onsite">'; foreach ($courses as $course) { if (bfnd_meta($course->ID, 'mode') !== 'online' && bfnd_course_track($course->ID) !== 'specialist') { bfnd_course_card($course); } } echo '</div></section>';
     $specialist_courses = array_filter($courses, function ($course) { return bfnd_meta($course->ID, 'mode') !== 'online' && bfnd_course_track($course->ID) === 'specialist'; });
@@ -507,11 +507,11 @@ function bfnd_render_collaboration() {
 
 function bfnd_render_inquiry_form() {
     $work_id = isset($_GET['work']) ? absint($_GET['work']) : 0;
-    if (!$work_id || get_post_type($work_id) !== 'bf_work') { $work_id = 0; }
+    if (!$work_id || get_post_type($work_id) !== 'bf_work' || get_post_status($work_id) !== 'publish') { $work_id = 0; }
     $selected_material = bfnd_requested_work_option($work_id, 'material');
     $selected_size = bfnd_requested_work_option($work_id, 'size');
     $course_id = isset($_GET['course']) ? absint($_GET['course']) : 0;
-    $course_title = $course_id && get_post_type($course_id) === 'bf_course' ? get_the_title($course_id) : '';
+    $course_title = $course_id && get_post_type($course_id) === 'bf_course' && get_post_status($course_id) === 'publish' ? get_the_title($course_id) : '';
     $online_interest = isset($_GET['interest']) && sanitize_key(wp_unslash($_GET['interest'])) === 'online-course';
     echo '<section id="inquiry" class="bf-inquiry-section"><div class="bf-wrap bf-inquiry-grid"><div><span class="bf-kicker">START A CONVERSATION</span><h2>聊聊你的想法。</h2><p>告訴我們你正在尋找什麼，我們會從材質、尺寸與使用情境，與你一起找到合適的木作方式。</p><div class="bf-direct-contact" role="group" aria-label="直接聯絡方式"><p class="bf-direct-contact-row"><span>電話</span><a href="tel:+886424616373">04-24616373</a></p><p class="bf-direct-contact-row"><span>手機</span><a href="tel:+886921747056">0921 747 056</a></p><p class="bf-direct-contact-row"><span>Email</span><a href="mailto:bearlovearth@gmail.com">bearlovearth@gmail.com</a></p><p class="bf-direct-contact-row"><span>LINE</span><a href="https://line.me/R/ti/p/%40iaz2765b" target="_blank" rel="noopener noreferrer">@iaz2765b</a></p></div><p class="bf-form-note">表單資料會保存到飛熊入夢後台供回覆使用。請勿填寫身分證、付款資訊或其他敏感資料；如需提供參考圖片，請先於說明欄描述，我們會另行確認傳送方式。</p></div><div class="bf-form-shell">';
     if (isset($_GET['sent']) && $_GET['sent'] === '1') { echo '<div class="bf-success" role="status"><h3>已收到你的詢問。</h3><p>我們會依留下的聯絡方式回覆你。</p></div>'; }

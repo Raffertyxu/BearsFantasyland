@@ -12,7 +12,8 @@ temporary = dist / f".bears-fantasyland-{getpid()}.tmp.zip"
 
 with ZipFile(temporary, "w", ZIP_DEFLATED, compresslevel=8) as package:
     for path in sorted(theme.rglob("*")):
-        if path.is_file():
+        # README.md documents internals for developers; keep it out of the public theme folder.
+        if path.is_file() and path.relative_to(theme).as_posix() != "README.md":
             package.write(path, arcname=path.relative_to(root).as_posix())
 
 temporary.replace(archive)
