@@ -39,7 +39,7 @@ function bfnd_migrate_native_journal_categories() {
 
 function bfnd_fields($type) {
     $shared = array('english' => '英文名稱', 'tagline' => '一句話介紹', 'seo_title' => 'SEO Title', 'seo_description' => 'SEO Description');
-    if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
+    if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'shop_product_id' => '對應的商店商品（選填；設定後作品頁顯示「前往選購」）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
     if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / program / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price_label' => '價格標籤（例如：優惠價）', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'course_access_url' => '線上課程 YouTube 連結（付款後寄給購買者）', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
     if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'size' => '參考尺寸', 'gallery_ids' => '作品照片')); }
     return array();
@@ -79,6 +79,10 @@ function bfnd_meta_box($post) {
                 }
                 echo '</select><p class="description">先到「商品」編輯簡單或變化商品，勾選「木作課程／會員方案商品」並儲存；系統會自動設為虛擬商品及隱藏於一般商店清單。變化商品可設定不同梯次、方案及名額；單一商品採 WooCommerce 售價與庫存。每個商品只能綁一堂課。</p></div>';
             }
+            continue;
+        }
+        if ($post->post_type === 'bf_work' && $key === 'shop_product_id') {
+            bfnd_work_shop_product_field(absint($value), $label);
             continue;
         }
         if ($post->post_type === 'bf_course' && $key === 'course_access_url') {
@@ -136,7 +140,7 @@ function bfnd_save_meta($post_id) {
         $value = in_array($key, array('features', 'audience', 'learning', 'tools', 'outcomes', 'schedule', 'notices', 'material_options', 'size_options'), true)
             ? sanitize_textarea_field($raw_value)
             : sanitize_text_field($raw_value);
-        if ($type === 'bf_course' && $key === 'woo_id') { $value = absint($raw_value); }
+        if (($type === 'bf_course' && $key === 'woo_id') || ($type === 'bf_work' && $key === 'shop_product_id')) { $value = absint($raw_value); }
         if ($type === 'bf_course' && $key === 'course_access_url') { $value = bfnd_sanitize_course_access_url($raw_value); }
         if ($key === 'gallery_ids' || $key === 'related_ids') { $value = array_values(array_filter(array_map('absint', explode(',', $value)))); }
         if ($key === 'featured') { $value = $value === '1' ? '1' : '0'; }
@@ -494,6 +498,45 @@ function bfnd_import_brand_image() {
     if ($lifestyle) { update_option('bfnd_lifestyle_hero_id', $lifestyle); }
 }
 
+function bfnd_inquiry_limits() {
+    return array('name' => 80, 'contact' => 160, 'dimension' => 200, 'space' => 200, 'budget' => 300, 'material_choice' => 200, 'size_choice' => 200, 'message' => 3000);
+}
+
+function bfnd_inquiry_check_lengths() {
+    foreach (bfnd_inquiry_limits() as $field => $max) {
+        $raw = $_POST[$field] ?? '';
+        if (!is_scalar($raw)) { continue; }
+        if (mb_strlen(wp_unslash((string) $raw), 'UTF-8') > $max) {
+            wp_die('部分欄位內容過長，請精簡後重新送出（留言最多 ' . bfnd_inquiry_limits()['message'] . ' 字）。', '內容過長', array('response' => 400, 'back_link' => true));
+        }
+    }
+}
+
+function bfnd_inquiry_client_ip() {
+    $ip = isset($_SERVER['HTTP_CF_CONNECTING_IP']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_CF_CONNECTING_IP'])) : '';
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+        $ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : '';
+    }
+    return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : 'unknown';
+}
+
+// Per-visitor limit plus a site-wide cap; the cap still bounds a flood if the client IP header is spoofed.
+function bfnd_inquiry_check_rate_limit() {
+    $buckets = array(
+        'bfnd_inq_ip_' . md5(bfnd_inquiry_client_ip()) => array(5, 10 * MINUTE_IN_SECONDS),
+        'bfnd_inq_all' => array(40, HOUR_IN_SECONDS),
+    );
+    foreach ($buckets as $key => $rule) {
+        $hits = get_transient($key);
+        $hits = is_array($hits) ? $hits : array('count' => 0, 'expires' => time() + $rule[1]);
+        if ($hits['count'] >= $rule[0]) {
+            wp_die('送出次數過多，請稍後再試，或直接透過 LINE 與我們聯繫。', '請稍後再試', array('response' => 429, 'back_link' => true));
+        }
+        $hits['count']++;
+        set_transient($key, $hits, max(1, $hits['expires'] - time()));
+    }
+}
+
 function bfnd_inquiry_action() {
     if (!isset($_POST['bfnd_inquiry_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bfnd_inquiry_nonce'])), 'bfnd_inquiry')) { wp_die('表單已逾時，請返回重新送出。'); }
     if (!empty($_POST['website'])) { wp_safe_redirect(bfnd_page_url('collaboration')); exit; }
@@ -501,6 +544,8 @@ function bfnd_inquiry_action() {
     $name = sanitize_text_field(wp_unslash($_POST['name'] ?? ''));
     $contact = sanitize_text_field(wp_unslash($_POST['contact'] ?? ''));
     if (!$name || !$contact) { wp_die('請填寫姓名與聯絡方式。'); }
+    bfnd_inquiry_check_lengths();
+    bfnd_inquiry_check_rate_limit();
     $work_id = absint($_POST['work_id'] ?? 0);
     if ($work_id && (get_post_type($work_id) !== 'bf_work' || get_post_status($work_id) !== 'publish')) {
         wp_die('作品資料已更新，請返回作品頁重新選擇後送出。', '請重新選擇作品', array('response' => 400));

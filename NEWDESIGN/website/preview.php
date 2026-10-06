@@ -15,9 +15,10 @@ define('BFND_URL', '/');
 $preview_asset_map = array(
     'theme-style' => __DIR__ . '/../theme/bears-fantasyland/public/style.css',
     'theme-interactions' => __DIR__ . '/../theme/bears-fantasyland/public/interactions.css',
+    'theme-site' => __DIR__ . '/../theme/bears-fantasyland/public/site.js',
 );
 if (isset($_GET['preview_asset'], $preview_asset_map[$_GET['preview_asset']])) {
-    header('Content-Type: text/css; charset=utf-8');
+    header('Content-Type: ' . (substr($_GET['preview_asset'], -4) === 'site' ? 'text/javascript' : 'text/css') . '; charset=utf-8');
     readfile($preview_asset_map[$_GET['preview_asset']]);
     exit;
 }
@@ -73,7 +74,7 @@ function apply_filters($filter, $text) { return '<p>' . esc_html($text) . '</p>'
 function has_post_thumbnail($post) { return false; }
 function get_the_post_thumbnail_url($post, $size) { return ''; }
 function get_the_date($format, $post) { return date($format); }
-function get_terms($args = array()) { return array(); }
+function get_terms($args = array()) { global $preview_posts; if (($args['taxonomy'] ?? '') !== 'bf_series') return array(); $names = array(); foreach ($preview_posts as $p) { $s = $p->data['series'] ?? ''; if ($p->post_type === 'bf_work' && $s !== '') $names[$s] = (object) array('slug' => $s, 'name' => $s); } return array_values($names); }
 function bfnd_page_post($key) { return null; }
 function has_shortcode($content, $tag) { return false; }
 function get_term_by($field, $value, $taxonomy) { return false; }
@@ -121,4 +122,4 @@ else {
         default: bfnd_render_home();
     }
 }
-?></main><?php bfnd_render_footer(); ?><script src="/public/site.js"></script><script src="/public/work-options.js"></script></body></html>
+?></main><?php bfnd_render_footer(); ?><script src="<?php echo !empty($_GET['preview_theme']) ? '/preview.php?preview_asset=theme-site' : '/public/site.js'; ?>"></script><script src="/public/work-options.js"></script></body></html>

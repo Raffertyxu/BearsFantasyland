@@ -476,7 +476,7 @@ function bfnd_render_inquiry_form() {
     bfnd_render_inquiry_option_field($work_id, 'material', '選擇木材／材質', $selected_material);
     bfnd_render_inquiry_option_field($work_id, 'size', '選擇尺寸', $selected_size);
     echo '</div><div class="bf-form-row"><label>其他尺寸需求（選填）<input name="dimension" maxlength="150" placeholder="例如希望再加長 10 公分"></label><label>使用空間<input name="space" maxlength="150" placeholder="例如住宅餐廳、商業空間"></label></div>';
-    echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : '')) . '</textarea></label>';
+    echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" maxlength="3000" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : '')) . '</textarea></label>';
     echo '<button class="bf-submit" type="submit">送出詢問 <span aria-hidden="true">↗</span></button></form></div></div></section>';
 }
 

@@ -199,13 +199,14 @@ function bfnd_render_furniture() {
         usort($terms, function ($a, $b) use ($order) { return ($order[$a->slug] ?? 100) <=> ($order[$b->slug] ?? 100) ?: strcmp($a->name, $b->name); });
         foreach ($terms as $term) { echo '<button data-filter="' . esc_attr($term->slug) . '" type="button">' . bfnd_e($term->name) . '</button>'; }
     }
-    echo '<button data-filter="other" type="button">其他</button></div><div class="bf-catalog-controls"><label><span class="bf-visually-hidden">搜尋作品</span><input id="bf-search" type="search" placeholder="搜尋作品、系列或木材"></label><label><span class="bf-visually-hidden">排序</span><select id="bf-sort"><option value="recent">最新作品</option><option value="series">系列</option><option value="material">材質</option></select></label></div></div>';
     $series_terms = get_terms(array('taxonomy' => 'bf_series', 'hide_empty' => true));
+    echo '<button data-filter="other" type="button">其他</button></div><div class="bf-catalog-controls"><label><span class="bf-visually-hidden">搜尋作品</span><input id="bf-search" type="search" placeholder="搜尋作品、系列或木材"></label>';
     if (!is_wp_error($series_terms) && $series_terms) {
-        echo '<div class="bf-collection-filter"><span class="bf-kicker">COLLECTIONS / 依系列瀏覽</span><div class="bf-filter-list" role="group" aria-label="作品系列"><button class="is-active" data-series-filter="all" type="button">全部系列</button>';
-        foreach ($series_terms as $term) { echo '<button data-series-filter="' . esc_attr($term->slug) . '" type="button">' . bfnd_e($term->name) . '</button>'; }
-        echo '</div></div>';
+        echo '<label><span class="bf-visually-hidden">作品系列</span><select id="bf-series"><option value="all">全部系列</option>';
+        foreach ($series_terms as $term) { echo '<option value="' . esc_attr($term->slug) . '">' . bfnd_e($term->name) . '</option>'; }
+        echo '</select></label>';
     }
+    echo '<label><span class="bf-visually-hidden">排序</span><select id="bf-sort"><option value="recent">最新作品</option><option value="series">系列</option><option value="material">材質</option></select></label></div></div>';
     echo '<p id="bf-result-count" class="bf-result-count" aria-live="polite"></p><div id="bf-catalog" class="bf-work-grid">';
     $q = bfnd_work_query(array('orderby' => 'menu_order', 'order' => 'ASC'));
     foreach ($q->posts as $post) {
@@ -274,7 +275,10 @@ function bfnd_render_work($id) {
     echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">WORKS INQUIRY</span><h2>喜歡這件作品？</h2><p>歡迎詢問作品尺寸、木種、製作方式與現有規格。</p>';
     if (bfnd_meta($id, 'size_adjustable') === '1') { echo '<p>部分作品可依空間需求調整尺寸，實際製作方式歡迎與我們討論。</p>'; }
     $inquiry_url = add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry';
-    echo '<a class="bf-button" data-bf-work-inquiry data-bf-work-id="' . esc_attr($id) . '" href="' . esc_url($inquiry_url) . '"><span>作品諮詢</span><span aria-hidden="true">↗</span></a></div></section>';
+    $shop_product = function_exists('bfnd_get_work_shop_product') ? bfnd_get_work_shop_product($id) : false;
+    echo '<div class="bf-cta-actions">';
+    if ($shop_product) { echo '<a class="bf-button" data-bf-work-shop href="' . esc_url($shop_product->get_permalink()) . '"><span>前往選購</span><span aria-hidden="true">→</span></a>'; }
+    echo '<a class="bf-button' . ($shop_product ? ' bf-button-outline' : '') . '" data-bf-work-inquiry data-bf-work-id="' . esc_attr($id) . '" href="' . esc_url($inquiry_url) . '"><span>作品諮詢</span><span aria-hidden="true">↗</span></a></div></div></section>';
     echo '<dialog id="bf-image-dialog" class="bf-image-dialog" aria-label="作品照片放大檢視"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="作品照片放大檢視"></dialog>';
 }
 
@@ -524,7 +528,7 @@ function bfnd_render_inquiry_form() {
     bfnd_render_inquiry_option_field($work_id, 'material', '選擇木材／材質', $selected_material);
     bfnd_render_inquiry_option_field($work_id, 'size', '選擇尺寸', $selected_size);
     echo '</div><div class="bf-form-row"><label>其他尺寸需求（選填）<input name="dimension" maxlength="150" placeholder="例如希望再加長 10 公分"></label><label>使用空間<input name="space" maxlength="150" placeholder="例如住宅餐廳、商業空間"></label></div>';
-    echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : esc_textarea(bfnd_inquiry_product_line()))) . '</textarea></label>';
+    echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" maxlength="3000" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : esc_textarea(bfnd_inquiry_product_line()))) . '</textarea></label>';
     echo '<button class="bf-submit" type="submit">送出詢問 <span aria-hidden="true">↗</span></button></form></div></div></section>';
 }
 

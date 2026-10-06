@@ -79,3 +79,38 @@ function bfnd_render_inquiry_option_field($work_id, $kind, $label, $selected_val
     }
     echo '</select><small id="' . esc_attr($field_id . '-feedback') . '" data-bf-inquiry-option-feedback aria-live="polite">請選擇此作品已設定的選項。</small></label>';
 }
+
+/** Published, purchasable, non-course shop product linked to a work, or false. */
+function bfnd_get_work_shop_product($work_id) {
+    if (!function_exists('wc_get_product')) { return false; }
+    $product_id = absint(get_post_meta($work_id, '_bfnd_shop_product_id', true));
+    $product = $product_id ? wc_get_product($product_id) : false;
+    if (!$product || $product->get_status() !== 'publish' || !$product->is_purchasable()) { return false; }
+    if (get_post_meta($product_id, '_bfnd_course_product', true) === 'yes') { return false; }
+    return $product;
+}
+
+function bfnd_work_shop_product_field($current_id, $label) {
+    echo '<p><label for="bfnd_shop_product_id"><strong>' . esc_html($label) . '</strong></label><br>';
+    if (!function_exists('wc_get_product')) {
+        echo '<select id="bfnd_shop_product_id" disabled style="width:100%;max-width:780px"><option>請先啟用 WooCommerce</option></select>';
+        echo '<input type="hidden" name="bfnd[shop_product_id]" value="' . esc_attr($current_id ?: '') . '"></p>';
+        return;
+    }
+    $ids = get_posts(array(
+        'post_type' => 'product', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'title', 'order' => 'ASC',
+        'meta_query' => array(array('key' => '_bfnd_course_product', 'compare' => 'NOT EXISTS')),
+    ));
+    echo '<select id="bfnd_shop_product_id" name="bfnd[shop_product_id]" style="width:100%;max-width:780px"><option value="">不連結商品（只顯示詢問）</option>';
+    if ($current_id && !in_array($current_id, array_map('intval', $ids), true)) {
+        $current = wc_get_product($current_id);
+        echo '<option value="' . esc_attr($current_id) . '" selected>目前連結：' . esc_html($current ? $current->get_name() : '已不存在的商品') . '（未發布或不可購買，前台不會顯示按鈕）</option>';
+    }
+    foreach ($ids as $id) {
+        $product = wc_get_product($id);
+        if (!$product) { continue; }
+        $price = wp_strip_all_tags($product->get_price_html());
+        echo '<option value="' . esc_attr($id) . '" ' . selected($current_id, $id, false) . '>' . esc_html($product->get_name() . ($price !== '' ? '｜' . $price : '')) . '</option>';
+    }
+    echo '</select><br><span class="description">作品頁會在「詢問此作品」旁顯示「前往選購」，連到這個商品頁。商品需已發布且可購買才會顯示。</span></p>';
+}

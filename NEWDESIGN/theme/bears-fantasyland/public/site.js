@@ -116,7 +116,7 @@
   if (catalog) {
     const items = [...catalog.querySelectorAll('.bf-catalog-item')];
     const filters = [...document.querySelectorAll('[data-filter]')];
-    const seriesFilters = [...document.querySelectorAll('[data-series-filter]')];
+    const series = document.querySelector('#bf-series');
     const search = document.querySelector('#bf-search');
     const sort = document.querySelector('#bf-sort');
     const count = document.querySelector('#bf-result-count');
@@ -124,13 +124,11 @@
     const more = document.querySelector('#bf-load-more');
     const pageSize = 12;
     let activeCategory = 'all';
-    let activeSeries = 'all';
     let visibleLimit = pageSize;
     const syncPressedState = (buttons) => buttons.forEach((button) => {
       button.setAttribute('aria-pressed', String(button.classList.contains('is-active')));
     });
     syncPressedState(filters);
-    syncPressedState(seriesFilters);
     if (count) {
       count.setAttribute('aria-live', 'polite');
       count.setAttribute('aria-atomic', 'true');
@@ -140,7 +138,7 @@
       const term = (search?.value || '').trim().toLocaleLowerCase();
       const matching = items.filter((item) =>
         (activeCategory === 'all' || item.dataset.category === activeCategory) &&
-        (activeSeries === 'all' || item.dataset.seriesFilter === activeSeries) &&
+        (!series || series.value === 'all' || item.dataset.seriesFilter === series.value) &&
         (!term || item.dataset.search?.includes(term))
       );
       matching.sort((a, b) => {
@@ -166,12 +164,7 @@
       syncPressedState(filters);
       reset();
     }));
-    seriesFilters.forEach((button) => button.addEventListener('click', () => {
-      activeSeries = button.dataset.seriesFilter;
-      seriesFilters.forEach((filter) => filter.classList.toggle('is-active', filter === button));
-      syncPressedState(seriesFilters);
-      reset();
-    }));
+    series?.addEventListener('change', reset);
     search?.addEventListener('input', reset);
     sort?.addEventListener('change', reset);
     more?.addEventListener('click', () => {

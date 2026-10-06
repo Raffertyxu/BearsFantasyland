@@ -829,3 +829,9 @@ body.bfnd-body :is(.bf-home-hero,.bf-page-hero,.bf-school-hero,.bf-lifestyle-her
 body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product span.onsale{top:calc(10*var(--bfnd-px));right:auto;left:calc(10*var(--bfnd-px));min-width:0;min-height:0;margin:0;padding:calc(4*var(--bfnd-px)) calc(10*var(--bfnd-px));border-radius:0;background:var(--bf-wood);color:#fff;font-family:var(--bf-serif);font-size:calc(11*var(--bfnd-px));font-weight:500;line-height:1.5;letter-spacing:.2em}
 body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product .price ins{text-decoration:none;font-weight:600}
 body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product .price del{color:var(--bf-muted);opacity:1}
+/* Work page CTA: optional shop link beside the inquiry button. */
+.bf-cta-actions{display:flex;flex-wrap:wrap;gap:calc(14*var(--bfnd-px))}
+body.bfnd-body .bf-button-outline{background:transparent;color:var(--bf-wood)!important}
+body.bfnd-body .bf-button-outline:hover{background:var(--bf-wood);color:#fff!important}
+@media(max-width:420px){.bf-cta-actions{width:100%}}
+@media(max-width:600px){.bf-catalog-controls{flex-wrap:wrap}.bf-catalog-controls label:first-child{flex-basis:100%}.bf-catalog-controls label:has(#bf-series){flex:1;min-width:0}.bf-catalog-controls #bf-series{width:100%;text-overflow:ellipsis}}
