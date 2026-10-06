@@ -16,7 +16,7 @@
  *   --base URL          preview origin (default http://localhost:8766, env BFND_PREVIEW_BASE)
  *   --pages a,b         subset of page keys (see PAGES)
  *   --widths 375x812,.. viewport list
- *   --variant theme|plugin|both   theme = preview_theme=1 (default), plugin = plugin fallback CSS
+ *   --variant theme               only the theme renderer exists (plugin fallback removed in 0.5.42)
  *   --no-screenshots    skip PNG output (check mode)
  *   --out DIR           screenshot/report folder (default qa-screenshots)
  *   --concurrency N     parallel pages (default 3)
@@ -74,7 +74,7 @@ function parseArgs(argv) {
 }
 function readHelp() { return 'See the header comment of scripts/check_layout.mjs'; }
 
-function variantsOf(v) { return v === 'both' ? ['theme', 'plugin'] : [v]; }
+function variantsOf() { return ['theme']; }
 function urlFor(base, variant, key) {
   const q = PAGES[key];
   if (!q) throw new Error(`Unknown page key: ${key}`);

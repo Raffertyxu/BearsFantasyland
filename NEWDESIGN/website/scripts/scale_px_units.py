@@ -38,8 +38,6 @@ FRONTEND_CSS = [
     ROOT / "theme/bears-fantasyland/public/style.css",
     ROOT / "theme/bears-fantasyland/public/interactions.css",
     ROOT / "theme/bears-fantasyland/public/product.css",
-    ROOT / "website/public/style.css",
-    ROOT / "website/public/interactions.css",
     ROOT / "website/public/work-options.css",
 ]
 

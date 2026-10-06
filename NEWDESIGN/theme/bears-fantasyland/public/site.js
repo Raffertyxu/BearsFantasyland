@@ -41,28 +41,6 @@
     iframe.focus();
   });
 
-  // Keep the published phone contact visible if an older server-rendered
-  // template is still cached after a theme update.
-  document.querySelectorAll('.bf-inquiry-grid').forEach((section) => {
-    const contact = section.querySelector('.bf-direct-contact');
-    if (!contact) return;
-    const note = section.querySelector('.bf-form-note')?.textContent.trim();
-    contact.querySelectorAll('.bf-direct-contact-row').forEach((row) => {
-      if (note && row.textContent.trim() === note) row.remove();
-    });
-    if (!contact.querySelector('a[href="tel:+886424616373"]')) {
-      const row = document.createElement('p');
-      row.className = 'bf-direct-contact-row';
-      const label = document.createElement('span');
-      label.textContent = '電話';
-      const link = document.createElement('a');
-      link.href = 'tel:+886424616373';
-      link.textContent = '04-24616373';
-      row.append(label, link);
-      contact.prepend(row);
-    }
-  });
-
   const schoolMenu = document.querySelector('.bf-nav-school');
   const schoolToggle = schoolMenu?.querySelector('.bf-nav-school-toggle');
   const menu = document.querySelector('.bf-menu-button');

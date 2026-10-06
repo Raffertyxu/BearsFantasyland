@@ -1,14 +1,6 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-function bfnd_manifest() {
-    static $data = null;
-    if ($data === null) {
-        $data = json_decode(file_get_contents(BFND_DIR . 'data/content.json'), true);
-    }
-    return $data;
-}
-
 function bfnd_pages() {
     return array(
         'home' => array('飛熊入夢', 'home'),
@@ -46,36 +38,6 @@ function bfnd_create_preview_pages() {
 function bfnd_page_url($key) {
     $page = bfnd_page_post($key);
     return $page ? get_permalink($page) : home_url('/');
-}
-
-/** One-time data migrations run on an administrator's admin request, never on visitor requests. */
-function bfnd_run_pending_migrations() {
-    if (!current_user_can('manage_options') || wp_doing_ajax()) { return; }
-    bfnd_migrate_page_slugs();
-    bfnd_migrate_native_journal_categories();
-    bfnd_migrate_course_editor_fields();
-    bfnd_migrate_course_catalog_v2();
-    bfnd_migrate_banner_carousels();
-    bfnd_migrate_meeting_product_categories();
-}
-
-function bfnd_migrate_page_slugs() {
-    if (get_option('bfnd_clean_slugs_v1')) { return; }
-    bfnd_create_preview_pages();
-    $complete = true;
-    foreach (bfnd_pages() as $key => $info) {
-        $page = bfnd_page_post($key);
-        if (!$page) { $complete = false; continue; }
-        if ($page->post_name === $info[1]) { continue; }
-        $conflict = get_page_by_path($info[1]);
-        if ($conflict && (int) $conflict->ID !== (int) $page->ID) { $complete = false; continue; }
-        $updated = wp_update_post(array('ID' => $page->ID, 'post_name' => $info[1]), true);
-        if (is_wp_error($updated)) { $complete = false; }
-    }
-    if ($complete) {
-        update_option('bfnd_clean_slugs_v1', '1');
-        flush_rewrite_rules();
-    }
 }
 
 function bfnd_redirect_legacy_pages() {
@@ -126,7 +88,9 @@ function bfnd_media_src($path) {
         return bfnd_nonfinal_photo($url, $id) ? '' : $url;
     }
     if (preg_match('#^https?://#', $path)) { $url = esc_url_raw($path); }
-    else { $url = bfnd_asset($path); }
+    // Legacy relative paths pointed at the import assets, which are no longer packaged.
+    elseif (is_file(BFND_DIR . ltrim($path, '/'))) { $url = bfnd_asset($path); }
+    else { return ''; }
     return bfnd_nonfinal_photo($url) ? '' : $url;
 }
 

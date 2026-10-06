@@ -1,64 +1,6 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Find a WooCommerce product only when the title match is unambiguous. */
-function bfnd_find_product_by_exact_title($title) {
-    $posts = get_posts(array(
-        'post_type' => 'product',
-        'post_status' => array('publish', 'private', 'draft', 'pending'),
-        'numberposts' => 30,
-        'fields' => 'ids',
-        's' => $title,
-    ));
-    $matches = array();
-    foreach ($posts as $product_id) {
-        if (get_the_title($product_id) === $title) { $matches[] = absint($product_id); }
-    }
-    return count($matches) === 1 ? $matches[0] : 0;
-}
-
-function bfnd_ensure_product_category($name, $slug) {
-    $term = get_term_by('slug', $slug, 'product_cat');
-    if (!$term) { $term = get_term_by('name', $name, 'product_cat'); }
-    if ($term && !is_wp_error($term)) { return $term; }
-    $created = wp_insert_term($name, 'product_cat', array('slug' => $slug));
-    if (is_wp_error($created)) { return false; }
-    return get_term((int) $created['term_id'], 'product_cat');
-}
-
-/** One-time, title-guarded WooCommerce category alignment from the client meeting. */
-function bfnd_migrate_meeting_product_categories() {
-    if (get_option('bfnd_meeting_product_categories_v1') || !taxonomy_exists('product_cat') || !function_exists('wc_get_product')) { return; }
-
-    $lifestyle = bfnd_ensure_product_category('生活木作', 'lifestyle-woodwork');
-    $tools = get_term_by('name', '手工具', 'product_cat');
-    if (!$tools) { $tools = bfnd_ensure_product_category('手工具', 'hand-tools'); }
-    if (!$lifestyle || !$tools || is_wp_error($lifestyle) || is_wp_error($tools)) { return; }
-
-    $furniture_titles = array('胡桃曲木桌', '延展之境櫻桃木桌');
-    $furniture_ids = array();
-    foreach ($furniture_titles as $title) {
-        $product_id = bfnd_find_product_by_exact_title($title);
-        if (!$product_id) { return; }
-        $furniture_ids[] = $product_id;
-    }
-    $tool_product_id = bfnd_find_product_by_exact_title('線鋸');
-    if (!$tool_product_id) { return; }
-
-    foreach ($furniture_ids as $product_id) {
-        $assigned = wp_set_object_terms($product_id, array((int) $lifestyle->term_id), 'product_cat', true);
-        if (is_wp_error($assigned) || $assigned === false) { return; }
-        $classic = get_term_by('slug', 'classic', 'product_cat');
-        if ($classic) {
-            $removed = wp_remove_object_terms($product_id, (int) $classic->term_id, 'product_cat');
-            if (is_wp_error($removed) || $removed === false) { return; }
-        }
-    }
-    $assigned_tool = wp_set_object_terms($tool_product_id, array((int) $tools->term_id), 'product_cat', true);
-    if (is_wp_error($assigned_tool) || $assigned_tool === false) { return; }
-    update_option('bfnd_meeting_product_categories_v1', 1, false);
-}
-
 function bfnd_store_settings_menu() {
     if (!function_exists('WC')) { return; }
     add_submenu_page('woocommerce', '飛熊商務設定', '飛熊商務設定', 'manage_woocommerce', 'bfnd-store-settings', 'bfnd_store_settings_page');

@@ -4,6 +4,13 @@
 正式站：https://a1.haotaimaker.com/  
 目前最新核對：主題「飛熊入夢」`1.3.43` 為啟用主題，外掛「飛熊入夢 NEWDESIGN 官網」`0.5.41` 為啟用外掛。部署及驗收紀錄見下方最新段落；其後較早版本條目是歷史記錄，不代表目前版本。
 
+## 2026-10-07 後台額外 CSS：刪除頁尾社群連結顏色舊規則
+
+- 使用者當次同意。「外觀 → 自訂 → 額外 CSS」（`custom_css[bears-fantasyland]`）刪除第 2–4 行（前台 `<style id="wp-custom-css">` 的第 3–5 行，前台多一個空行）：`.bf-footer .bf-footer-main .bf-footer-social a { color: #493325; }` 與其 `:hover`／`:focus-visible { color: #8a654b; }`。由 Claude 在已登入的自訂器以 `wp.customize` 設定並發布。
+- 原內容備份：`NEWDESIGN/website/qa-screenshots/custom-css/additional-css-backup-2026-10-07.css`（SHA-256 `1e577a5f…3006b240`），要還原就把那 3 行貼回去。
+- 刪除前在瀏覽器模擬：主題 `style.css` 第 141–142 行已有相同顏色與 hover 規則，`interactions.css` 的 hover 規則特異性更高；刪除前後 4 個圖示計算色相同（IG／FB／YT `rgb(73, 51, 37)`、LINE `rgb(7, 94, 50)`）。唯一差異：鍵盤 focus 時 IG／FB／YT 不再變成 #8a654b，維持 #493325。
+- 即時驗收：未登入首頁的額外 CSS 已無這 3 行（與備份 diff 只差這 3 行）；首頁 4 個圖示計算色與刪除前相同。
+
 ## 2026-10-07 主題 1.3.43、外掛 0.5.41：資安審查低風險項目
 
 - 來源：分支 `claude/batch2-security-hardening` commit `be8b1df`。使用者當次授權後，由 Claude 從已登入的 Chrome 後台上傳，頁內 SHA-256 比對一致。

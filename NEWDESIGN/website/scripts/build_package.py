@@ -11,7 +11,8 @@ package = dist / "bears-fantasyland-newdesign"
 if package.exists():
     rmtree(package)
 package.mkdir(parents=True)
-for name in ("assets", "data", "public", "src", "templates"):
+# assets/ and data/ only feed the local preview; the theme renders every public page.
+for name in ("public", "src"):
     copytree(root / name, package / name)
 copy2(root / "bears-fantasyland-newdesign.php", package / "bears-fantasyland-newdesign.php")
 zip_path = dist / "bears-fantasyland-newdesign.zip"

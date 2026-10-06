@@ -89,9 +89,9 @@ function bfnd_course_price_html($course_id) {
     return $price !== '' ? ($label !== '' ? esc_html($label) . ' ' : '') . 'NT$ ' . esc_html(number_format((int) $price)) : '';
 }
 require_once __DIR__ . '/src/work-options.php';
-$preview_theme = isset($_GET['preview_theme']) && $_GET['preview_theme'] === '1';
-if ($preview_theme) { require_once __DIR__ . '/../theme/bears-fantasyland/src/render.php'; }
-else { require_once __DIR__ . '/src/render.php'; }
+// The plugin no longer ships a fallback renderer, so the preview always uses the theme.
+$preview_theme = true;
+require_once __DIR__ . '/../theme/bears-fantasyland/src/render.php';
 $page = $_GET['page'] ?? 'home';
 $post = null;
 if (in_array($page, array('work', 'lifestyle-work', 'course'))) {
@@ -123,4 +123,4 @@ else {
         default: bfnd_render_home();
     }
 }
-?></main><?php bfnd_render_footer(); ?><script src="<?php echo !empty($_GET['preview_theme']) ? '/preview.php?preview_asset=theme-site' : '/public/site.js'; ?>"></script><script src="/public/work-options.js"></script></body></html>
+?></main><?php bfnd_render_footer(); ?><script src="/preview.php?preview_asset=theme-site"></script><script src="/public/work-options.js"></script></body></html>

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check public/site.js && node --check public/yoast-analysis.js && node --check public/work-options.js && node --check ../theme/bears-fantasyland/public/site.js && node --check scripts/check_layout.mjs && python scripts/lint_css_units.py",
+    "check": "node --check public/yoast-analysis.js && node --check public/work-options.js && node --check ../theme/bears-fantasyland/public/site.js && node --check scripts/check_layout.mjs && python scripts/lint_css_units.py",
     "check:layout": "node scripts/check_layout.mjs",
     "fix:css-units": "python scripts/scale_px_units.py"
   },

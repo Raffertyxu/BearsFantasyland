@@ -93,6 +93,7 @@ function bfnd_course_product_meta_box_html($post) {
     $enabled = get_post_meta($post->ID, '_bfnd_course_product', true) === 'yes';
     echo '<p><label><input type="checkbox" name="bfnd_course_product" value="yes" ' . checked($enabled, true, false) . '> 將此商品作為課程報名／會員方案收款項目</label></p>';
     echo '<p class="description">儲存時會設為虛擬商品（不計運費），並從一般商店商品清單隱藏。課程可綁定此商品；變化商品可用不同方案或梯次及各自名額。每個商品只能綁一堂課。</p>';
+    echo '<p class="description">線上課程：把 YouTube 連結寫在「商品資料 → 進階 → 購買備註」。顧客付款完成後，WooCommerce 會在訂單頁與訂單通知信顯示這段文字。</p>';
 }
 
 function bfnd_save_course_product($product) {
@@ -155,100 +156,3 @@ function bfnd_course_order_line_item($item, $cart_item_key, $values, $order) {
     }
 }
 add_action('woocommerce_checkout_create_order_line_item', 'bfnd_course_order_line_item', 10, 4);
-
-/** Accept only HTTPS YouTube watch/share URLs for private course fulfillment. */
-function bfnd_sanitize_course_access_url($url) {
-    $url = trim((string) $url);
-    if ($url === '') { return ''; }
-    $url = esc_url_raw($url, array('https'));
-    if ($url === '') { return ''; }
-    $parts = wp_parse_url($url);
-    if (!is_array($parts) || strtolower((string) ($parts['scheme'] ?? '')) !== 'https' || empty($parts['host']) || empty($parts['path'])) { return ''; }
-    if (isset($parts['user']) || isset($parts['pass']) || (isset($parts['port']) && (int) $parts['port'] !== 443)) { return ''; }
-    $host = strtolower(rtrim((string) $parts['host'], '.'));
-    $allowed_hosts = array('youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be');
-    return in_array($host, $allowed_hosts, true) ? $url : '';
-}
-
-function bfnd_course_access_url($course_id) {
-    return bfnd_sanitize_course_access_url(get_post_meta(absint($course_id), '_bfnd_course_access_url', true));
-}
-
-function bfnd_send_course_access_for_order($order_id, $force = false) {
-    if (!function_exists('wc_get_order')) { return; }
-    $order = $order_id instanceof WC_Order ? $order_id : wc_get_order(absint($order_id));
-    if (!$order) { return; }
-    if (!$order->is_paid()) {
-        if ($force) { $order->add_order_note('線上課程連結尚未寄送：訂單尚未完成付款。'); }
-        return;
-    }
-    // Offline methods reach "processing" before money arrives; staff confirm and resend manually.
-    if (!$force && in_array($order->get_payment_method(), array('cod', 'bacs', 'cheque'), true)) {
-        $order->add_order_note('線上課程連結未自動寄送：此付款方式需人工確認入帳，確認後請使用「重新寄送線上課程連結」訂單動作。');
-        return;
-    }
-
-    $recipient = sanitize_email($order->get_billing_email());
-    if (!$recipient || !is_email($recipient)) {
-        $order->add_order_note('線上課程連結尚未寄送：訂單沒有有效的聯絡 Email。');
-        return;
-    }
-
-    foreach ($order->get_items('line_item') as $item) {
-        if (!($item instanceof WC_Order_Item_Product)) { continue; }
-        $course_id = absint($item->get_meta('_bfnd_course_id', true));
-        if (!$course_id || get_post_type($course_id) !== 'bf_course') { continue; }
-        if (get_post_meta($course_id, '_bfnd_mode', true) !== 'online') { continue; }
-
-        if (!$force && $item->get_meta('_bfnd_course_access_email_sent_at', true)) { continue; }
-        $access_url = bfnd_course_access_url($course_id);
-        if ($access_url === '') {
-            if ($item->get_meta('_bfnd_course_access_email_state', true) !== 'waiting_for_link') {
-                $item->update_meta_data('_bfnd_course_access_email_state', 'waiting_for_link');
-                $item->save();
-                $order->add_order_note('線上課程連結尚未寄送：請先在課程資料補上有效的 YouTube 連結，再使用「重新寄送線上課程連結」訂單動作。');
-            }
-            continue;
-        }
-
-        $course_name = sanitize_text_field(wp_specialchars_decode(get_the_title($course_id), ENT_QUOTES));
-        $site_name = sanitize_text_field(wp_specialchars_decode(get_bloginfo('name'), ENT_QUOTES));
-        $subject = sanitize_text_field(sprintf('[%s] %s 課程連結', $site_name, $course_name));
-        $message = "您好，\n\n您購買的線上課程「{$course_name}」已完成付款。\n\n課程連結：{$access_url}\n\n若連結無法開啟，請直接回覆此信聯絡我們。\n\n{$site_name}";
-        if (!wp_mail($recipient, $subject, $message)) {
-            $order->add_order_note('線上課程連結寄送失敗：WordPress 郵件程序回報失敗，請確認訂單 Email 後使用重新寄送動作。');
-            continue;
-        }
-
-        $item->update_meta_data('_bfnd_course_access_email_sent_at', current_time('mysql'));
-        $item->update_meta_data('_bfnd_course_access_email_state', 'accepted_by_wp_mail');
-        $item->save();
-        $order->add_order_note('線上課程連結已交給 WordPress 郵件程序寄送至訂單 Email；實際收件仍需由客戶或管理員確認。');
-    }
-}
-
-function bfnd_course_access_payment_complete($order_id) {
-    bfnd_send_course_access_for_order($order_id);
-}
-add_action('woocommerce_payment_complete', 'bfnd_course_access_payment_complete', 20);
-add_action('woocommerce_order_status_processing', 'bfnd_course_access_payment_complete', 20);
-add_action('woocommerce_order_status_completed', 'bfnd_course_access_payment_complete', 20);
-
-function bfnd_course_access_order_actions($actions, $order) {
-    if (!($order instanceof WC_Order)) { return $actions; }
-    foreach ($order->get_items('line_item') as $item) {
-        $course_id = absint($item->get_meta('_bfnd_course_id', true));
-        if ($course_id && get_post_meta($course_id, '_bfnd_mode', true) === 'online') {
-            $actions['bfnd_resend_course_access'] = '重新寄送線上課程連結';
-            break;
-        }
-    }
-    return $actions;
-}
-add_filter('woocommerce_order_actions', 'bfnd_course_access_order_actions', 10, 2);
-
-function bfnd_course_access_resend_order_action($order) {
-    if (!($order instanceof WC_Order) || !current_user_can('edit_shop_order', $order->get_id())) { return; }
-    bfnd_send_course_access_for_order($order, true);
-}
-add_action('woocommerce_order_action_bfnd_resend_course_access', 'bfnd_course_access_resend_order_action');
