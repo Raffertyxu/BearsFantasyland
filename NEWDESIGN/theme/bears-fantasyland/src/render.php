@@ -566,6 +566,7 @@ function bfnd_render_commerce() {
     elseif (is_account_page()) { $type = 'account'; $eyebrow = 'MY ACCOUNT'; $title = '會員中心'; $intro = '查看訂單、配送地址與帳號資料。'; }
     elseif (is_product()) { $type = 'product'; $eyebrow = 'SHOP'; $title = get_the_title(); $intro = ''; }
     else { $type = 'shop'; $eyebrow = 'SHOP'; $title = is_product_category() || is_product_tag() ? single_term_title('', false) : '商品選購'; $intro = '探索飛熊入夢的作品與木作商品。'; }
+    if ($type === 'product') { bfnd_render_product_page($shop, $cart, $account); return; }
     echo '<section class="bf-commerce-hero"><div class="bf-wrap"><nav class="bf-breadcrumb" aria-label="麵包屑"><a href="' . esc_url(bfnd_page_url('home')) . '">首頁</a><span aria-hidden="true">／</span><span>' . bfnd_e($title) . '</span></nav><span class="bf-kicker">' . bfnd_e($eyebrow) . '</span><h1>' . bfnd_e($title) . '</h1>';
     if ($intro) { echo '<p>' . bfnd_e($intro) . '</p>'; }
     echo '</div></section><section class="bf-commerce-section"><div class="bf-wrap bf-commerce-content bf-commerce-' . esc_attr($type) . '">';
@@ -586,7 +587,122 @@ function bfnd_render_commerce() {
         echo do_shortcode('[products limit="12" columns="4" paginate="true"]');
     }
     elseif (function_exists('woocommerce_content')) { woocommerce_content(); }
-    echo '</div></section><nav class="bf-commerce-next bf-wrap" aria-label="相關頁面"><a href="' . esc_url(bfnd_page_url('furniture')) . '">探索家具作品 <span aria-hidden="true">↗</span></a><a href="' . esc_url($shop) . '">選購商品 <span aria-hidden="true">↗</span></a><a href="' . esc_url($cart) . '">購物車 <span aria-hidden="true">↗</span></a><a href="' . esc_url($account) . '">會員中心 <span aria-hidden="true">↗</span></a><a href="' . esc_url(bfnd_page_url('service')) . '">購買與服務 <span aria-hidden="true">↗</span></a></nav>';
+    echo '</div></section>';
+    bfnd_render_commerce_next($shop, $cart, $account);
+}
+
+function bfnd_render_commerce_next($shop, $cart, $account) {
+    echo '<nav class="bf-commerce-next bf-wrap" aria-label="相關頁面"><a href="' . esc_url(bfnd_page_url('furniture')) . '">探索家具作品 <span aria-hidden="true">↗</span></a><a href="' . esc_url($shop) . '">選購商品 <span aria-hidden="true">↗</span></a><a href="' . esc_url($cart) . '">購物車 <span aria-hidden="true">↗</span></a><a href="' . esc_url($account) . '">會員中心 <span aria-hidden="true">↗</span></a><a href="' . esc_url(bfnd_page_url('service')) . '">購買與服務 <span aria-hidden="true">↗</span></a></nav>';
+}
+
+// Single product page. WooCommerce still renders the gallery, price, cart form and
+// every summary hook (payment buttons, structured data); the theme only swaps the
+// tabs and related-products blocks for the furniture work page's section language.
+function bfnd_render_product_page($shop, $cart, $account) {
+    $id = get_queried_object_id();
+    $product = function_exists('wc_get_product') ? wc_get_product($id) : null;
+    $category = $product ? bfnd_product_primary_category($id) : null;
+    $title = get_the_title($id);
+    echo '<section class="bf-commerce-section bf-product-section"><div class="bf-wrap bf-commerce-content bf-commerce-product bf-product-page"><nav class="bf-breadcrumb bf-product-breadcrumb" aria-label="麵包屑"><a href="' . esc_url(bfnd_page_url('home')) . '">首頁</a><span aria-hidden="true">／</span><a href="' . esc_url($shop) . '">商品選購</a>';
+    if ($category) { $category_url = get_term_link($category); if (!is_wp_error($category_url)) { echo '<span aria-hidden="true">／</span><a href="' . esc_url($category_url) . '">' . esc_html($category->name) . '</a>'; } }
+    echo '<span aria-hidden="true">／</span><span aria-current="page">' . bfnd_e($title) . '</span></nav>';
+    if ($product) {
+        remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_product_data_tabs', 10);
+        remove_action('woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15);
+        remove_action('woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20);
+        add_action('woocommerce_single_product_summary', function () use ($category) {
+            echo '<span class="bf-kicker bf-product-kicker">SHOP' . ($category ? ' / ' . esc_html($category->name) : '') . '</span>';
+        }, 4);
+        add_action('woocommerce_single_product_summary', 'bfnd_render_product_assurance', 35);
+    }
+    if (function_exists('woocommerce_content')) { woocommerce_content(); }
+    echo '</div></section>';
+    // Password-protected products show only WooCommerce's password form.
+    if ($product && !post_password_required($id)) { bfnd_render_product_sections($product, $shop); }
+    bfnd_render_commerce_next($shop, $cart, $account);
+}
+
+function bfnd_product_primary_category($id) {
+    $primary = (int) get_post_meta($id, '_yoast_wpseo_primary_product_cat', true);
+    $term = $primary && has_term($primary, 'product_cat', $id) ? get_term($primary, 'product_cat') : null;
+    if ($term && !is_wp_error($term)) { return $term; }
+    $terms = get_the_terms($id, 'product_cat');
+    if (!$terms || is_wp_error($terms)) { return null; }
+    $default = (int) get_option('default_product_cat');
+    foreach ($terms as $term) { if ((int) $term->term_id !== $default && $term->slug !== 'uncategorized') { return $term; } }
+    return null;
+}
+
+function bfnd_render_product_assurance() {
+    echo '<ul class="bf-product-assurance"><li><a href="' . esc_url(bfnd_page_url('service')) . '"><span>購買、配送與售後說明</span><span aria-hidden="true">↗</span></a></li><li><a href="' . esc_url(bfnd_page_url('collaboration') . '#inquiry') . '"><span>商品諮詢與客製需求</span><span aria-hidden="true">↗</span></a></li></ul>';
+}
+
+// Visible WooCommerce attributes plus dimensions/weight, as label => value pairs.
+function bfnd_product_spec_rows($product) {
+    $rows = array();
+    foreach ($product->get_attributes() as $attribute) {
+        if (!is_object($attribute) || !$attribute->get_visible()) { continue; }
+        $values = $attribute->is_taxonomy() ? wc_get_product_terms($product->get_id(), $attribute->get_name(), array('fields' => 'names')) : $attribute->get_options();
+        $values = array_filter(array_map('trim', array_map('strval', (array) $values)), 'strlen');
+        if ($values) { $rows[] = array(wc_attribute_label($attribute->get_name(), $product), implode('、', $values)); }
+    }
+    $plain = function ($html) { return trim(html_entity_decode(wp_strip_all_tags((string) $html), ENT_QUOTES, 'UTF-8')); };
+    // Parent values only: a variable product whose sizes live on its variations would otherwise print N/A.
+    if (array_filter((array) $product->get_dimensions(false))) { $rows[] = array('尺寸', $plain(wc_format_dimensions($product->get_dimensions(false)))); }
+    if ((string) $product->get_weight() !== '') { $rows[] = array('重量', $plain(wc_format_weight($product->get_weight()))); }
+    return $rows;
+}
+
+function bfnd_product_visible_ids($ids, $exclude) {
+    $visible = array();
+    foreach (array_unique(array_map('absint', (array) $ids)) as $pid) {
+        $item = $pid && $pid !== $exclude ? wc_get_product($pid) : null;
+        if ($item && $item->is_visible() && get_post_meta($pid, '_bfnd_course_product', true) !== 'yes') { $visible[] = $pid; }
+    }
+    return $visible;
+}
+
+function bfnd_render_product_grid($kicker, $title, $ids, $link = '', $link_label = '') {
+    echo '<section class="bf-section bf-wrap bf-product-related">';
+    bfnd_section_head($kicker, $title, $link, $link_label);
+    echo '<div class="bf-commerce-content bf-product-grid">' . do_shortcode('[products ids="' . esc_attr(implode(',', $ids)) . '" columns="4" limit="4" orderby="post__in"]') . '</div></section>';
+}
+
+// Sections below the buy box. Each one appears only when the product has content
+// for it, and the 01 / 02 / 03 numbering follows whatever is actually shown.
+function bfnd_render_product_sections($product, $shop) {
+    $id = $product->get_id();
+    $index = 0;
+    $label = function ($name) use (&$index) { $index++; return sprintf('%02d / %s', $index, $name); };
+    $description = trim((string) $product->get_description());
+    if ($description !== '') {
+        echo '<section class="bf-section bf-wrap bf-product-story"><div class="bf-product-block-head"><span class="bf-index">' . esc_html($label('ABOUT')) . '</span><h2>商品介紹</h2></div><div class="bf-product-prose">' . apply_filters('the_content', $description) . '</div></section>';
+    }
+    $rows = bfnd_product_spec_rows($product);
+    if ($rows) {
+        echo '<section class="bf-spec-section bf-product-spec"><div class="bf-wrap"><span class="bf-index">' . esc_html($label('SPECIFICATION')) . '</span><h2>商品規格</h2><dl class="bf-spec-grid">';
+        foreach ($rows as $row) { echo '<div><dt>' . bfnd_e($row[0]) . '</dt><dd>' . bfnd_e($row[1]) . '</dd></div>'; }
+        echo '</dl></div></section>';
+    }
+    if (function_exists('wc_reviews_enabled') && wc_reviews_enabled() && comments_open($id)) {
+        $GLOBALS['post'] = get_post($id);
+        setup_postdata($GLOBALS['post']);
+        $GLOBALS['product'] = $product;
+        echo '<section class="bf-section bf-wrap bf-commerce-content bf-product-reviews"><div class="bf-product-block-head"><span class="bf-index">' . esc_html($label('REVIEWS')) . '</span><h2>顧客評價</h2></div><div class="woocommerce">';
+        comments_template();
+        echo '</div></section>';
+        wp_reset_postdata();
+    }
+    $upsells = bfnd_product_visible_ids($product->get_upsell_ids(), $id);
+    if ($upsells) { bfnd_render_product_grid('YOU MAY ALSO LIKE', '搭配推薦', array_slice($upsells, 0, 4)); }
+    $related = bfnd_product_visible_ids(wc_get_related_products($id, 8, $upsells), $id);
+    if ($related) { bfnd_render_product_grid('RELATED PRODUCTS', '相關商品', array_slice($related, 0, 4), $shop, '所有商品'); }
+    // The [products] loop leaves its last item in the globals; put this product back.
+    $GLOBALS['post'] = get_post($id);
+    $GLOBALS['product'] = $product;
+    echo '<section class="bf-cta bf-product-cta"><div class="bf-wrap"><span class="bf-kicker">BEFORE YOU BUY</span><h2>對這件商品有疑問？</h2><p>尺寸、材質、配送或保養方式，歡迎先與我們聯繫。</p>';
+    bfnd_button('聯絡我們', bfnd_page_url('collaboration') . '#inquiry');
+    echo '</div></section>';
 }
 
 function bfnd_render_journal_article() {

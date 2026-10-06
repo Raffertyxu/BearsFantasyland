@@ -825,3 +825,7 @@ body.bfnd-body .bf-collab-sustain .bf-button-light { border-color: var(--bf-wood
 @media(min-width:1920px){body.bfnd-body .bf-collab-hero{height:auto;min-height:calc(540*var(--bfnd-px))}body.bfnd-body .bf-collab-hero h1{max-width:max(clamp(calc(760*var(--bfnd-px)),22vw,calc(1500*var(--bfnd-px))),9em)}}
 /* Keyboard focus stays visible on photographs and dark bands. */
 body.bfnd-body :is(.bf-home-hero,.bf-page-hero,.bf-school-hero,.bf-lifestyle-hero,.bf-split-promos,.bf-cta,.bf-lifestyle-cta,.bf-school-cta,.bf-footer-bottom) :where(a,button):focus-visible,body.bfnd-body .bf-split-promos>a:focus-visible{outline:calc(2*var(--bfnd-px)) solid #f8f6f2;outline-offset:calc(3*var(--bfnd-px));box-shadow:0 0 0 calc(5*var(--bfnd-px)) rgba(52,43,37,.6)}
+/* Store product cards (shop, categories, related, inline grids): brand sale tag and plain prices instead of WooCommerce olive defaults. */
+body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product span.onsale{top:calc(10*var(--bfnd-px));right:auto;left:calc(10*var(--bfnd-px));min-width:0;min-height:0;margin:0;padding:calc(4*var(--bfnd-px)) calc(10*var(--bfnd-px));border-radius:0;background:var(--bf-wood);color:#fff;font-family:var(--bf-serif);font-size:calc(11*var(--bfnd-px));font-weight:500;line-height:1.5;letter-spacing:.2em}
+body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product .price ins{text-decoration:none;font-weight:600}
+body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product .price del{color:var(--bf-muted);opacity:1}
