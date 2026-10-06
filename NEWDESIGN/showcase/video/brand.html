@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>飛熊入夢｜品牌故事 45 秒影片</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #out{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;aspect-ratio:16/9}
+  #gl{display:none}
+  #hud{position:fixed;left:8px;bottom:8px;font:12px monospace;color:#aaa}
+</style>
+</head>
+<body>
+<canvas id="gl" width="1920" height="1080"></canvas>
+<canvas id="out" width="1920" height="1080"></canvas>
+<div id="hud"></div>
+<script>
+(async () => {
+'use strict';
+/*
+  品牌故事 45 秒影片，內容取自 /brand-story/ 頁面原文。
+  ?t=12.3  顯示單一畫格   ?render  逐格送給 render.mjs 編碼   無參數  即時預覽
+  只用實拍素材；沒有工坊實拍照的「台中 Maker 工藝基地」以文字段落呈現。
+*/
+const W = 1920, H = 1080, FPS = 30, DURATION = 45;
+const BASE = '../../website/assets/';
+const params = new URLSearchParams(location.search);
+
+// fx: 0 木紋燃痕 1 漣漪 2 木條切片 3 推鏡 4 墨韻 5 色散 6 甩鏡 7 漏光 8 開門
+// layout: 0 滿版 1 畫框（直幅照片） 2 片尾模糊
+const SHOTS = [
+  { img:'works/cherry-island-table/03.webp', at:0, z:[1.5,1.2], f:[[.55,.5],[.5,.45]], r:[.02,0] },
+  { img:'works/muyo/01.webp', at:2.5, fx:7, d:1.0, z:[1.25,1.08], f:[[.62,.4],[.55,.55]], r:[0,0] },
+  { img:'works/muju/04.webp', at:6, fx:4, d:1.0, z:[1.3,1.12], f:[[.6,.5],[.45,.5]], r:[.01,-.005] },
+  { img:'works/arch/02.webp', at:8.5, fx:0, d:.9, z:[1.1,1.28], f:[[.3,.5],[.6,.6]], r:[0,0] },
+  { img:'works/muju/06.webp', at:11, fx:6, d:.5, z:[1.15,1.05], f:[[.7,.5],[.3,.5]], r:[0,0] },
+  { img:'works/muki/03.webp', at:12.5, fx:2, d:.6, z:[1.08,1.2], f:[[.4,.5],[.6,.45]], r:[0,0] },
+  { img:'works/muyo/03.webp', at:14, fx:5, d:.6, layout:1, z:[1.0,1.12], f:[[.5,.6],[.5,.4]], r:[0,0] },
+  { img:'works/arch/03.webp', at:15.5, fx:8, d:.5, z:[1.2,1.06], f:[[.5,.4],[.5,.55]], r:[0,0] },
+  { img:'works/warm/05.webp', at:17, fx:3, d:.7, z:[1.12,1.3], f:[[.45,.45],[.55,.4]], r:[0,0] },
+  { img:'works/ripple/01.webp', at:20, fx:1, d:1.0, z:[1.3,1.08], f:[[.55,.4],[.5,.45]], r:[.025,0] },
+  { img:'works/landscape-table/01.webp', at:23, fx:7, d:.9, z:[1.06,1.2], f:[[.4,.55],[.6,.6]], r:[0,0] },
+  { img:'works/muyo/02.webp', at:26, fx:4, d:.9, layout:1, z:[1.0,1.12], f:[[.5,.3],[.5,.7]], r:[0,0] },
+  { img:'brand/real-lecture.webp', at:29, fx:0, d:.9, z:[1.12,1.02], f:[[.6,.45],[.5,.5]], r:[0,0] },
+  { img:'courses/cnc.webp', at:31.5, fx:2, d:.6, layout:1, z:[1.0,1.06], f:[[.5,.5],[.5,.5]], r:[0,0] },
+  { img:'works/muyo/01.webp', at:34, fx:3, d:.7, z:[2.6,2.15], f:[[.58,.38],[.72,.45]], r:[.03,0] },
+  { img:'works/muju/02.webp', at:38.5, fx:7, d:1.0, layout:2, z:[1.08,1.16], f:[[.5,.5],[.5,.5]], r:[0,0] }
+];
+
+// 章節標（左上）：[開始, 結束, 編號, 英文, 中文]
+const CHAPTERS = [
+  [6, 11, '01', 'OUR ORIGIN', '源於熱愛'],
+  [11, 17, '02', 'FURNITURE', '實木家具'],
+  [17, 29, '—', 'OUR PHILOSOPHY', '品牌理念'],
+  [29, 34, '03', 'EDUCATION & MAKING', '木工教育 × 數位製造'],
+  [34, 38.5, '04', 'TAICHUNG MAKER', '台中 Maker 工藝基地']
+];
+
+// 字卡：每行 [文字, 樣式]；align left 時錨在左下，center 時置中
+const ST = {
+  kicker: ['500 26px', 'latin', 'cream', 10],
+  brand: ['500 34px', 'serif', 'amber', 10],
+  hero: ['600 112px', 'serif', 'cream', 8],
+  title: ['600 104px', 'serif', 'cream', 8],
+  quote: ['500 66px', 'serif', 'cream', 6],
+  lead: ['500 46px', 'serif', 'cream', 6],
+  body: ['400 30px', 'sans', 'soft', 4],
+  tags: ['400 28px', 'sans', 'amber', 6]
+};
+const CAPTIONS = [
+  { tin:.7, tout:2.05, align:'center', y:H / 2 - 20, dim:.55, lines:[['BRAND STORY / BEAR’S FANTASYLAND','kicker'], ['從一雙木工的手，到一個新的世代。','lead']] },
+  { tin:2.95, tout:5.6, align:'left', y:H - 360, lines:[['飛熊入夢','brand'], ['木，讓生活更美好。','hero'], ['木不只是材料，而是一種更好的生活方式。','body']] },
+  { tin:6.35, tout:8.25, align:'left', y:H - 300, lines:[['源於熱愛','title'], ['從傳統木工出發，結合現代設計與數位製造。','body']] },
+  { tin:8.8, tout:10.65, align:'left', y:H - 290, lines:[['在手作的溫度與科技的精準之間，','quote'], ['尋找屬於這個時代的木作方式。','quote']] },
+  { tin:11.3, tout:13.8, align:'left', y:H - 300, lines:[['實木家具','title'], ['從木材的選擇、比例、結構到使用方式。','body']] },
+  { tin:14.25, tout:16.7, align:'left', y:H - 390, lines:[['回到家具最單純的本質——','quote'], ['自然、耐用，','quote'], ['並且能長久陪伴生活。','quote']] },
+  { tin:17.4, tout:19.65, align:'left', y:H - 290, lines:[['讓傳承，','quote'], ['成為創新的開始。','quote']] },
+  { tin:20.45, tout:22.65, align:'left', y:H - 290, lines:[['新與舊的交替，不是取代，','quote'], ['而是讓彼此成就。','quote']] },
+  { tin:23.4, tout:25.65, align:'left', y:H - 290, lines:[['傳統給了我們根，','quote'], ['設計讓我們長出新的枝枒。','quote']] },
+  { tin:26.4, tout:28.65, align:'left', y:H - 290, lines:[['把兩個世代的手，','quote'], ['牽在一起。','quote']] },
+  { tin:29.4, tout:31.3, align:'left', y:H - 290, lines:[['真正值得傳承的，不只有作品，','quote'], ['還有製作它的方法。','quote']] },
+  { tin:31.85, tout:33.7, align:'left', y:H - 300, lines:[['從第一次接觸木材開始','lead'], ['木工基礎　·　自由創作　·　CNC 數位木工','tags']] },
+  { tin:34.45, tout:38.0, align:'center', y:H / 2 - 30, dim:.45, lines:[['飛熊入夢扎根台中。','title'], ['木工設備　·　CNC 數位製造　·　設計　·　教育　·　創作','tags']] },
+  { tin:39.1, tout:41.5, align:'center', y:H / 2 - 70, lines:[['A BETTER LIVING WITH WOOD','kicker'], ['承一代人的手藝，','quote'], ['創下一代人的家具。','quote']] }
+];
+const STORY_START = 6, STORY_END = 38.5, OUTRO = 41.85;
+
+/* ---------------- WebGL2 ---------------- */
+const glCanvas = document.getElementById('gl');
+const gl = glCanvas.getContext('webgl2', { antialias:false, preserveDrawingBuffer:true, premultipliedAlpha:false });
+if (!gl) { document.body.textContent = 'WebGL2 not available'; report('ERROR no webgl2'); return; }
+
+const VERT = `#version 300 es
+in vec2 p; out vec2 vUv; void main(){ vUv = p*.5+.5; gl_Position = vec4(p,0.,1.); }`;
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 vUv; out vec4 o;
+uniform sampler2D uT0, uT1;
+uniform vec2 uRes, uS0, uS1;
+uniform vec4 uC0, uC1;
+uniform float uL0, uL1, uP, uTime;
+uniform int uFx;
+#define PI 3.14159265
+float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+float ease(float t){return t<.5?4.*t*t*t:1.-pow(-2.*t+2.,3.)/2.;}
+float sweep(float v,float p,float e){return smoothstep(v,v+e,p*(1.+e));}
+
+vec2 coverUV(vec2 uv, vec2 img, vec4 c, vec2 res){
+  float ra=res.x/res.y, ia=img.x/img.y;
+  vec2 s = ra>ia ? vec2(1., ia/ra) : vec2(ra/ia, 1.);
+  s /= c.x;
+  vec2 q = uv-.5; q.x *= ra;
+  float cs=cos(c.w), sn=sin(c.w); q = mat2(cs,-sn,sn,cs)*q; q.x /= ra;
+  vec2 room = 1.-s;
+  return (q+.5)*s + room*c.yz;
+}
+vec4 layer(sampler2D t, vec2 img, vec4 c, float L, vec2 uv){
+  if(L<.5) return texture(t, coverUV(uv,img,c,uRes));
+  if(L<1.5){
+    vec4 bg = textureLod(t, coverUV(uv,img,vec4(1.2,.5,.5,0.),uRes), 5.5);
+    bg.rgb *= .42;
+    float h=.8; float w=h*(img.x/img.y)/(uRes.x/uRes.y);
+    vec2 ctr=vec2(.94-w*.5,.5);
+    vec2 q=(uv-ctr)/vec2(w,h)+.5;
+    if(q.x>=0.&&q.x<=1.&&q.y>=0.&&q.y<=1.) return texture(t, coverUV(q,img,c,vec2(w*uRes.x,h*uRes.y)));
+    vec2 dq=max(abs(uv-ctr)-vec2(w,h)*.5,0.);
+    float sh=exp(-length(dq*vec2(uRes.x/uRes.y,1.))*28.);
+    bg.rgb *= 1.-.55*sh;
+    return bg;
+  }
+  vec4 b = textureLod(t, coverUV(uv,img,c,uRes), 3.2);
+  b.rgb *= .3;
+  return b;
+}
+vec4 A(vec2 uv){return layer(uT0,uS0,uC0,uL0,uv);}
+vec4 B(vec2 uv){return layer(uT1,uS1,uC1,uL1,uv);}
+
+void main(){
+  vec2 uv=vUv; float p=uP; float ra=uRes.x/uRes.y; float s=sin(p*PI);
+  vec4 col;
+  if(p<=0.){ col=A(uv); }
+  else if(p>=1.){ col=B(uv); }
+  else if(uFx==0){ // 木紋燃痕
+    float g=fbm(vec2(uv.x*2.2,uv.y*22.+fbm(uv*3.)*4.));
+    float v=clamp(uv.x*.62+g*.38,0.,1.);
+    float m=sweep(v,p,.08); float edge=1.-abs(m*2.-1.);
+    vec2 d=vec2(0.,(g-.5)*.05*edge);
+    col=mix(A(uv+d),B(uv-d),m);
+    col.rgb+=vec3(1.,.6,.26)*pow(edge,3.)*.65;
+  } else if(uFx==1){ // 漣漪
+    vec2 q=(uv-.5)*vec2(ra,1.); float dist=length(q);
+    float maxR=length(vec2(ra,1.))*.5; float r=p*(maxR+.3);
+    float band=smoothstep(.28,0.,abs(dist-r))*s;
+    vec2 dir=dist>0.?q/dist:vec2(0.);
+    float w=sin(dist*38.-p*26.)*.02*band+sin(dist*12.-p*9.)*.012*s;
+    vec2 off=dir*w/vec2(ra,1.);
+    float m=1.-smoothstep(r-.14,r+.02,dist);
+    col=mix(A(uv+off),B(uv-off*1.4),m);
+    col.rgb+=vec3(1.,.9,.75)*band*.08;
+  } else if(uFx==2){ // 木條切片
+    float n=7.; float id=floor(uv.x*n); float fx=fract(uv.x*n);
+    float delay=id/(n-1.)*.42; float lp=ease(clamp((p-delay)/.58,0.,1.));
+    float m=step(1.-lp,uv.y);
+    vec4 a=A(vec2(uv.x,uv.y+lp*.25)); a.rgb*=1.-.4*lp;
+    vec4 b=B(vec2(uv.x,uv.y-(1.-lp)*.35)); b.rgb*=mix(.7,1.,lp);
+    col=mix(a,b,m);
+    float line=smoothstep(.004,0.,abs(uv.y-(1.-lp)))*step(.001,lp)*step(lp,.999);
+    col.rgb+=vec3(1.,.82,.6)*line*.8;
+    col.rgb*=1.-smoothstep(.985,1.,fx)*.35*s;
+  } else if(uFx==3){ // 推鏡光爆
+    vec2 c=vec2(.5); vec4 a=vec4(0.), b=vec4(0.);
+    for(int i=0;i<16;i++){ float t=float(i)/15.; float k=1.-t*.16*s;
+      a+=A(c+(uv-c)*(1.-p*.3)*k); b+=B(c+(uv-c)*(1.-(1.-p)*.3)*k); }
+    col=mix(a/16.,b/16.,smoothstep(.38,.62,p));
+    col.rgb+=vec3(1.,.84,.62)*pow(s,5.)*.28;
+  } else if(uFx==4){ // 墨韻煙幕
+    float n=fbm(uv*vec2(ra,1.)*2.4+vec2(0.,p*.7));
+    float v=clamp((uv.x*.55+(1.-uv.y)*.45)*.7+n*.3,0.,1.);
+    float m=sweep(v,p,.2); float edge=1.-abs(m*2.-1.);
+    vec2 d=(vec2(n)-.5)*.07*edge;
+    col=mix(A(uv+d),B(uv-d*.5),m);
+    col.rgb*=1.-edge*.5;
+  } else if(uFx==5){ // 色散橫掃
+    float n=noise(vec2(uv.y*9.,3.1))*.5+noise(vec2(uv.y*42.,7.))*.18;
+    float v=clamp((1.-uv.x)*.78+n*.32,0.,1.);
+    float m=sweep(v,p,.12); float edge=1.-abs(m*2.-1.);
+    float sh=.01*s+.022*edge;
+    vec2 ua=uv+vec2(p*.08,0.), ub=uv-vec2((1.-p)*.08,0.);
+    vec4 a=vec4(A(ua+vec2(sh,0.)).r,A(ua).g,A(ua-vec2(sh,0.)).b,1.);
+    vec4 b=vec4(B(ub+vec2(sh,0.)).r,B(ub).g,B(ub-vec2(sh,0.)).b,1.);
+    col=mix(a,b,m);
+    col.rgb+=vec3(1.,.95,.9)*pow(edge,6.)*.3;
+  } else if(uFx==6){ // 甩鏡
+    vec4 a=vec4(0.), b=vec4(0.);
+    float pe=ease(p);
+    for(int i=0;i<14;i++){ float k=(float(i)/13.-.5)*s*.16;
+      a+=A(uv+vec2(pe*.55+k,0.)); b+=B(uv-vec2((1.-pe)*.55,0.)+vec2(k,0.)); }
+    col=mix(a/14.,b/14.,smoothstep(.42,.58,p));
+    col.rgb*=1.+s*.08;
+  } else if(uFx==7){ // 漏光
+    float m=smoothstep(.25,.75,p);
+    vec2 cc=vec2(.5);
+    col=mix(A(cc+(uv-cc)*(1.-p*.04)), B(cc+(uv-cc)*(1.+(1.-p)*.04)), m);
+    float l=fbm(uv*vec2(1.4,.7)+vec2(uTime*.35,uTime*.1));
+    vec3 leak=vec3(1.,.55,.22)*smoothstep(.35,.85,l+s*.55-uv.x*.35)*s
+             +vec3(1.,.8,.55)*smoothstep(.6,1.,1.-length((uv-vec2(.85,.75))*vec2(ra,1.)*.9))*s*.8;
+    col.rgb=1.-(1.-col.rgb)*(1.-clamp(leak*.6,0.,1.));
+  } else { // 開門
+    float gap=ease(p)*.5;
+    float top=step(.5,uv.y);
+    vec4 a=A(vec2(uv.x, uv.y + mix(gap,-gap,top)));
+    a.rgb*=1.-gap*.8;
+    vec4 b=B(.5+(uv-.5)*(1.-.12*(1.-p)));
+    float m=step(abs(uv.y-.5),gap);
+    col=mix(a,b,m);
+    float line=smoothstep(.003,0.,abs(abs(uv.y-.5)-gap))*step(.001,gap)*step(gap,.499);
+    col.rgb+=vec3(1.,.85,.65)*line*.9;
+  }
+  vec2 vq=(uv-.5)*vec2(ra*.8,1.);
+  col.rgb*=mix(.68,1.,smoothstep(.95,.25,length(vq)));
+  col.rgb=mix(col.rgb,col.rgb*vec3(1.05,1.,.92),.55);
+  col.rgb=mix(col.rgb, smoothstep(0.,1.,col.rgb), .25);
+  col.rgb+=(hash(uv*uRes+fract(uTime*7.31)*100.)-.5)*.03;
+  o=vec4(col.rgb,1.);
+}`;
+
+function compile(type, src) {
+  const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+  return sh;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
+gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+const vbo = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+const aLoc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(aLoc); gl.vertexAttribPointer(aLoc, 2, gl.FLOAT, false, 0, 0);
+const U = {};
+['uT0','uT1','uRes','uS0','uS1','uC0','uC1','uL0','uL1','uP','uTime','uFx'].forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
+gl.uniform1i(U.uT0, 0); gl.uniform1i(U.uT1, 1);
+gl.uniform2f(U.uRes, W, H);
+gl.viewport(0, 0, W, H);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+/* ---------------- assets ---------------- */
+const loadImage = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('load ' + src)); im.src = src; });
+const cache = new Map();
+for (const s of SHOTS) {
+  if (!cache.has(s.img)) {
+    const im = await loadImage(BASE + s.img);
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    cache.set(s.img, { tex:t, w:im.naturalWidth, h:im.naturalHeight });
+  }
+  s.asset = cache.get(s.img);
+}
+const logoImg = await loadImage('../../website/public/logo-transparent.png');
+const logo = document.createElement('canvas');
+logo.width = logoImg.naturalWidth; logo.height = logoImg.naturalHeight;
+{ const c = logo.getContext('2d'); c.drawImage(logoImg, 0, 0); c.globalCompositeOperation = 'source-in'; c.fillStyle = '#f3ece2'; c.fillRect(0, 0, logo.width, logo.height); }
+
+const SERIF = '"Noto Serif TC"', SANS = '"Noto Sans TC"', LATIN = '"Cormorant Garamond"';
+const allText = CAPTIONS.map((c) => c.lines.map((l) => l[0]).join('')).join('') + CHAPTERS.map((c) => c.slice(2).join('')).join('') +
+  '從台灣出發，做讓我們自己都感到驕傲的設計。家具設計木工教育數位製造・—×0123456789';
+await Promise.all([
+  document.fonts.load(`600 100px ${SERIF}`, allText), document.fonts.load(`500 100px ${SERIF}`, allText),
+  document.fonts.load(`400 40px ${SANS}`, allText), document.fonts.load(`300 40px ${SANS}`, allText),
+  document.fonts.load(`300 40px ${LATIN}`, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/&’—'),
+  document.fonts.load(`400 40px ${LATIN}`, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/&’—'),
+  document.fonts.load(`500 40px ${LATIN}`, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/&’—')
+]);
+
+/* ---------------- timeline ---------------- */
+const clamp01 = (x) => Math.min(Math.max(x, 0), 1);
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+const easeInOutCubic = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeOutExpo = (t) => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+const easeInCubic = (t) => t * t * t;
+
+SHOTS.forEach((s, i) => {
+  const next = SHOTS[i + 1];
+  s.from = s.at - (s.d || 0) / 2;
+  s.to = next ? next.at + next.d / 2 : DURATION;
+  s.end = next ? next.at : DURATION;
+});
+
+function camera(s, t) {
+  const u = easeInOutSine(clamp01((t - s.from) / (s.to - s.from)));
+  return [lerp(s.z[0], s.z[1], u), lerp(s.f[0][0], s.f[1][0], u), 1 - lerp(s.f[0][1], s.f[1][1], u), lerp(s.r[0], s.r[1], u)];
+}
+
+function drawGL(t) {
+  let i = SHOTS.length - 1;
+  while (i > 0 && t < SHOTS[i].at) i--;
+  let a = SHOTS[i], b = a, p = 0, fx = 0;
+  const next = SHOTS[i + 1];
+  if (next && t >= next.at - next.d / 2) { b = next; p = (t - (next.at - next.d / 2)) / next.d; fx = next.fx; }
+  else if (i > 0 && t < a.at + a.d / 2) { b = a; a = SHOTS[i - 1]; p = (t - (b.at - b.d / 2)) / b.d; fx = b.fx; }
+  p = easeInOutCubic(clamp01(p));
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, a.asset.tex);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, b.asset.tex);
+  gl.uniform2f(U.uS0, a.asset.w, a.asset.h); gl.uniform2f(U.uS1, b.asset.w, b.asset.h);
+  gl.uniform4f(U.uC0, ...camera(a, t)); gl.uniform4f(U.uC1, ...camera(b, t));
+  gl.uniform1f(U.uL0, a.layout || 0); gl.uniform1f(U.uL1, b.layout || 0);
+  gl.uniform1f(U.uP, b === a ? 0 : p);
+  gl.uniform1i(U.uFx, fx);
+  gl.uniform1f(U.uTime, t);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+/* ---------------- typography overlay ---------------- */
+const out = document.getElementById('out');
+const ctx = out.getContext('2d');
+const CREAM = '#f8f6f2', SOFT = 'rgba(248,246,242,.72)', AMBER = '#d9a46a';
+const M = 110; // safe margin
+
+// 由下往上遮罩進場、往上退場
+function phase(t, tin, tout, inDur = .7, outDur = .35) {
+  if (t < tin) return null;
+  if (tout != null && t >= tout + outDur) return null;
+  const ein = easeOutExpo(clamp01((t - tin) / inDur));
+  const eout = tout != null ? easeInCubic(clamp01((t - tout) / outDur)) : 0;
+  return { off: eout > 0 ? -eout : 1 - ein, alpha: ein * (1 - eout) };
+}
+function maskText(text, x, y, font, color, ph, opts = {}) {
+  if (!ph) return 0;
+  ctx.save();
+  ctx.font = font;
+  ctx.letterSpacing = opts.spacing || '0px';
+  ctx.textAlign = opts.align || 'left';
+  ctx.textBaseline = 'alphabetic';
+  const m = ctx.measureText(text);
+  const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+  const h = asc + desc;
+  const left = opts.align === 'center' ? x - m.width / 2 : opts.align === 'right' ? x - m.width : x;
+  ctx.beginPath(); ctx.rect(left - 20, y - asc - 6, m.width + 40, h + 14); ctx.clip();
+  ctx.globalAlpha = Math.max(ph.alpha, 0) * (opts.alpha ?? 1);
+  ctx.fillStyle = color;
+  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 18;
+  ctx.fillText(text, x, y + ph.off * (h + 14));
+  ctx.restore();
+  return m.width;
+}
+function line(x, y, w, color, k, alpha = 1, origin = 'left') {
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color;
+  const ww = w * k;
+  ctx.fillRect(origin === 'center' ? x - ww / 2 : x, y, ww, 2);
+  ctx.restore();
+}
+
+const FAMILY = { serif:SERIF, sans:SANS, latin:LATIN };
+const COLOR = { cream:CREAM, soft:SOFT, amber:AMBER };
+
+function drawCaption(c, t) {
+  if (t < c.tin || t > c.tout + .6) return;
+  const specs = c.lines.map(([text, style]) => {
+    const [font, fam, color, spacing] = ST[style];
+    const size = parseInt(font.split(' ')[1], 10);
+    return { text, font:`${font} ${FAMILY[fam]}`, color:COLOR[color], spacing:spacing + 'px', size };
+  });
+  const x = c.align === 'center' ? W / 2 : M;
+  let y = c.y;
+  specs.forEach((s, k) => {
+    if (k > 0) y += Math.max(specs[k - 1].size * .35, 14) + s.size * 1.15;
+    const ph = phase(t, c.tin + k * .09, c.tout + k * .04, .85, .32);
+    maskText(s.text, x, y, s.font, s.color, ph, { align:c.align, spacing:s.spacing });
+  });
+}
+
+function drawOverlay(t) {
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(glCanvas, 0, 0);
+
+  // 左下壓暗讓字清楚；置中字卡另外整體壓暗
+  const presence = clamp01((t - 2.6) / .6) * (1 - clamp01((t - OUTRO + .6) / .6));
+  if (presence > 0) {
+    ctx.save(); ctx.globalAlpha = presence;
+    let g = ctx.createLinearGradient(0, 0, W * .62, 0);
+    g.addColorStop(0, 'rgba(18,14,11,.66)'); g.addColorStop(1, 'rgba(18,14,11,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    g = ctx.createLinearGradient(0, H, 0, H * .45);
+    g.addColorStop(0, 'rgba(18,14,11,.72)'); g.addColorStop(1, 'rgba(18,14,11,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    g = ctx.createLinearGradient(0, 0, 0, H * .28);
+    g.addColorStop(0, 'rgba(18,14,11,.5)'); g.addColorStop(1, 'rgba(18,14,11,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  let dim = 0;
+  CAPTIONS.forEach((c) => {
+    if (!c.dim) return;
+    const k = clamp01((t - c.tin + .5) / .6) * (1 - clamp01((t - c.tout - .2) / .6));
+    dim = Math.max(dim, c.dim * k);
+  });
+  if (dim > 0) { ctx.fillStyle = `rgba(14,11,9,${dim})`; ctx.fillRect(0, 0, W, H); }
+
+  // 章節標
+  CHAPTERS.forEach(([a, b, num, en, cn]) => {
+    const tin = a + .1, tout = b - .35;
+    const ph = phase(t, tin, tout, .8, .3);
+    if (!ph) return;
+    const y = 132;
+    maskText(num, M, y, `400 34px ${LATIN}`, AMBER, ph, { spacing:'2px' });
+    const lk = easeOutExpo(clamp01((t - tin - .1) / .7)) * (1 - easeInCubic(clamp01((t - tout) / .3)));
+    line(M + 58, y - 11, 56, AMBER, lk, .9);
+    const w = maskText(cn, M + 136, y, `500 30px ${SERIF}`, CREAM, phase(t, tin + .06, tout, .8, .3), { spacing:'4px' });
+    maskText(en, M + 136 + w + 22, y - 2, `400 20px ${LATIN}`, SOFT, phase(t, tin + .12, tout, .8, .3), { spacing:'6px' });
+  });
+
+  CAPTIONS.forEach((c) => drawCaption(c, t));
+
+  // 故事進度線
+  if (t > STORY_START - .4 && t < STORY_END + .6) {
+    const k = clamp01((t - STORY_START + .4) / .5) * (1 - clamp01((t - STORY_END) / .5));
+    const prog = clamp01((t - STORY_START) / (STORY_END - STORY_START));
+    ctx.save(); ctx.globalAlpha = k;
+    ctx.fillStyle = 'rgba(248,246,242,.22)'; ctx.fillRect(M, H - 70, W - M * 2, 2);
+    ctx.fillStyle = CREAM; ctx.fillRect(M, H - 70, (W - M * 2) * prog, 2);
+    ctx.restore();
+  }
+
+  // 片尾
+  if (t > OUTRO - .2) {
+    const k = easeOutExpo(clamp01((t - OUTRO) / 1.2));
+    const lw = 760, lh = lw * logo.height / logo.width;
+    const sc = lerp(.94, 1, k);
+    ctx.save(); ctx.globalAlpha = k;
+    ctx.translate(W / 2, H / 2 - 80); ctx.scale(sc, sc);
+    ctx.drawImage(logo, -lw / 2, -lh / 2, lw, lh);
+    ctx.restore();
+    line(W / 2, H / 2 + 70, 300, AMBER, easeOutExpo(clamp01((t - OUTRO - .4) / .9)), .9, 'center');
+    maskText('從台灣出發，做讓我們自己都感到驕傲的設計。', W / 2, H / 2 + 150, `500 40px ${SERIF}`, CREAM, phase(t, OUTRO + .5, null, .9), { align:'center', spacing:'6px' });
+    maskText('家具設計　·　木工教育　·　數位製造', W / 2, H / 2 + 220, `400 24px ${SANS}`, AMBER, phase(t, OUTRO + .85, null, .9), { align:'center', spacing:'8px' });
+  }
+
+  const black = Math.max(1 - clamp01(t / .7), clamp01((t - (DURATION - .6)) / .6));
+  if (black > 0) { ctx.fillStyle = `rgba(0,0,0,${black})`; ctx.fillRect(0, 0, W, H); }
+}
+
+
+function renderFrame(t) { drawGL(t); drawOverlay(t); }
+
+function report(msg) { return fetch('/log', { method:'POST', body:String(msg) }).catch(() => {}); }
+
+/* ---------------- modes ---------------- */
+const hud = document.getElementById('hud');
+if (params.has('render')) {
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  await report('GL ' + (dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)));
+  const total = Math.round(DURATION * FPS);
+  for (let f = 0; f < total; f++) {
+    renderFrame(f / FPS);
+    const data = ctx.getImageData(0, 0, W, H).data;
+    const r = await fetch('/frame', { method:'POST', body:data.buffer });
+    if (!r.ok) { await report('ERROR frame ' + f); return; }
+    if (f % 30 === 0) await report(`frame ${f}/${total}`);
+  }
+  await fetch('/done', { method:'POST' });
+} else if (params.has('t')) {
+  renderFrame(Number(params.get('t')) || 0);
+  hud.textContent = 't=' + params.get('t');
+  document.title = 'ready';
+} else {
+  const start = performance.now();
+  const loop = (now) => {
+    const t = ((now - start) / 1000) % DURATION;
+    renderFrame(t);
+    hud.textContent = t.toFixed(2) + 's';
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+})().catch((err) => {
+  document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f88;position:fixed;top:0">${err.stack}</pre>`);
+  fetch('/log', { method:'POST', body:'ERROR ' + err.stack }).catch(() => {});
+});
+</script>
+</body>
+</html>
