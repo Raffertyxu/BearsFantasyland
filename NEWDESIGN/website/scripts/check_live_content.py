@@ -15,7 +15,7 @@ def assert_no_placeholders(label, text):
 CASES = {
     "/": ("logo-transparent.png", "飛熊日誌"),
     "/woodworking-school/": ("木作學習路徑", "專項技能課程", "線上課程資訊近期公布"),
-    "/furniture/": ("COLLECTIONS / 依系列瀏覽", "搜尋作品、系列或木材"),
+    "/furniture/": ('<select id="bf-series">', "全部系列", "搜尋作品、系列或木材"),
     "/lifestyle/": ("生活木作", "晨露圓境托盤"),
     "/brand-story/": ("我們希望有一天", "對這片土地的自信", "飛熊入夢木作教學現場"),
     "/collaboration/": ("需求討論", "提案報價", "完成交付", "bf-sdg-goals", "飛熊日誌"),
@@ -32,6 +32,8 @@ for path, markers in CASES.items():
         raise SystemExit(1)
     assert not re.search(r"(?i)(editorial|wooden-cup)", html), f"{path} references an illustrative image asset"
     assert_no_placeholders(path, html)
+    if path == "/furniture/":
+        assert "COLLECTIONS / 依系列瀏覽" not in html, "furniture page still shows the retired series button row"
 
 journal_counts = {}
 for path in ("/", "/collaboration/", "/journal/"):

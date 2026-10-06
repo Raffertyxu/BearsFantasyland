@@ -1,6 +1,6 @@
 # 飛熊入夢官網：接手待辦清單
 
-更新：2026-10-06（Claude，商品頁版型與課程購買 session）
+更新：2026-10-07（Claude，主題 1.3.42／外掛 0.5.40 上線）
 語言：與使用者溝通一律用**繁體中文（台灣）**；程式碼與 commit message 用英文。
 
 ---
@@ -10,10 +10,10 @@
 | 項目 | 狀態 |
 |---|---|
 | 正式站 | https://a1.haotaimaker.com/ （WordPress + WooCommerce 11.1.2 + Yoast + Wordfence + 綠界 ECPay） |
-| 啟用主題 | 「飛熊入夢」**1.3.41**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.41.zip`） |
-| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.39**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.39.zip`） |
-| 與正式站一致的程式碼 | `main` 分支（已併入 `claude/product-page-design-2cb8d1`） |
-| 回退用 ZIP | 主題 1.3.35～1.3.40、外掛 0.5.36／0.5.38 都在 `dist/`（Git LFS） |
+| 啟用主題 | 「飛熊入夢」**1.3.42**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.42.zip`） |
+| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.40**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.40.zip`） |
+| 與正式站一致的程式碼 | `claude/batch1-inquiry-shop-link-filter` 分支（**尚未併入 `main`**） |
+| 回退用 ZIP | 主題 1.3.35～1.3.41、外掛 0.5.36／0.5.38／0.5.39 都在 `dist/`（Git LFS） |
 | 綠界 | **正式收款模式**（「啟用測試模式」關閉）。刷卡測試會真的扣款 |
 
 每次上線的完整紀錄、SHA-256 與即時驗收結果：`NEWDESIGN/website/DEPLOYMENT.md` 最上面幾段。
@@ -30,16 +30,16 @@
     3. 課程報名提示有出現。
   - 確認完把這筆測試訂單取消，名額會回補。
   - 規定：AI 不可代為付款或操作金流。
-- [x] **家具頁兩排篩選要不要合併**（使用者選「系列改下拉選單」；已在分支 `claude/batch1-inquiry-shop-link-filter` 做好，主題 1.3.42，**待上線**）（/furniture/：上排「家具分類」`bf_work_cat`，下排「作品系列」`bf_series`）
+- [x] **家具頁兩排篩選要不要合併**（使用者選「系列改下拉選單」；已在分支 `claude/batch1-inquiry-shop-link-filter` 做好，主題 1.3.42，**2026-10-07 已上線**）（/furniture/：上排「家具分類」`bf_work_cat`，下排「作品系列」`bf_series`）
   - 建議：保留分類頁籤，系列改成搜尋框旁的下拉選單。等使用者決定。
   - 程式位置：主題 `src/render.php` 約 194–205 行；前端篩選在 `public/site.js` 約 119 行（`data-series-filter`）。
 - [ ] **資安（見 `NEWDESIGN/website/SECURITY-AUDIT-2026-10-06.md`）**
   - [ ] 🔴 主機上來源不明的 `wp-content/mu-plugins/customize-controlsse.php`：每次請求都會執行，9/17 起就記錄，至今未查明。需主機權限下載檢視，或請主機商協助。**不可宣稱已確認是惡意或已確認根因**（見 `PM-AUDIT.md`）。使用者可能需要一份給主機商的說明。
-  - [x] （外掛 0.5.40 已做好，**待上線**：每 IP 10 分鐘 5 次、全站每小時 40 次、欄位長度上限）🟠 詢問表單沒有頻率限制與伺服器端長度限制（外掛 `src/admin.php` 約 500 行 `bfnd_inquiry`），可能被灌單。可加 transient 依 IP 限流＋欄位長度上限。
+  - [x] （外掛 0.5.40，**2026-10-07 已上線**，限流未在正式站實測：每 IP 10 分鐘 5 次、全站每小時 40 次、欄位長度上限）🟠 詢問表單沒有頻率限制與伺服器端長度限制（外掛 `src/admin.php` 約 500 行 `bfnd_inquiry`），可能被灌單。可加 transient 依 IP 限流＋欄位長度上限。
   - [ ] 🟠 `xmlrpc.php` 開啟。先確認 Jetpack 是否在用，再用 Wordfence 關閉 XML-RPC 驗證。改設定前要問使用者。
   - [ ] 低風險 10 條見報告。
 - [ ] **重複造輪子清理（見 `NEWDESIGN/website/NATIVE-REUSE-AUDIT-2026-10-06.md`）**：估計可刪或改用原生功能 3,000 行以上。要分批做、每批都驗證，開始前先問使用者。
-  1. ✅ 已在外掛 0.5.40／主題 1.3.42 做好，**待上線**：作品編輯頁「對應的商店商品」下拉選單，作品頁底部顯示「前往選購」。**不要合併** `claude/upload-plugin-theme-files-15c122`（1.3.36／0.5.37「作品加入購物車」）。它建在 1.3.35 上，合併會蓋掉 1.3.37～1.3.41 的商品頁。改成作品頁存一個 Woo 商品 ID，放「前往選購」連到商品頁（約 20 行）。
+  1. ✅ 外掛 0.5.40／主題 1.3.42，**2026-10-07 已上線**（目前沒有作品綁商品，前台還看不到按鈕）：作品編輯頁「對應的商店商品」下拉選單，作品頁底部顯示「前往選購」。**不要合併** `claude/upload-plugin-theme-files-15c122`（1.3.36／0.5.37「作品加入購物車」）。它建在 1.3.35 上，合併會蓋掉 1.3.37～1.3.41 的商品頁。改成作品頁存一個 Woo 商品 ID，放「前往選購」連到商品頁（約 20 行）。
   2. 刪掉用不到的程式（約 2,500 行）：
      - 已用完的匯入／遷移工具；
      - 主題啟用時根本不載入的外掛備援 renderer（外掛 `src/render.php`）；
@@ -74,7 +74,7 @@
 
 ## 3. Claude 可以接著做的小事（做之前先告知使用者）
 
-- [x] （主題 1.3.42 已做好，**待上線**：商品與所有變化都沒填貨號時隱藏整行）商品資訊出現「貨號: 不提供」（可變商品沒填 SKU 時 Woo 的預設行為）。可在 `product.css` 隱藏，或請客戶填貨號。
+- [x] （主題 1.3.42，**2026-10-07 已上線**，7 個商品頁已確認不再出現：商品與所有變化都沒填貨號時隱藏整行）商品資訊出現「貨號: 不提供」（可變商品沒填 SKU 時 Woo 的預設行為）。可在 `product.css` 隱藏，或請客戶填貨號。
 - [ ] 後台「外觀 > 自訂 > 額外 CSS」第 3–5 行是 LINE 按鈕顏色的舊規則。主題已用更高特異性蓋過，可在使用者同意後刪除。
 - [ ] 主題 `src/render.php` 與外掛 `src/render.php` 是兩份不同步的副本。主題啟用時只用主題那份。
 - [ ] `HANDOFF.md`、`README.md` 中舊的版本敘述可整併。
@@ -85,7 +85,8 @@
 
 | 分支 | 內容 | 處置 |
 |---|---|---|
-| `main` | = 正式站（主題 1.3.41／外掛 0.5.39） | 從這裡開新分支 |
+| `main` | 主題 1.3.41／外掛 0.5.39（落後正式站一版） | 從這裡開新分支 |
+| `claude/batch1-inquiry-shop-link-filter` | = 正式站（主題 1.3.42／外掛 0.5.40） | 待併入 main |
 | `claude/product-page-design-2cb8d1` | 本 session 的工作，已併入 main | 可刪 |
 | `claude/website-rwd-large-screens-777491` | 1.3.35 大螢幕等比例縮放，已包含在 main | 可刪 |
 | `claude/upload-plugin-theme-files-15c122` | 未上線的 1.3.36／0.5.37「作品加入購物車」（WIP commit） | **不要合併**，見 1.4 |
