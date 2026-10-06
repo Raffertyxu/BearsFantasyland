@@ -1,5 +1,5 @@
 // 逐格算出影片頁並用 ffmpeg 編成 MP4。
-// 用法：node render.mjs [--page brand.html --out bears-brand-story-45s.mp4] [--chrome "path\to\chrome.exe"] [--profile <暫存資料夾>]
+// 用法：node render.mjs [--page brand.html --out bears-brand-story-45s.mp4] [--audio out/score.wav] [--chrome "path\to\chrome.exe"] [--profile <暫存資料夾>]
 import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -19,12 +19,14 @@ const PAGE = arg('--page', 'reel.html');
 const OUT = path.join(OUT_DIR, arg('--out', 'bears-furniture-30s.mp4'));
 const CHROME = arg('--chrome', 'C:/Program Files/Google/Chrome/Application/chrome.exe');
 const PROFILE = arg('--profile', fs.mkdtempSync(path.join(os.tmpdir(), 'reel-chrome-')));
+const AUDIO = arg('--audio', null); // 選用：與畫面同長的音檔，路徑相對於本資料夾
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
 const ffmpeg = spawn('ffmpeg', [
   '-y', '-loglevel', 'error',
   '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${W}x${H}`, '-r', String(FPS), '-i', '-',
+  ...(AUDIO ? ['-i', path.resolve(HERE, AUDIO), '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '256k', '-shortest'] : []),
   '-c:v', 'libx264', '-preset', 'slow', '-crf', '19', '-pix_fmt', 'yuv420p',
   '-profile:v', 'high', '-movflags', '+faststart', OUT
 ], { stdio: ['pipe', 'inherit', 'inherit'] });
