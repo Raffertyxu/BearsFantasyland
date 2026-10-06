@@ -1,0 +1,20 @@
+{
+  "source": "audio/inspiring-cinematic-tunetank-409347.mp3",
+  "bpm": 110,
+  "beat": 0.5454545,
+  "trackFirstBeat": 0.515,
+  "trackStart": 16.333,
+  "duration": 30,
+  "note": "Video time t = track time - 16.333. Beat k in video at k*0.5454545s. Downbeats every 4 beats (k%4==0). Measured via spectral-flux onset + RMS on 2026-10-06.",
+  "sections": [
+    {"name": "intro",      "from": 0,      "to": 2.182,  "beats": [0, 4],   "energy": "quiet pad"},
+    {"name": "hit",        "at": 2.182,    "beat": 4,    "energy": "first big hit (-6.7 dB), decays over ~3s"},
+    {"name": "buildA",     "from": 2.182,  "to": 10.909, "beats": [4, 20],  "energy": "medium, dips quiet ~9.7-10.7"},
+    {"name": "reentry",    "at": 10.909,   "beat": 20},
+    {"name": "buildB",     "from": 10.909, "to": 19.636, "beats": [20, 36], "energy": "medium, rising"},
+    {"name": "preDropHit", "at": 19.636,   "beat": 36,   "energy": "single hit then near-silence 20.1-21.6"},
+    {"name": "DROP",       "at": 21.818,   "beat": 40,   "energy": "full (-6.9 dB), sustained"},
+    {"name": "climax",     "from": 21.818, "to": 27.273, "beats": [40, 50]},
+    {"name": "outro",      "from": 27.273, "to": 30,     "beats": [50, 55], "energy": "music still full; apply audio fade-out 27.3-30"}
+  ]
+}

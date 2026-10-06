@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>飛熊入夢｜品牌故事 45 秒廣告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #gl{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;aspect-ratio:16/9}
+  #ov{display:none}
+  #hud{position:fixed;left:8px;bottom:8px;font:12px monospace;color:#aaa}
+</style>
+</head>
+<body>
+<canvas id="gl" width="1920" height="1080"></canvas>
+<canvas id="ov" width="1920" height="1080"></canvas>
+<div id="hud"></div>
+<script>
+(async () => {
+'use strict';
+/*
+  45 秒品牌故事廣告（原創配樂：audio/bears-brand-score-45s.wav，從 0 秒起）。
+  ?t=12.3            顯示單一畫格
+  ?render            逐格送給 render.mjs 編碼
+  ?render&times=a,b  只送指定時間點（render.mjs --stills）
+  無參數             即時預覽，點一下畫面連同配樂播放
+  剪點依 audio/brand-structure.json：96 BPM，第 k 拍在 k × 0.625 秒，每小節 2.5 秒，剪點對齊到最近的畫格。
+  段落：intro 0–10、verse 10–20、build 20–30、pre-drop 重擊 28.75（28.9–30 真空）、DROP 30、climax 30–40、resolve 40–45。
+  字卡全部取自網站 /brand-story/ 原文（NEWDESIGN/website/src/render.php bfnd_render_story），只節錄不改寫。
+  畫面完全是時間 t 的純函數（無狀態），任一畫格可單獨算出。引擎沿用 ad30.html。
+*/
+const W = 1920, H = 1080, FPS = 30, DURATION = 45;
+const BEAT = 0.625;
+const AUDIO_SRC = 'audio/bears-brand-score-45s.wav';
+const AUDIO_START = 0;
+const BASE = '../../website/assets/';
+const params = new URLSearchParams(location.search);
+const beatT = (b) => b * BEAT;
+const cutT = (b) => Math.round(b * BEAT * FPS) / FPS; // 剪點對齊畫格
+const BAR = (H - W / 2.39) / 2;                        // 2.39:1 黑邊高度 ≈ 138px
+
+/* ---------------- easing ---------------- */
+const clamp01 = (x) => Math.min(Math.max(x, 0), 1);
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth = (t) => t * t * (3 - 2 * t);
+const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+const easeOutExpo = (t) => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+const easeInCubic = (t) => t * t * t;
+const easeInQuad = (t) => t * t;
+const win = (t, a, b) => clamp01((t - a) / (b - a));
+// 攝影機慣性曲線：glide = 切入時已在移動、指數減速（不等速）；cd = 從靜止起步的臨界阻尼；sstep = 靜止到靜止
+const EASE = {
+  glide: (u, k = 1.5) => (1 - Math.exp(-k * u)) / (1 - Math.exp(-k)),
+  cd: (u, w = 5) => { const f = (x) => 1 - (1 + w * x) * Math.exp(-w * x); return f(u) / f(1); },
+  sstep: (u) => smoother(u),
+  lin: (u) => u
+};
+
+/* ---------------- 文案（全部取自 NEWDESIGN/website/src/render.php 的 bfnd_render_story，括號內為行號） ---------------- */
+const COPY = {
+  kicker: 'BRAND STORY  /  BEAR’S FANTASYLAND',             // L393
+  title: '飛熊入夢', tagline: '木，讓生活更美好。',           // L393
+  hand: ['從一雙木工的手，', '到一個新的世代。'],             // L393
+  wood: ['我們相信，木不只是材料，', '而是一種更好的生活方式。'], // L393
+  origin: ['源於熱愛', '飛熊入夢源自對木工的熱愛。'],         // L401
+  craft: ['在手作的溫度與科技的精準之間，', '尋找屬於這個時代的木作方式。'], // L401
+  struct: ['對木材的理解、對尺寸的堅持、', '對結構的講究'],    // L407（節錄）
+  meet: ['讓手工具與數位製造相遇，', '讓傳統榫接與現代設計對話'], // L408（節錄）
+  newold: '新與舊的交替，不是取代，而是讓彼此成就。',         // L409
+  method: '真正值得傳承的，不只有一件完成的作品，還有製作它的方法。', // L418
+  thesis: '讓傳承，成為創新的開始。',                        // L404
+  root: ['傳統給了我們根，', '設計讓我們長出新的枝枒。'],      // L412
+  hands: '把兩個世代的手，牽在一起。',                       // L413
+  better: 'A BETTER LIVING WITH WOOD',                        // L421
+  statement: ['承一代人的手藝，', '創下一代人的家具。']        // L421
+};
+// 上黑邊的章節標：[起拍, 終拍, 編號, 英文, 中文]（L401、L404、L418）
+const CHAPTERS = [
+  [16, 24, '01', 'OUR ORIGIN', '源於熱愛'],
+  [24, 40, '—', 'OUR PHILOSOPHY', '品牌理念'],
+  [40, 46, '03', 'EDUCATION & MAKING', '木工教育 × 數位製造']
+];
+const SERVICES = '家具訂製　·　空間合作　·　木作學堂';
+
+/* ---------------- 分鏡 ----------------
+  b: 起始拍號（第 k 拍 = k × 0.625s）。panel 參數：
+   img     圖片（相對 assets/）
+   rect    畫面上的矩形 [x,y,w,h]（px，y 向下），預設全幅
+   c       影像中心點 [[x0,y0],[x1,y1]]（影像座標 0–1，y 向下）
+   z       相對 cover 的縮放 [z0,z1]
+   r       roll（弧度）
+   ease    ['glide',k] 等
+   par     2.5D 視差位移 [[x0,y0],[x1,y1]]（畫面比例；越近的層位移越大，焦平面不動）
+   dolly   依深度的推軌差（近景放大較多）
+   depth   [a, gy, gx, pivot]：景深平面 nearness = a + gy·(y−.5) + gx·(x−.5)
+   focus   [f0,f1] 對焦 nearness；ap 光圈（最大模糊半徑 px）；focusT 對焦時間窗（鏡頭內比例）
+  素材只用實拍：works/ 作品照（不含 landscape-table/01、ridge-table/01、muju/02–06）、brand/real-lecture.webp。
+  1448 寬的照片滿版時 cover 已是 1.326 倍，所以 z 幾乎不推，運鏡改用視差與分割畫面。
+*/
+const P = (img, o = {}) => Object.assign({
+  img, rect: [0, 0, W, H], c: [[.5, .5], [.5, .5]], z: [1.0, 1.015], r: [0, 0], ease: ['glide', 1.5],
+  par: [[0, 0], [0, 0]], dolly: [0, 0], depth: [.5, .8, 0, .5], sub: [.5, .5, .3, 0],
+  focus: [.5, .5], ap: 6, focusT: [0, 1], sharp: .32
+}, o);
+const HALF_L = [0, 0, 957, H], HALF_R = [963, 0, 957, H];
+const THIRD = (i) => [i * 642, 0, 636, H];
+const split = (a, b, o = {}) => [
+  P(a, Object.assign({ rect: HALF_L, c: [[.5, .47], [.5, .53]], z: [1.02, 1.05], par: [[0, .01], [0, -.01]], ap: 0 }, o)),
+  P(b, Object.assign({ rect: HALF_R, c: [[.5, .53], [.5, .47]], z: [1.02, 1.05], par: [[0, -.01], [0, .01]], ap: 0 }, o))];
+
+const SHOTS = [
+  // ══ INTRO 0–10（鋼琴獨奏）：慢、靜。每鏡一小節。
+  // b0：黑場中一道光帶掃過櫻桃木轉角的木紋，景深極淺，焦點慢慢拉實
+  { b: 0, sec: 'intro', panels: [P('works/cherry-island-table/03.webp', {
+      c: [[.6, .54], [.53, .49]], z: [1.22, 1.15], r: [.045, .02], ease: ['glide', .9],
+      par: [[.014, 0], [-.008, 0]], dolly: [.06, .02], depth: [.5, .9, -.5, .5], focus: [.0, .62], focusT: [.05, .92], ap: 28 })],
+    light: (t) => [lerp(-1.05, .7, smoother(win(t, 0, 2.3))), .2, .35, .05] },
+  // b4（bar 2 重拍）：硬切，品牌名落下。暗背景的板凳，凳面放在畫面上緣，兩腳之間的暗部留給標題
+  { b: 4, sec: 'intro', title: true, panels: [P('works/warm/05.webp', {
+      c: [[.5, .62], [.5, .6]], z: [1.0, 1.03], ease: ['glide', 1.2],
+      par: [[.012, 0], [-.01, 0]], dolly: [.02, .04], depth: [.45, 1.0, 0, .5], focus: [.62, .62], ap: 9 })] },
+  // b8：書櫃內部的木紋，橫移
+  { b: 8, sec: 'intro', panels: [P('works/arch/02.webp', {
+      c: [[.44, .5], [.53, .5]], z: [1.05, 1.08], ease: ['glide', 1.1],
+      par: [[-.016, 0], [.012, 0]], depth: [.5, .3, .8, .5], focus: [.55, .55], ap: 10 })] },
+  // b12：桌角與大片灰牆（牆面留給字卡），尾端呼吸變暗接 bar 5
+  { b: 12, sec: 'intro', breath: [9.25, 9.95], panels: [P('works/cherry-island-table/04.webp', {
+      c: [[.56, .5], [.545, .49]], z: [1.1, 1.15], ease: ['sstep'],
+      par: [[.01, 0], [-.006, 0]], dolly: [0, .03], depth: [.5, .5, -.6, .5], focus: [.6, .6], ap: 8 })] },
+
+  // ══ VERSE 10–20（低音弦樂進來）：人與手作。每鏡一小節。
+  // b16（bar 5 結構點）：授課實拍放進畫框，背景是同一張照片的柔焦放大
+  { b: 16, sec: 'verse', panels: [
+      P('brand/real-lecture.webp', { backdrop: true, z: [1.1, 1.1] }),
+      P('brand/real-lecture.webp', { rect: [150, 165, 1000, 750], c: [[.47, .5], [.53, .5]], z: [1.0, 1.04], ease: ['glide', 1.4],
+        par: [[.01, 0], [-.01, 0]], ap: 0 })] },
+  // b20：兩張工坊地板上的板凳（同一張凳子、不同光線）
+  { b: 20, sec: 'verse', panels: split('works/warm/01.webp', 'works/warm/02.webp', { ease: ['glide', 1.4] }) },
+  // b24：櫻桃木中島的指接榫特寫，往榫頭推
+  { b: 24, sec: 'verse', panels: [P('works/cherry-island-table/02.webp', {
+      c: [[.38, .44], [.36, .42]], z: [1.2, 1.26], ease: ['glide', 1.3],
+      par: [[.012, 0], [-.008, 0]], dolly: [.02, .04], depth: [.5, .6, -.4, .5], focus: [.6, .6], ap: 9 })] },
+  // b28：胡桃木桌面＋楓木弧形腳；結尾向左甩鏡（bar 9 結構點）
+  { b: 28, sec: 'verse', panels: [P('works/muwi/03.webp', {
+      z: [1.0, 1.012], ease: ['glide', 1.6],
+      par: [[.018, 0], [-.012, 0]], depth: [.5, .9, 0, .5], focus: [.6, .6], ap: 7 })],
+    whipOut: { dir: [-1, 0], dur: .1 } },
+
+  // ══ BUILD 20–30（ostinato＋鼓＋riser）：工序到成品，2 拍 → 1 拍
+  { b: 32, sec: 'build', whipIn: { dir: [-1, 0], dur: .12 }, panels: split('works/muyo/02.webp', 'works/muwi/02.webp', { ease: ['glide', 2] }) },
+  { b: 34, sec: 'build', panels: [P('works/walnut-island-bar/01.webp', {
+      z: [1.0, 1.012], ease: ['glide', 2], par: [[-.016, 0], [.012, 0]], depth: [.5, .9, 0, .5], focus: [.6, .6], ap: 6 })] },
+  { b: 36, sec: 'build', kick: .008, panels: split('works/grid/03.webp', 'works/ridge-shelf/04.webp', { ease: ['glide', 2.2] }) },
+  { b: 38, sec: 'build', kick: .008, panels: [P('works/plain/01.webp', {
+      z: [1.0, 1.012], ease: ['glide', 2.2], par: [[.016, 0], [-.012, 0]], depth: [.5, .9, 0, .5], focus: [.6, .6], ap: 6 })] },
+  { b: 40, sec: 'build', kick: .01, panels: split('works/ridge-shelf/02.webp', 'works/ridge-shelf/01.webp', { ease: ['glide', 2.6] }) },
+  { b: 41, sec: 'build', kick: .01, panels: [
+      P('works/breeze/01.webp', { rect: THIRD(0), c: [[.5, .5], [.5, .46]], z: [1.02, 1.05], ease: ['glide', 2.6], ap: 0 }),
+      P('works/grid/01.webp', { rect: THIRD(1), c: [[.5, .46], [.5, .52]], z: [1.02, 1.05], ease: ['glide', 2.6], ap: 0 }),
+      P('works/arch/01.webp', { rect: THIRD(2), c: [[.5, .5], [.5, .46]], z: [1.02, 1.05], ease: ['glide', 2.6], ap: 0 })] },
+  { b: 42, sec: 'build', kick: .01, panels: [P('works/cherry-island-table/01.webp', {
+      z: [1.0, 1.04], ease: ['glide', 2.6], par: [[.014, 0], [-.01, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 43, sec: 'build', kick: .01, panels: [P('works/muwi/01.webp', {
+      z: [1.0, 1.012], ease: ['glide', 2.6], par: [[-.014, 0], [.01, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 44, sec: 'build', kick: .012, panels: [P('works/muyo/01.webp', {
+      z: [1.0, 1.012], ease: ['glide', 3], par: [[0, .012], [0, -.008]], focus: [.6, .6], ap: 5 })] },
+  { b: 45, sec: 'build', kick: .012, panels: [P('works/muki/02.webp', {
+      z: [1.0, 1.012], ease: ['glide', 3], par: [[.014, 0], [-.01, 0]], focus: [.6, .6], ap: 5 })] },
+  // ── b46 = 28.75 pre-drop 重擊：0.15 秒衝擊推鏡＋乾淨閃白，閃白退去直接落入黑場（28.9–30 真空）
+  { b: 46, sec: 'hush', impact: { dz: .11, dur: .15 }, panels: [P('works/cherry-island-table/02.webp', {
+      c: [[.5, .52], [.5, .52]], z: [1.0, 1.01], ease: ['lin'], depth: [.5, .9, 0, .5], focus: [.6, .6], ap: 6 })],
+    expo: (t, s) => 1 - smooth(win(t, s.start + .1, s.start + .2)) },
+
+  // ══ DROP 30.0：全片唯一的華麗轉場（光爆＋bloom），黑邊打開成全幅，實拍空間全景
+  { b: 48, sec: 'climax', kick: .014, panels: [P('works/muki/01.webp', {
+      z: [1.0, 1.01], ease: ['glide', 2.2],
+      par: [[-.02, 0], [.01, 0]], dolly: [0, .02], depth: [.45, 1.0, .2, .55], focus: [.6, .6], ap: 6 })] },
+  // ══ CLIMAX 30–40：每拍一刀（兩處半拍），每拍 scale kick、每小節重拍加重
+  { b: 50, sec: 'climax', kick: .012, panels: [P('works/muki/03.webp', {
+      z: [1.0, 1.01], ease: ['glide', 3.5], par: [[.02, 0], [-.006, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 51, sec: 'climax', kick: .012, panels: [P('works/muki/04.webp', {
+      z: [1.0, 1.01], ease: ['glide', 3.5], par: [[-.02, 0], [.006, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 52, sec: 'climax', kick: .012, panels: [
+      P('brand/real-lecture.webp', { backdrop: true, z: [1.1, 1.1] }),
+      P('brand/real-lecture.webp', { rect: [400, 60, 1120, 840], c: [[.5, .5], [.53, .5]], z: [1.0, 1.03], ease: ['glide', 3.5], ap: 0 })] },
+  { b: 53, sec: 'climax', kick: .012, panels: split('works/muyo/03.webp', 'works/muki/02.webp', { ease: ['glide', 3.5] }) },
+  { b: 54, sec: 'climax', kick: .012, panels: [P('works/ripple/01.webp', {
+      c: [[.5, .44], [.517, .408]], z: [1.0, 1.035], ease: ['glide', 3.5], dolly: [0, .04], focus: [.6, .6], ap: 4 })] },
+  // b55 圓對圓的 match cut：上一鏡凳面接這一鏡凳面（同 ad30 的參數）
+  { b: 55, sec: 'climax', kick: .012, panels: [P('works/ripple/04.webp', {
+      c: [[.4167, .379], [.43, .36]], z: [1.2, 1.24], r: [.01, -.015], ease: ['glide', 3.5], focus: [.6, .6], ap: 4 })] },
+  { b: 55.5, sec: 'climax', kick: .01, panels: split('works/ripple/03.webp', 'works/ripple/02.webp', { ease: ['glide', 3.5], c: [[.5, .44], [.5, .47]] }) },
+  { b: 56, sec: 'climax', kick: .012, panels: [P('works/arch/03.webp', {
+      z: [1.0, 1.012], ease: ['glide', 3.5], par: [[-.012, 0], [0, 0]], focus: [.6, .6], ap: 4 })] },
+  { b: 57, sec: 'climax', kick: .012, panels: [P('works/arch/02.webp', {
+      c: [[.62, .5], [.66, .5]], z: [1.06, 1.09], ease: ['glide', 3.5], dolly: [0, .04], depth: [.5, .3, .8, .5], focus: [.55, .55], ap: 8 })] },
+  { b: 58, sec: 'climax', kick: .012, panels: split('works/warm/04.webp', 'works/warm/01.webp', { ease: ['glide', 3.5] }) },
+  { b: 59, sec: 'climax', kick: .012, panels: [
+      P('works/ridge-shelf/03.webp', { rect: THIRD(0), c: [[.5, .5], [.5, .46]], z: [1.02, 1.05], ease: ['glide', 3.5], ap: 0 }),
+      P('works/breeze/01.webp', { rect: THIRD(1), c: [[.5, .46], [.5, .52]], z: [1.02, 1.05], ease: ['glide', 3.5], ap: 0 }),
+      P('works/plain/02.webp', { rect: THIRD(2), c: [[.5, .5], [.5, .46]], z: [1.02, 1.05], ease: ['glide', 3.5], ap: 0 })] },
+  { b: 60, sec: 'climax', kick: .012, panels: [P('works/muyo/01.webp', {
+      z: [1.0, 1.01], ease: ['glide', 3.5], par: [[.02, 0], [-.006, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 61, sec: 'climax', kick: .012, panels: [P('works/cherry-island-table/04.webp', {
+      c: [[.4, .5], [.42, .5]], z: [1.18, 1.22], ease: ['glide', 3.5], par: [[0, .012], [0, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 62, sec: 'climax', kick: .012, panels: [P('works/muwi/01.webp', {
+      z: [1.0, 1.01], ease: ['glide', 3.5], par: [[-.02, 0], [.006, 0]], focus: [.6, .6], ap: 5 })] },
+  { b: 62.5, sec: 'climax', kick: .01, panels: split('works/muwi/02.webp', 'works/muyo/02.webp', { ease: ['glide', 3.5] }) },
+  // b63：同一張凳子的彩色與黑白並置（兩個世代）
+  { b: 63, sec: 'climax', kick: .012, panels: split('works/warm/02.webp', 'works/warm/03.webp', { ease: ['glide', 3.5] }) },
+
+  // ══ RESOLVE 40–45（鋼琴收尾）：40.0 最後和弦硬切到慢鏡，與開場的品牌名鏡頭首尾呼應 → logo → 淡黑
+  { b: 64, sec: 'resolve', panels: [P('works/warm/05.webp', {
+      c: [[.5, .62], [.5, .6]], z: [1.0, 1.035], ease: ['sstep'],
+      par: [[.01, 0], [-.008, 0]], dolly: [0, .04], depth: [.45, 1.0, 0, .5], focus: [.62, .62], ap: 7 })],
+    focusOut: [42.1, 43.0], expo: (t) => lerp(1, .36, smooth(win(t, 42.0, 42.9))) }
+];
+SHOTS.forEach((s, i) => {
+  s.start = cutT(s.b);
+  s.end = i + 1 < SHOTS.length ? cutT(SHOTS[i + 1].b) : DURATION;
+});
+
+/* ---------------- WebGL2 ---------------- */
+const glCanvas = document.getElementById('gl');
+const gl = glCanvas.getContext('webgl2', { antialias: false, preserveDrawingBuffer: true, premultipliedAlpha: false, alpha: false });
+if (!gl) { document.body.textContent = 'WebGL2 not available'; report('ERROR no webgl2'); return; }
+
+const VERT = `#version 300 es
+layout(location=0) in vec2 p; void main(){ gl_Position = vec4(p,0.,1.); }`;
+
+const PANEL = `#version 300 es
+precision highp float;
+uniform sampler2D uTex;
+uniform vec2 uImg;
+uniform vec4 uRect;      // x, y(top-down), w, h px
+uniform vec2 uC;         // image center, y down
+uniform float uScale;    // screen px per image px
+uniform float uRoll;
+uniform vec2 uShift;     // whip offset (panel frac)
+uniform vec2 uPar;
+uniform float uDolly;
+uniform vec4 uDepth;     // a gy gx pivot
+uniform vec4 uSub;
+uniform float uFocus, uAp, uExpo, uSharp, uBackdrop, uRB;
+uniform vec2 uMB;        // motion blur px
+uniform vec4 uLight;     // pos width angle base (base<0 off)
+out vec4 o;
+float nearness(vec2 q){
+  float n = uDepth.x + uDepth.y*(q.y-.5) + uDepth.z*(q.x-.5);
+  vec2 d = (q-uSub.xy)*vec2(uRect.z/uRect.w,1.);
+  n += uSub.w*exp(-dot(d,d)/(uSub.z*uSub.z));
+  return clamp(n,0.,1.);
+}
+vec2 toImg(vec2 q){
+  q -= uShift;
+  float dn = nearness(q) - uDepth.w;
+  q -= uPar*dn;
+  q = .5 + (q-.5)/(1.+uDolly*dn);
+  vec2 p = (q-.5)*uRect.zw;
+  float cs=cos(uRoll), sn=sin(uRoll);
+  p = mat2(cs,sn,-sn,cs)*p;
+  return uC + p/(uImg*uScale);
+}
+vec3 tap(vec2 iuv, float lod){ return textureLod(uTex, vec2(iuv.x, 1.-iuv.y), lod).rgb; }
+void main(){
+  vec2 fc = gl_FragCoord.xy;
+  vec2 q = vec2((fc.x-uRect.x)/uRect.z, ((1080.-fc.y)-uRect.y)/uRect.w);
+  vec3 col;
+  if(uBackdrop>.5){
+    vec2 iuv = toImg(q); col = vec3(0.);
+    for(int i=0;i<9;i++){ vec2 d=vec2(float(i%3)-1.,float(i/3)-1.)*.025; col += tap(iuv+d, 6.); }
+    col *= .26/9.;
+  } else {
+    float n = nearness(q);
+    float r = min(uAp*abs(n-uFocus), 30.);
+    float mb = length(uMB);
+    if(r<.7 && mb<.7 && uRB<.0008){
+      vec2 iuv = toImg(q);
+      col = tap(iuv,0.);
+      vec3 bl = .25*(tap(iuv+vec2(.7,0.)/uImg,0.)+tap(iuv-vec2(.7,0.)/uImg,0.)+tap(iuv+vec2(0.,.7)/uImg,0.)+tap(iuv-vec2(0.,.7)/uImg,0.));
+      col = max(col + uSharp*(col-bl), 0.);
+    } else {
+      const int N = 24; const float GA = 2.39996;
+      // 景深用等向的 mip 模糊；動態模糊只沿運動方向取樣，mip 只補一點避免分段（否則垂直方向也會糊）
+      float lodDof = log2(max(r/sqrt(float(N))*1.6, 1.)/uScale);
+      float lodMb = log2(max(max(mb, uRB*uRect.z*.5)/float(N)*.4, 1.)/uScale);
+      float lod = clamp(max(lodDof, lodMb), 0., 6.);
+      vec3 acc = vec3(0.);
+      for(int i=0;i<N;i++){
+        float fi = float(i)+.5;
+        float s = fi/float(N)-.5;
+        vec2 d = vec2(cos(fi*GA), sin(fi*GA))*r*sqrt(fi/float(N)) + uMB*s;
+        vec2 qq = q + d/uRect.zw;
+        qq = .5 + (qq-.5)*(1.-uRB*(s+.5));
+        acc += tap(toImg(qq), lod);
+      }
+      col = acc/float(N);
+    }
+  }
+  if(uLight.w>=0.){
+    vec2 dir = vec2(cos(uLight.z), sin(uLight.z));
+    float s = dot((q-.5)*vec2(uRect.z/uRect.w,1.), dir);
+    float band = exp(-pow((s-uLight.x)/uLight.y,2.));
+    float halo = exp(-pow((s-uLight.x)/(uLight.y*3.2),2.));
+    col *= uLight.w + band*1.35 + halo*.22;
+    col *= mix(vec3(1.), vec3(1.06,.98,.86), band);
+  }
+  o = vec4(col*uExpo, 1.);
+}`;
+
+const BRIGHT = `#version 300 es
+precision highp float;
+uniform sampler2D uScene; uniform vec2 uRes; uniform float uThr;
+out vec4 o;
+void main(){
+  vec2 uv = gl_FragCoord.xy/uRes;
+  vec3 c = vec3(0.);
+  for(int i=0;i<4;i++){ vec2 d = vec2(float(i%2)-.5, float(i/2)-.5)/vec2(1920.,1080.); c += texture(uScene, uv+d).rgb; }
+  c *= .25;
+  float l = max(c.r, max(c.g, c.b));
+  float k = .22;
+  float soft = clamp(l-uThr+k, 0., 2.*k); soft = soft*soft/(4.*k+1e-4);
+  float w = max(soft, l-uThr)/max(l,1e-4);
+  o = vec4(c*w, 1.);
+}`;
+
+const POST = `#version 300 es
+precision highp float;
+uniform sampler2D uScene, uBright, uOver;
+uniform float uFrame, uFlash, uBars, uFade, uBloom, uBurst, uCA, uTime, uGrain;
+uniform vec2 uBurstPos;
+out vec4 o;
+float h21(vec2 p){ p = fract(p*vec2(443.897,441.423)); p += dot(p, p.yx+19.19); return fract((p.x+p.y)*p.x); }
+float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
+  return mix(mix(h21(i),h21(i+vec2(1,0)),u.x), mix(h21(i+vec2(0,1)),h21(i+vec2(1,1)),u.x), u.y); }
+vec3 tent(float lod, vec2 uv){
+  vec2 px = exp2(lod)/vec2(960.,540.);
+  vec3 c = textureLod(uBright, uv, lod).rgb*4.;
+  c += (textureLod(uBright, uv+vec2(px.x,0.), lod).rgb + textureLod(uBright, uv-vec2(px.x,0.), lod).rgb
+      + textureLod(uBright, uv+vec2(0.,px.y), lod).rgb + textureLod(uBright, uv-vec2(0.,px.y), lod).rgb)*2.;
+  c += textureLod(uBright, uv+px, lod).rgb + textureLod(uBright, uv-px, lod).rgb
+     + textureLod(uBright, uv+vec2(px.x,-px.y), lod).rgb + textureLod(uBright, uv-vec2(px.x,-px.y), lod).rgb;
+  return c/16.;
+}
+vec3 grade(vec3 c){
+  c *= vec3(1.025, 1.0, .965);                      // 微暖白平衡
+  float l = dot(c, vec3(.2126,.7152,.0722));
+  float sh = 1.-smoothstep(.0,.42,l), hi = smoothstep(.5,1.,l);
+  c += vec3(-.016,.004,.020)*sh;                    // 陰影偏青綠（克制）
+  c += vec3(.026,.008,-.024)*hi;                    // 高光帶暖
+  c = mix(c, c*c*(3.-2.*c), .2);                    // 柔和 S 曲線
+  l = dot(c, vec3(.2126,.7152,.0722));
+  c = mix(vec3(l), c, 1.04);
+  c = c*.968 + .014;                                // 黑位微抬、白位微收（不死白）
+  return clamp(c, 0., 1.);
+}
+void main(){
+  vec2 R = vec2(1920.,1080.);
+  vec2 uv = gl_FragCoord.xy/R;
+  vec2 dc = uv-.5;
+  float ca = uCA*(.4+dot(dc,dc)*2.);
+  vec3 col = vec3(texture(uScene, uv-dc*ca).r, texture(uScene, uv).g, texture(uScene, uv+dc*ca).b);
+  // bloom + halation
+  vec3 b1 = tent(1., uv), b2 = tent(2., uv), b3 = tent(3., uv), b4 = tent(4., uv), b5 = tent(5., uv);
+  vec3 bloom = b2*.22 + b3*.28 + b4*.28 + b5*.22;
+  col += bloom*uBloom*vec3(1.,.9,.76);
+  col += max(b1-b2*.6, 0.)*vec3(1.,.38,.12)*.22*uBloom;   // halation：亮部邊緣的紅橙暈
+  col = grade(col);
+  // DROP 光爆與漏光
+  if(uBurst>0.){
+    vec2 d = (uv-uBurstPos)*vec2(1.777,1.);
+    float g = exp(-dot(d,d)*2.2) + exp(-dot(d,d)*26.)*1.4;
+    float streak = exp(-abs(d.y)*48.)*exp(-abs(d.x)*1.2);
+    float leak = smoothstep(.15,1.15, uv.x + .18*sin(uv.y*5.+uTime*1.7) + .1*sin(uv.y*13.-uTime*2.3));
+    vec3 L = vec3(1.,.70,.40)*g + vec3(1.,.86,.66)*streak*.9 + vec3(1.,.48,.18)*leak*.75;
+    col = 1.-(1.-col)*(1.-clamp(L*uBurst,0.,1.));
+  }
+  // 暗角
+  float v = length(dc*vec2(1.35,1.));
+  col *= mix(.74, 1., smoothstep(.95,.32,v));
+  // 閃白：放在暗角之後（角落不會被壓灰），先推曝光，再以 screen 往純白推；uFlash=1 時整格是純白 #fff
+  float fl = clamp(uFlash, 0., 1.);
+  col = min(col*(1.+fl*3.), 1.);
+  col = 1.-(1.-col)*(1.-fl);
+  // 2.39:1 黑邊
+  float y = (1.-uv.y)*1080.;
+  float bar = 138.3*uBars;
+  float inBar = (bar > .5) ? max(1.-smoothstep(bar-1.,bar,y), smoothstep(1080.-bar, 1081.-bar, y)) : 0.;
+  col *= 1.-inBar;
+  // 字卡（Canvas2D，預乘 alpha）
+  vec4 ov = texture(uOver, uv);
+  col = col*(1.-ov.a) + ov.rgb;
+  // 膠片顆粒：每格不同，亮度加權，兩個尺度
+  float seed = mod(uFrame, 251.);
+  vec2 fc = gl_FragCoord.xy;
+  float g1 = vnoise(fc*.62 + vec2(seed*17.13, seed*31.71));
+  float g2 = vnoise(fc*1.31 + vec2(seed*7.37, seed*13.9));
+  float gr = (g1*.65 + g2*.35) - .5;
+  float lum = dot(col, vec3(.299,.587,.114));
+  col += gr*uGrain*(.35 + 2.6*lum*(1.-lum))*(1.-inBar)*(1.-fl);
+  col *= uFade;
+  o = vec4(clamp(col,0.,1.), 1.);
+}`;
+
+function compile(type, src) {
+  const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+  return sh;
+}
+function program(fsrc, names) {
+  const pr = gl.createProgram();
+  gl.attachShader(pr, compile(gl.VERTEX_SHADER, VERT));
+  gl.attachShader(pr, compile(gl.FRAGMENT_SHADER, fsrc));
+  gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+  const u = {};
+  names.forEach((n) => { u[n] = gl.getUniformLocation(pr, n); });
+  return { pr, u };
+}
+const PP = program(PANEL, ['uTex','uImg','uRect','uC','uScale','uRoll','uShift','uPar','uDolly','uDepth','uSub','uFocus','uAp','uExpo','uSharp','uBackdrop','uRB','uMB','uLight']);
+const PB = program(BRIGHT, ['uScene','uRes','uThr']);
+const PO = program(POST, ['uScene','uBright','uOver','uFrame','uFlash','uBars','uFade','uBloom','uBurst','uCA','uTime','uGrain','uBurstPos']);
+
+const vbo = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+function makeTarget(w, h, mips) {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texStorage2D(gl.TEXTURE_2D, mips ? Math.floor(Math.log2(Math.max(w, h))) + 1 : 1, gl.RGBA8, w, h);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mips ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const fb = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  return { tex, fb, w, h };
+}
+const sceneT = makeTarget(W, H, false);
+const brightT = makeTarget(W / 2, H / 2, true);
+const overTex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, overTex);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+/* ---------------- assets ---------------- */
+const loadImage = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('load ' + src)); im.src = src; });
+const aniso = gl.getExtension('EXT_texture_filter_anisotropic');
+const cache = new Map();
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+for (const s of SHOTS) for (const p of s.panels) {
+  if (!cache.has(p.img)) {
+    const im = await loadImage(BASE + p.img);
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (aniso) gl.texParameterf(gl.TEXTURE_2D, aniso.TEXTURE_MAX_ANISOTROPY_EXT, 8);
+    cache.set(p.img, { tex: t, w: im.naturalWidth, h: im.naturalHeight });
+  }
+  p.asset = cache.get(p.img);
+}
+const logoImg = await loadImage('../../website/public/logo-transparent.png');
+const logo = document.createElement('canvas');
+logo.width = logoImg.naturalWidth; logo.height = logoImg.naturalHeight;
+{ const c = logo.getContext('2d'); c.drawImage(logoImg, 0, 0); c.globalCompositeOperation = 'source-in'; c.fillStyle = '#f3ece2'; c.fillRect(0, 0, logo.width, logo.height); }
+
+const SERIF = '"Noto Serif TC"', LATIN = '"Cormorant Garamond"';
+const allText = Object.values(COPY).flat().join('') + CHAPTERS.map((c) => c[4]).join('') + SERVICES + '×—';
+const LATIN_TEXT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.'’—,·/&";
+await Promise.all([
+  document.fonts.load(`600 100px ${SERIF}`, allText), document.fonts.load(`500 100px ${SERIF}`, allText),
+  ...[300, 400, 500, 600].map((w) => document.fonts.load(`${w} 40px ${LATIN}`, LATIN_TEXT))
+]);
+
+/* ---------------- camera ---------------- */
+const coverScale = (p) => Math.max(p.rect[2] / p.asset.w, p.rect[3] / p.asset.h);
+// 影像點 P 要落在畫面位置 S（panel 比例）時，影像中心應在哪
+function anchorC(p, Pt, S, z) {
+  const sc = coverScale(p) * z;
+  return [Pt[0] - (S[0] - .5) * p.rect[2] / (p.asset.w * sc), Pt[1] - (S[1] - .5) * p.rect[3] / (p.asset.h * sc)];
+}
+function screenOf(p, Pt, c, z) {
+  const sc = coverScale(p) * z;
+  return [.5 + (Pt[0] - c[0]) * p.asset.w * sc / p.rect[2], .5 + (Pt[1] - c[1]) * p.asset.h * sc / p.rect[3]];
+}
+// match cut：上一鏡結尾的特徵點對齊下一鏡開頭的特徵點（同一個畫面位置）
+SHOTS.forEach((s, i) => {
+  if (!s.matchIn) return;
+  const prev = SHOTS[i - 1], pa = prev.panels[0], pb = s.panels[0];
+  const S = screenOf(pb, s.matchIn.P, pb.c[0], pb.z[0]);
+  pa.c[1] = anchorC(pa, prev.match.P, S, pa.z[1]);
+  if (!pa.c[0]) pa.c[0] = pa.c[1].slice();
+  s.matchScreen = S;
+});
+
+// 每拍的 scale kick：2 格內推上去，再快速回穩
+function kickEnv(t, s) {
+  if (!s.kick) return 0;
+  const k = Math.floor((t + 1e-6) / BEAT) * BEAT;
+  const tau = t - Math.max(k, s.start);
+  if (tau < 0) return 0;
+  const accent = Math.round(k / BEAT) % 4 === 0 ? 1.6 : 1; // 每小節第一拍（配樂重音）加重
+  return accent * (tau < 1 / 15 ? tau * 15 : Math.exp(-(tau - 1 / 15) / .12));
+}
+
+function panelState(s, p, t) {
+  const D = s.end - s.start;
+  const u0 = clamp01((t - s.start) / D);
+  const [name, k] = p.ease;
+  const u = EASE[name](u0, k);
+  let z = lerp(p.z[0], p.z[1], u);
+  let rb = 0, mb = [0, 0], shift = [0, 0];
+  z *= 1 + (s.kick || 0) * kickEnv(t, s);
+  if (s.impact) {
+    const tau = t - s.start, d = s.impact.dur;
+    const e = easeOutCubic(clamp01(tau / d));
+    z *= 1 + s.impact.dz * e;
+    const vel = tau < d ? s.impact.dz * 3 * Math.pow(1 - tau / d, 2) / d : 0; // dz/dt
+    rb = vel / FPS * 1.4;
+  }
+  const whip = (w, tau, out) => {
+    const e = 1 - clamp01(tau / w.dur);
+    const amt = .22;
+    const off = amt * e * e * (out ? -1 : 1);
+    const vel = 2 * amt * e / w.dur / FPS; // panel frac per frame
+    shift = [w.dir[0] * off, w.dir[1] * off];
+    mb = [w.dir[0] * vel * p.rect[2] * 1.3, w.dir[1] * vel * p.rect[3] * 1.3];
+  };
+  if (s.whipIn && t - s.start < s.whipIn.dur) whip(s.whipIn, t - s.start, false);
+  if (s.whipOut && s.end - t < s.whipOut.dur + 1e-6) whip(s.whipOut, s.end - t, true);
+  const c = [lerp(p.c[0][0], p.c[1][0], u), lerp(p.c[0][1], p.c[1][1], u)];
+  const par = [lerp(p.par[0][0], p.par[1][0], u), lerp(p.par[0][1], p.par[1][1], u)];
+  const dolly = lerp(p.dolly[0], p.dolly[1], u);
+  const sc = coverScale(p) * z;
+  // 視野不得超出照片邊緣（保留視差位移的餘量）
+  const sx = p.rect[2] / (p.asset.w * sc), sy = p.rect[3] / (p.asset.h * sc);
+  const mx = Math.abs(par[0]) * .5 * sx + .002, my = Math.abs(par[1]) * .5 * sy + .002;
+  c[0] = Math.min(Math.max(c[0], sx / 2 + mx), 1 - sx / 2 - mx);
+  c[1] = Math.min(Math.max(c[1], sy / 2 + my), 1 - sy / 2 - my);
+  if (sx >= 1) c[0] = .5;
+  if (sy >= 1) c[1] = .5;
+  const fu = smoother(clamp01((u0 - p.focusT[0]) / (p.focusT[1] - p.focusT[0])));
+  let focus = lerp(p.focus[0], p.focus[1], fu), ap = p.ap;
+  if (s.focusOut) { const k = smooth(win(t, s.focusOut[0], s.focusOut[1])); ap = lerp(p.ap, 26, k); focus = lerp(focus, .05, k); }
+  let expo = s.expo ? s.expo(t, s) : 1;
+  if (s.breath) expo *= 1 - .45 * smooth(win(t, s.breath[0], s.breath[1]));
+  return { c, z, sc, roll: lerp(p.r[0], p.r[1], u), par, dolly, focus, ap, expo, rb, mb, shift };
+}
+
+/* ---------------- 全片時間軸效果 ---------------- */
+const T = { b4: cutT(4), b16: cutT(16), b32: cutT(32), b46: cutT(46), b48: cutT(48), b64: cutT(64) };
+function flashAt(t) {
+  let f = 0;
+  // hold：滿值維持幾秒，之後指數衰減
+  const ev = (at, amp, tau, hold = 0) => { if (t >= at) f = Math.max(f, amp * (t < at + hold ? 1 : Math.exp(-(t - at - hold) / tau))); };
+  ev(T.b4, .18, .16);           // bar 2 重拍：品牌名，輕微曝光衝擊
+  ev(T.b16, .3, .22);           // bar 5 結構點：弦樂進來
+  ev(T.b46, 1, .05, 1.5 / FPS); // 28.75 pre-drop 重擊：乾淨純白閃白（約兩格滿白）
+  return f;
+}
+function burstAt(t) {
+  if (t < T.b48 - .6) return 0;
+  if (t < T.b48) return .9 * easeInCubic(win(t, T.b48 - .6, T.b48)); // 真空段的反向漲光
+  return 1.05 * Math.exp(-(t - T.b48) / .32);
+}
+function bloomAt(t) {
+  let b = .32;
+  if (t >= T.b48) b += 1.1 * Math.exp(-(t - T.b48) / .7);
+  if (t < T.b4) b = .55;
+  return b;
+}
+const barsAt = (t) => t < T.b48 ? 1 : 1 - easeOutExpo(win(t, T.b48, T.b48 + .45));
+const fadeAt = (t) => 1 - smooth(win(t, 44.5, 44.97));
+function caAt(t, s) {
+  let ca = .0016;
+  if (s.whipIn && t - s.start < s.whipIn.dur) ca = .006;
+  if (s.whipOut && s.end - t < s.whipOut.dur) ca = .006;
+  if (s.impact && t - s.start < .2) ca = .0045;
+  return ca;
+}
+
+function shotAt(t) {
+  let i = SHOTS.length - 1;
+  while (i > 0 && t + 1e-6 < SHOTS[i].start) i--;
+  return SHOTS[i];
+}
+
+/* ---------------- typography overlay ---------------- */
+const ov = document.getElementById('ov');
+const ctx = ov.getContext('2d');
+const CREAM = '248,244,236', INK = '43,33,25', AMBER = '217,164,106';
+
+function text(str, x, y, o) {
+  const { size = 24, weight = 500, family = SERIF, spacing = 0, rgb = CREAM, alpha = 1, align = 'left', blur = 0, shadow = 0 } = o;
+  if (alpha <= .002) return 0;
+  ctx.save();
+  ctx.font = `${weight} ${size}px ${family}`;
+  ctx.letterSpacing = spacing + 'px';
+  ctx.textBaseline = 'alphabetic';
+  const w = ctx.measureText(str).width - spacing; // 去掉最後一字後面的字距
+  const left = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  ctx.textAlign = 'left';
+  if (blur > .05) ctx.filter = `blur(${blur}px)`;
+  if (shadow) { ctx.shadowColor = `rgba(0,0,0,${shadow})`; ctx.shadowBlur = 24; }
+  ctx.fillStyle = `rgba(${rgb},${alpha})`;
+  ctx.fillText(str, left, y);
+  ctx.restore();
+  return w;
+}
+function hair(x, y, w, rgb, alpha, origin = 'left', k = 1) {
+  if (k <= 0 || alpha <= 0) return;
+  ctx.save(); ctx.fillStyle = `rgba(${rgb},${alpha})`;
+  const ww = w * k;
+  ctx.fillRect(origin === 'center' ? x - ww / 2 : origin === 'right' ? x - ww : x, y, ww, 1.5);
+  ctx.restore();
+}
+const measure = (str, size, weight, family, spacing) => {
+  ctx.save(); ctx.font = `${weight} ${size}px ${family}`; ctx.letterSpacing = spacing + 'px';
+  const w = ctx.measureText(str).width - spacing; ctx.restore(); return w;
+};
+
+const easeInOutSine = (x) => -(Math.cos(Math.PI * x) - 1) / 2;
+const BRONZE = '140,92,52';
+
+// 標題：字距收攏＋中心向外的遮罩展開＋模糊轉清晰＋一道光掃過字面（bar 2 重拍 2.5s 落下）
+const titleCanvas = document.createElement('canvas');
+titleCanvas.width = W; titleCanvas.height = 360;
+const tctx = titleCanvas.getContext('2d');
+function drawTitle(t) {
+  const tau = t - T.b4;
+  if (tau < 0 || t > cutT(8)) return;
+  const outK = smooth(win(t, cutT(8) - .5, cutT(8) - .06));
+  const spacing = lerp(120, 44, easeOutExpo(clamp01(tau / 1.5))) + outK * 18;
+  const size = 132, cy = 640;
+  tctx.clearRect(0, 0, W, 360);
+  tctx.save();
+  tctx.font = `600 ${size}px ${SERIF}`; tctx.letterSpacing = spacing + 'px'; tctx.textBaseline = 'alphabetic';
+  const tw = tctx.measureText(COPY.title).width - spacing;
+  const blur = lerp(14, 0, easeOutCubic(clamp01(tau / .55))) + outK * 10;
+  if (blur > .05) tctx.filter = `blur(${blur}px)`;
+  tctx.fillStyle = `rgb(${CREAM})`;
+  tctx.fillText(COPY.title, W / 2 - tw / 2, 220);
+  tctx.filter = 'none';
+  const sw = win(tau, .55, 1.45);
+  if (sw > 0 && sw < 1) {
+    const x = lerp(W / 2 - tw / 2 - 260, W / 2 + tw / 2 + 260, easeInOutSine(sw));
+    tctx.globalCompositeOperation = 'source-atop';
+    const g = tctx.createLinearGradient(x - 160, 0, x + 160, 0);
+    g.addColorStop(0, 'rgba(255,214,160,0)'); g.addColorStop(.5, 'rgba(255,236,205,.95)'); g.addColorStop(1, 'rgba(255,214,160,0)');
+    tctx.fillStyle = g; tctx.fillRect(0, 0, W, 360);
+  }
+  tctx.restore();
+  scrim(W / 2, cy + 10, 640, 230, .4 * smooth(clamp01(tau / .4)) * (1 - outK));
+  const reveal = easeOutExpo(clamp01(tau / .9));
+  const half = (tw / 2 + 200) * reveal;
+  ctx.save();
+  ctx.globalAlpha = clamp01(tau / .25) * (1 - outK);
+  ctx.beginPath(); ctx.rect(W / 2 - half, cy - 220, half * 2, 360); ctx.clip();
+  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 40;
+  ctx.drawImage(titleCanvas, 0, cy - 220);
+  ctx.restore();
+  const lk = easeOutExpo(win(tau, .35, 1.25));
+  hair(W / 2, cy + 46, 300, AMBER, .85 * (1 - outK), 'center', lk);
+  const st = win(tau, .5, 1.3);
+  text(COPY.tagline, W / 2, cy + 112, { size: 34, weight: 500, spacing: lerp(22, 12, easeOutExpo(st)) + outK * 6,
+    alpha: .9 * easeOutCubic(st) * (1 - outK), align: 'center', blur: (1 - easeOutCubic(st)) * 6 + outK * 6, shadow: .35 });
+}
+
+// 黑邊內的小字：淡入＋字距收攏＋模糊轉清晰
+function barLabel(str, x, y, t0, t1, o) {
+  const a = easeOutCubic(win(o.t, t0, t0 + .45)) * (1 - smooth(win(o.t, t1 - .25, t1)));
+  if (a <= 0) return 0;
+  const k = 1 - easeOutExpo(win(o.t, t0, t0 + .7));
+  return text(str, x, y, Object.assign({}, o, { alpha: (o.alpha ?? 1) * a, spacing: o.spacing + k * 5, blur: k * 3 }));
+}
+
+// 字卡底下的柔和暗化（或亮化）：橢圓徑向漸層，確保字與複雜背景之間有對比
+function scrim(cx, cy, rx, ry, a, rgb = '0,0,0') {
+  if (a <= .002) return;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(rx, ry);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  g.addColorStop(0, `rgba(${rgb},${a})`); g.addColorStop(.5, `rgba(${rgb},${a * .7})`); g.addColorStop(1, `rgba(${rgb},0)`);
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// 字卡樣式
+const ST = {
+  kick: { family: LATIN, weight: 500, size: 23, spacing: 9, alpha: .88, lh: 70 },
+  head: { weight: 600, size: 66, spacing: 12, alpha: .97, lh: 92 },
+  quote: { weight: 500, size: 50, spacing: 7, alpha: .96, lh: 76 },
+  body: { weight: 500, size: 30, spacing: 5, alpha: .88, lh: 50 }
+};
+// 故事字卡：t0 進、t1 出（秒）。每行依序由左向右遮罩展開＋模糊轉清晰＋微微上浮；出場時模糊淡出
+const CARDS = [
+  { t0: 5.25, t1: 7.4, x: 150, y: 735, ink: 'light', scrim: [470, 690, 720, 300, .55],
+    lines: [[COPY.hand[0], 'quote'], [COPY.hand[1], 'quote']] },
+  { t0: 7.75, t1: 9.6, x: 1130, y: 470, ink: 'dark', scrim: [1470, 450, 600, 240, .28, '236,234,230'],
+    lines: [[COPY.wood[0], 'quote'], [COPY.wood[1], 'quote']] },
+  { t0: 10.3, t1: 12.35, x: 1250, y: 420, ink: 'light', scrim: [1480, 470, 520, 300, .3],
+    lines: [[COPY.origin[0], 'head'], [COPY.origin[1], 'body']] },
+  { t0: 12.8, t1: 14.85, x: 960, y: 780, align: 'center', ink: 'light', scrim: [960, 760, 820, 220, .6],
+    lines: [[COPY.craft[0], 'quote'], [COPY.craft[1], 'quote']] },
+  { t0: 15.3, t1: 17.35, x: 150, y: 765, ink: 'light', scrim: [470, 720, 720, 280, .58],
+    lines: [[COPY.struct[0], 'quote'], [COPY.struct[1], 'quote']] },
+  { t0: 17.8, t1: 19.85, x: 160, y: 300, ink: 'light', scrim: [480, 260, 680, 220, .4],
+    lines: [[COPY.meet[0], 'quote'], [COPY.meet[1], 'quote']] },
+  // 高潮：全幅畫面每拍一刀，字卡固定在左下，底部有一層持續的漸層暗化
+  { t0: 32.6, t1: 34.88, x: 110, y: 962, ink: 'light', lines: [[COPY.root[0], 'quote']] },
+  { t0: 35.1, t1: 37.38, x: 110, y: 962, ink: 'light', lines: [[COPY.root[1], 'quote']] },
+  { t0: 37.6, t1: 39.9, x: 110, y: 962, ink: 'light', lines: [[COPY.hands, 'quote']] },
+  // 收尾：40.0 最後和弦後的品牌宣言（開場板凳鏡頭上方的暗部）
+  { t0: 40.3, t1: 42.35, x: 960, y: 560, align: 'center', ink: 'light', scrim: [960, 600, 620, 220, .35],
+    lines: [[COPY.better, 'kick'], [COPY.statement[0], 'quote'], [COPY.statement[1], 'quote']] }
+];
+function card(c, t) {
+  if (t < c.t0 - .1 || t > c.t1) return;
+  const out = smooth(win(t, c.t1 - .32, c.t1));
+  const align = c.align || 'left';
+  const rgb = c.ink === 'dark' ? INK : CREAM;
+  if (c.scrim) {
+    const [sx, sy, rx, ry, a, srgb] = c.scrim;
+    scrim(sx, sy, rx, ry, a * smooth(win(t, c.t0 - .1, c.t0 + .4)) * (1 - out), srgb);
+  }
+  let y = c.y;
+  c.lines.forEach(([str, sty], i) => {
+    const o = ST[sty];
+    const st = c.t0 + i * .16;
+    const k = easeOutCubic(win(t, st, st + .7));
+    const w = measure(str, o.size, o.weight, o.family || SERIF, o.spacing);
+    const left = align === 'center' ? c.x - w / 2 : c.x;
+    const wipe = easeOutExpo(win(t, st, st + .8));
+    ctx.save();
+    ctx.beginPath();
+    if (align === 'center') ctx.rect(c.x - (w / 2 + 40) * wipe, y - o.size * 1.4, (w + 80) * wipe, o.size * 2);
+    else ctx.rect(left - 40, y - o.size * 1.4, (w + 80) * wipe, o.size * 2);
+    ctx.clip();
+    text(str, left, y + (1 - k) * 12, { size: o.size, weight: o.weight, family: o.family || SERIF, spacing: o.spacing,
+      rgb: sty === 'kick' ? (c.ink === 'dark' ? BRONZE : AMBER) : rgb, alpha: o.alpha * k * (1 - out),
+      blur: (1 - k) * 8 + out * 7, shadow: c.ink === 'dark' ? 0 : .45 });
+    ctx.restore();
+    y += o.lh;
+  });
+}
+
+function drawOverlay(t, s) {
+  ctx.clearRect(0, 0, W, H);
+  const yTop = BAR / 2 + 8, yBot = H - BAR / 2 + 8;
+
+  // 前奏：黑邊內一行很小的英文 kicker（L393）
+  if (t < T.b4) {
+    barLabel(COPY.kicker, W / 2, yBot, .75, T.b4 - .1,
+      { t, family: LATIN, weight: 400, size: 17, spacing: 9, align: 'center', alpha: .62 });
+  }
+  drawTitle(t);
+
+  // 上黑邊章節標（verse–build）
+  for (const [b0, b1, no, en, zh] of CHAPTERS) {
+    const t0 = cutT(b0) + .2, t1 = cutT(b1) - .02;
+    if (t < t0 || t > t1) continue;
+    const wn = barLabel(no, 110, yTop, t0, t1, { t, family: LATIN, weight: 500, size: 19, spacing: 3, rgb: AMBER, alpha: .9 });
+    const lk = easeOutExpo(win(t, t0 + .1, t0 + .8)) * (1 - smooth(win(t, t1 - .25, t1)));
+    hair(110 + wn + 20, yTop - 7, 32, AMBER, .8, 'left', lk);
+    const we = barLabel(en, 110 + wn + 72, yTop - 1, t0 + .08, t1, { t, family: LATIN, weight: 500, size: 15, spacing: 8, alpha: .55 });
+    barLabel(zh, 110 + wn + 72 + we + 24, yTop, t0 + .14, t1, { t, size: 19, weight: 500, spacing: 7, alpha: .88 });
+  }
+
+  // build：理念句放在下黑邊（剪接加速時字不跟著跳，永遠壓在黑底上）
+  barLabel(COPY.newold, W / 2, yBot + 2, cutT(32) + .3, cutT(40) - .1, { t, size: 30, weight: 500, spacing: 8, align: 'center', alpha: .93 });
+  barLabel(COPY.method, W / 2, yBot + 2, cutT(40) + .15, cutT(46) - .04, { t, size: 28, weight: 500, spacing: 6, align: 'center', alpha: .93 });
+
+  // 28.9–30 真空：全片最重要的一句（L404 品牌理念標題），逐字由模糊轉清晰
+  if (t >= 28.9 && t < T.b48) {
+    const str = COPY.thesis, chars = [...str];
+    const size = 58, spacing = 16;
+    const total = measure(str, size, 500, SERIF, spacing);
+    let x = W / 2 - total / 2;
+    const out = smooth(win(t, T.b48 - .16, T.b48 - .02));
+    chars.forEach((ch, i) => {
+      const a = easeOutCubic(win(t, 28.95 + i * .028, 28.95 + i * .028 + .42));
+      const w = measure(ch, size, 500, SERIF, 0);
+      text(ch, x, 562, { size, weight: 500, alpha: .96 * a * (1 - out), blur: (1 - a) * 10 + out * 10, shadow: .3 });
+      x += w + spacing;
+    });
+  }
+
+  // 高潮：底部持續的漸層暗化（字卡不隨每拍換圖而失去對比）
+  if (t >= T.b48 && t < T.b64) {
+    const a = .62 * smooth(win(t, T.b48 + .2, T.b48 + .6)) * (1 - smooth(win(t, T.b64 - .15, T.b64 - .01)));
+    const g = ctx.createLinearGradient(0, H, 0, H - 380);
+    g.addColorStop(0, `rgba(0,0,0,${a})`); g.addColorStop(.45, `rgba(0,0,0,${a * .55})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, H - 380, W, 380);
+  }
+  for (const c of CARDS) card(c, t);
+
+  // 片尾：logo（模糊轉清晰＋微縮放）→ 細線 → 品牌標語 → 服務項目（不放網址；四件一組在畫面垂直置中）
+  if (t > 42.3) {
+    const k = easeOutCubic(win(t, 42.55, 43.45));
+    const lw = 640, lh = lw * logo.height / logo.width;
+    const sc = lerp(1.04, 1, easeOutExpo(win(t, 42.55, 43.65)));
+    ctx.save();
+    ctx.globalAlpha = k;
+    const lb = (1 - k) * 12;
+    if (lb > .05) ctx.filter = `blur(${lb}px)`;
+    ctx.translate(W / 2, 482); ctx.scale(sc, sc);
+    ctx.drawImage(logo, -lw / 2, -lh / 2, lw, lh);
+    ctx.restore();
+    hair(W / 2, 624, 56, AMBER, .85, 'center', easeOutExpo(win(t, 42.95, 43.65)));
+    const u = win(t, 43.05, 43.65);
+    text(COPY.tagline, W / 2, 688, { size: 32, weight: 500, spacing: lerp(18, 10, easeOutExpo(u)), align: 'center', alpha: .92 * easeOutCubic(u), blur: (1 - easeOutCubic(u)) * 5 });
+    const v = win(t, 43.3, 43.85);
+    text(SERVICES, W / 2, 746, { size: 19, weight: 500, spacing: 8, align: 'center', alpha: .6 * easeOutCubic(v), blur: (1 - easeOutCubic(v)) * 4 });
+  }
+}
+
+/* ---------------- render ---------------- */
+const audit = new Map(); // 每鏡最大有效放大倍率（螢幕 px / 原圖 px）
+function renderFrame(t) {
+  const s = shotAt(t);
+  // 1. 鏡頭
+  gl.bindFramebuffer(gl.FRAMEBUFFER, sceneT.fb);
+  gl.viewport(0, 0, W, H);
+  gl.disable(gl.SCISSOR_TEST);
+  gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.useProgram(PP.pr);
+  gl.enable(gl.SCISSOR_TEST);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.uniform1i(PP.u.uTex, 0);
+  const light = s.light ? s.light(t) : [0, 1, 0, -1];
+  for (const p of s.panels) {
+    const st = panelState(s, p, t);
+    const [rx, ry, rw, rh] = p.rect;
+    gl.scissor(rx, H - ry - rh, rw, rh);
+    gl.bindTexture(gl.TEXTURE_2D, p.asset.tex);
+    gl.uniform2f(PP.u.uImg, p.asset.w, p.asset.h);
+    gl.uniform4f(PP.u.uRect, rx, ry, rw, rh);
+    gl.uniform2f(PP.u.uC, st.c[0], st.c[1]);
+    gl.uniform1f(PP.u.uScale, st.sc);
+    gl.uniform1f(PP.u.uRoll, st.roll);
+    gl.uniform2f(PP.u.uShift, st.shift[0], st.shift[1]);
+    gl.uniform2f(PP.u.uPar, st.par[0], st.par[1]);
+    gl.uniform1f(PP.u.uDolly, st.dolly);
+    gl.uniform4f(PP.u.uDepth, ...p.depth);
+    gl.uniform4f(PP.u.uSub, ...p.sub);
+    gl.uniform1f(PP.u.uFocus, st.focus);
+    gl.uniform1f(PP.u.uAp, st.ap);
+    gl.uniform1f(PP.u.uExpo, st.expo);
+    gl.uniform1f(PP.u.uSharp, p.sharp);
+    gl.uniform1f(PP.u.uBackdrop, p.backdrop ? 1 : 0);
+    gl.uniform1f(PP.u.uRB, st.rb);
+    gl.uniform2f(PP.u.uMB, st.mb[0], st.mb[1]);
+    gl.uniform4f(PP.u.uLight, ...light);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    if (!p.backdrop) {
+      const key = `b${s.b} ${p.img}`;
+      audit.set(key, Math.max(audit.get(key) || 0, st.sc));
+    }
+  }
+  gl.disable(gl.SCISSOR_TEST);
+  // 2. bloom 亮部
+  gl.bindFramebuffer(gl.FRAMEBUFFER, brightT.fb);
+  gl.viewport(0, 0, W / 2, H / 2);
+  gl.useProgram(PB.pr);
+  gl.bindTexture(gl.TEXTURE_2D, sceneT.tex);
+  gl.uniform1i(PB.u.uScene, 0);
+  gl.uniform2f(PB.u.uRes, W / 2, H / 2);
+  gl.uniform1f(PB.u.uThr, .68);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.bindTexture(gl.TEXTURE_2D, brightT.tex);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  // 3. 字卡
+  drawOverlay(t, s);
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, overTex);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, ov);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+  // 4. 後製：bloom/halation、調色、光爆、暗角、黑邊、字卡、顆粒
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, W, H);
+  gl.useProgram(PO.pr);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, sceneT.tex);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, brightT.tex);
+  gl.uniform1i(PO.u.uScene, 0); gl.uniform1i(PO.u.uBright, 1); gl.uniform1i(PO.u.uOver, 2);
+  gl.uniform1f(PO.u.uFrame, Math.round(t * FPS));
+  gl.uniform1f(PO.u.uFlash, flashAt(t));
+  gl.uniform1f(PO.u.uBars, barsAt(t));
+  gl.uniform1f(PO.u.uFade, fadeAt(t));
+  gl.uniform1f(PO.u.uBloom, bloomAt(t));
+  gl.uniform1f(PO.u.uBurst, burstAt(t));
+  gl.uniform2f(PO.u.uBurstPos, .74, .62);
+  gl.uniform1f(PO.u.uCA, caAt(t, s));
+  gl.uniform1f(PO.u.uTime, t);
+  gl.uniform1f(PO.u.uGrain, .05);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  gl.activeTexture(gl.TEXTURE0);
+}
+
+const pixels = new Uint8Array(W * H * 4), flipped = new Uint8Array(W * H * 4);
+function readFrame() {
+  gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  const row = W * 4;
+  for (let y = 0; y < H; y++) flipped.set(pixels.subarray((H - 1 - y) * row, (H - y) * row), y * row);
+  return flipped;
+}
+
+function report(msg) { return fetch('/log', { method: 'POST', body: String(msg) }).catch(() => {}); }
+
+/* ---------------- modes ---------------- */
+const hud = document.getElementById('hud');
+if (params.has('render')) {
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  await report('GL ' + (dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)));
+  if (params.has('times')) {
+    for (const ts of params.get('times').split(',')) {
+      renderFrame(Number(ts));
+      const r = await fetch('/frame?t=' + encodeURIComponent(ts), { method: 'POST', body: readFrame() });
+      if (!r.ok) { await report('ERROR still ' + ts); return; }
+    }
+  } else {
+    const total = Math.round(DURATION * FPS);
+    for (let f = 0; f < total; f++) {
+      renderFrame(f / FPS);
+      const r = await fetch('/frame', { method: 'POST', body: readFrame() });
+      if (!r.ok) { await report('ERROR frame ' + f); return; }
+      if (f % 90 === 0) await report(`frame ${f}/${total}`);
+    }
+    await report('cuts ' + SHOTS.map((s) => `b${s.b}@${s.start.toFixed(3)}`).join(' '));
+    await report('magnification ' + [...audit].map(([k, v]) => `${k}=${v.toFixed(3)}`).join(' | '));
+  }
+  await fetch('/done', { method: 'POST' });
+} else if (params.has('t')) {
+  renderFrame(Number(params.get('t')) || 0);
+  hud.textContent = 't=' + params.get('t');
+  document.title = 'ready';
+} else {
+  const audio = new Audio(AUDIO_SRC);
+  let start = performance.now(), playing = false;
+  glCanvas.addEventListener('click', () => {
+    audio.currentTime = AUDIO_START; audio.play(); playing = true;
+  });
+  const loop = (now) => {
+    const t = playing ? Math.min(audio.currentTime - AUDIO_START, DURATION - .001) : ((now - start) / 1000) % DURATION;
+    if (playing && audio.currentTime - AUDIO_START >= DURATION) audio.pause();
+    renderFrame(Math.max(t, 0));
+    hud.textContent = t.toFixed(2) + 's  b' + (t / BEAT).toFixed(1) + (playing ? '' : '  (click = play with music)');
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+})().catch((err) => {
+  document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f88;position:fixed;top:0">${err.stack}</pre>`);
+  fetch('/log', { method: 'POST', body: 'ERROR ' + err.stack }).catch(() => {});
+});
+</script>
+</body>
+</html>
