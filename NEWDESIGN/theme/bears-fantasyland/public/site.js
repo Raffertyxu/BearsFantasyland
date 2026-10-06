@@ -281,3 +281,18 @@
     schedule();
   });
 })();
+(() => {
+  // Product inquiry links ("聯絡我們", "商品諮詢") carry the chosen WooCommerce
+  // variation, so the inquiry form can prefill e.g. 木種: 胡桃木.
+  const links = document.querySelectorAll('[data-bf-product-inquiry]');
+  const $ = window.jQuery;
+  if (!links.length || !$) return;
+  const setVariation = (id) => links.forEach((link) => {
+    const url = new URL(link.href, window.location.href);
+    if (id) url.searchParams.set('variation', id); else url.searchParams.delete('variation');
+    link.href = url.toString();
+  });
+  $('form.variations_form')
+    .on('found_variation', (event, variation) => setVariation(variation && variation.variation_id))
+    .on('reset_data', () => setVariation(''));
+})();

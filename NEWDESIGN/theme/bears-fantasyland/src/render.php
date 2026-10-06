@@ -523,7 +523,7 @@ function bfnd_render_inquiry_form() {
     bfnd_render_inquiry_option_field($work_id, 'material', '選擇木材／材質', $selected_material);
     bfnd_render_inquiry_option_field($work_id, 'size', '選擇尺寸', $selected_size);
     echo '</div><div class="bf-form-row"><label>其他尺寸需求（選填）<input name="dimension" maxlength="150" placeholder="例如希望再加長 10 公分"></label><label>使用空間<input name="space" maxlength="150" placeholder="例如住宅餐廳、商業空間"></label></div>';
-    echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : '')) . '</textarea></label>';
+    echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : esc_textarea(bfnd_inquiry_product_line()))) . '</textarea></label>';
     echo '<button class="bf-submit" type="submit">送出詢問 <span aria-hidden="true">↗</span></button></form></div></div></section>';
 }
 
@@ -574,21 +574,32 @@ function bfnd_render_commerce() {
     elseif ($type === 'checkout') { echo do_shortcode('[woocommerce_checkout]'); }
     elseif ($type === 'account') { echo do_shortcode('[woocommerce_my_account]'); }
     elseif ($type === 'shop' && is_page(array('woodshop', 'shop'))) {
-        $terms = get_terms(array('taxonomy' => 'product_cat', 'hide_empty' => true));
-        if (!is_wp_error($terms) && $terms) {
-            echo '<nav class="bf-shop-categories" aria-label="商品分類"><a aria-current="page" href="' . esc_url($shop) . '">全部商品</a>';
-            foreach ($terms as $term) {
-                if ($term->slug === 'uncategorized') { continue; }
-                if ($term->name === '手工具') { echo '<span class="bf-shop-category-group">木作學堂</span>'; }
-                echo '<a href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>';
-            }
-            echo '</nav>';
-        }
+        bfnd_render_shop_categories($shop);
         echo do_shortcode('[products limit="12" columns="4" paginate="true"]');
+    }
+    elseif ($type === 'shop' && function_exists('woocommerce_content')) {
+        // Category / tag / shop archives: same category tabs and card grid as the 商品選購 page.
+        // The hero already shows the title, and the .woocommerce wrapper picks up the store card styles.
+        bfnd_render_shop_categories($shop);
+        add_filter('woocommerce_show_page_title', '__return_false');
+        echo '<div class="woocommerce columns-4">'; woocommerce_content(); echo '</div>';
     }
     elseif (function_exists('woocommerce_content')) { woocommerce_content(); }
     echo '</div></section>';
     bfnd_render_commerce_next($shop, $cart, $account);
+}
+
+function bfnd_render_shop_categories($shop) {
+    $terms = get_terms(array('taxonomy' => 'product_cat', 'hide_empty' => true));
+    if (is_wp_error($terms) || !$terms) { return; }
+    $current = is_product_category() ? get_queried_object_id() : 0;
+    echo '<nav class="bf-shop-categories" aria-label="商品分類"><a' . ($current ? '' : ' aria-current="page"') . ' href="' . esc_url($shop) . '">全部商品</a>';
+    foreach ($terms as $term) {
+        if ($term->slug === 'uncategorized') { continue; }
+        if ($term->name === '手工具') { echo '<span class="bf-shop-category-group">木作學堂</span>'; }
+        echo '<a' . ((int) $term->term_id === $current ? ' aria-current="page"' : '') . ' href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>';
+    }
+    echo '</nav>';
 }
 
 function bfnd_render_commerce_next($shop, $cart, $account) {
@@ -634,7 +645,27 @@ function bfnd_product_primary_category($id) {
 }
 
 function bfnd_render_product_assurance() {
-    echo '<ul class="bf-product-assurance"><li><a href="' . esc_url(bfnd_page_url('service')) . '"><span>購買、配送與售後說明</span><span aria-hidden="true">↗</span></a></li><li><a href="' . esc_url(bfnd_page_url('collaboration') . '#inquiry') . '"><span>商品諮詢與客製需求</span><span aria-hidden="true">↗</span></a></li></ul>';
+    echo '<ul class="bf-product-assurance"><li><a href="' . esc_url(bfnd_page_url('service')) . '"><span>購買、配送與售後說明</span><span aria-hidden="true">↗</span></a></li><li><a data-bf-product-inquiry href="' . esc_url(bfnd_product_inquiry_url(get_the_ID())) . '"><span>商品諮詢與客製需求</span><span aria-hidden="true">↗</span></a></li></ul>';
+}
+
+// Inquiry link for a product; site.js appends &variation= once a WooCommerce variation is chosen.
+function bfnd_product_inquiry_url($id) {
+    return add_query_arg('product', absint($id), bfnd_page_url('collaboration')) . '#inquiry';
+}
+
+// "我想詢問商品｜name（木種: 胡桃木）" plus the product URL, from ?product=&variation= on the inquiry page.
+// Only published, visible products and their own variations are accepted.
+function bfnd_inquiry_product_line() {
+    if (!function_exists('wc_get_product') || empty($_GET['product'])) { return ''; }
+    $product = wc_get_product(absint($_GET['product']));
+    if (!$product || $product->is_type('variation') || get_post_status($product->get_id()) !== 'publish' || !$product->is_visible()) { return ''; }
+    $line = '我想詢問商品｜' . $product->get_name();
+    $variation = !empty($_GET['variation']) ? wc_get_product(absint($_GET['variation'])) : null;
+    if ($variation && $variation->is_type('variation') && $variation->get_parent_id() === $product->get_id()) {
+        $spec = trim(html_entity_decode(wp_strip_all_tags(wc_get_formatted_variation($variation, true, true)), ENT_QUOTES, 'UTF-8'));
+        if ($spec !== '') { $line .= '（' . $spec . '）'; }
+    }
+    return $line . "\n商品頁：" . get_permalink($product->get_id());
 }
 
 // Visible WooCommerce attributes plus dimensions/weight, as label => value pairs.
@@ -701,7 +732,7 @@ function bfnd_render_product_sections($product, $shop) {
     $GLOBALS['post'] = get_post($id);
     $GLOBALS['product'] = $product;
     echo '<section class="bf-cta bf-product-cta"><div class="bf-wrap"><span class="bf-kicker">BEFORE YOU BUY</span><h2>對這件商品有疑問？</h2><p>尺寸、材質、配送或保養方式，歡迎先與我們聯繫。</p>';
-    bfnd_button('聯絡我們', bfnd_page_url('collaboration') . '#inquiry');
+    echo '<a class="bf-button" data-bf-product-inquiry href="' . esc_url(bfnd_product_inquiry_url($id)) . '"><span>聯絡我們</span><span aria-hidden="true">↗</span></a>';
     echo '</div></section>';
 }
 
