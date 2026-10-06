@@ -456,7 +456,7 @@ body.bfnd-body .bf-school-cta{position:relative}
 body.bfnd-body .bf-school-cta::before{content:'';position:absolute;inset:0;background:rgba(36,24,13,.35)}
 body.bfnd-body .bf-school-cta .bf-wrap{position:relative}
 body.bfnd-body .bf-school-cta p{color:var(--bf-white)}
-body.bfnd-body .bf-vertical-note{background:rgba(26,18,13,.78);padding:calc(12*var(--bfnd-px)) calc(10*var(--bfnd-px));width:max-content;max-width:none}
+body.bfnd-body .bf-vertical-note{text-shadow:0 0 calc(14*var(--bfnd-px)) rgba(26,18,13,.9),0 calc(1*var(--bfnd-px)) calc(3*var(--bfnd-px)) rgba(26,18,13,.75)}
 body.bfnd-body .bf-home-hero .bf-kicker,body.bfnd-body .bf-page-hero .bf-kicker,body.bfnd-body .bf-promo-copy .bf-kicker{color:var(--bf-white)}
 body.bfnd-body .bf-home-hero-shade{background:linear-gradient(90deg,rgba(26,18,13,.78) 0%,rgba(26,18,13,.62) 50%,rgba(26,18,13,.2) 100%)}
 body.bfnd-body .bf-page-hero-overlay{background:linear-gradient(90deg,#1d140dcc,#1d140d80 80%)}

@@ -140,7 +140,10 @@ function bfnd_page_design_walk($node, $section, &$fields, $overrides, $apply, &$
             $key = $section . '_text_' . ++$serial['text'];
             $default = bfnd_page_design_inner_html($node);
             $fields[$key] = array('type' => 'text', 'label' => mb_substr($plain, 0, 70), 'default' => $default, 'tag' => $tag);
-            if ($apply && isset($overrides['text'][$key])) {
+            // An override whose text equals the default (ignoring whitespace) only drops the default's
+            // markup, e.g. a migrated "GOOD WOODBETTER LIVING." without the <br>: keep the default HTML.
+            $same_text = isset($overrides['text'][$key]) && preg_replace('/\s+/u', '', html_entity_decode(wp_strip_all_tags((string) $overrides['text'][$key]), ENT_QUOTES | ENT_HTML5, 'UTF-8')) === preg_replace('/\s+/u', '', $node->textContent);
+            if ($apply && isset($overrides['text'][$key]) && !$same_text) {
                 bfnd_page_design_set_inner_html($node, bfnd_page_design_safe_inline($overrides['text'][$key]));
             }
             return;
