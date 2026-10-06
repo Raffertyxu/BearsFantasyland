@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>飛熊入夢｜合作提案 60 秒影片</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #out{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;aspect-ratio:16/9}
+  #gl{display:none}
+  #hud{position:fixed;left:8px;bottom:8px;font:12px monospace;color:#aaa}
+</style>
+</head>
+<body>
+<canvas id="gl" width="1920" height="1080"></canvas>
+<canvas id="out" width="1920" height="1080"></canvas>
+<div id="hud"></div>
+<script>
+(async () => {
+'use strict';
+/*
+  合作提案 60 秒影片，文案取自 /collaboration/ 頁面原文。
+  ?t=12.3  顯示單一畫格   ?render  逐格送給 render.mjs 編碼   無參數  即時預覽
+  只用實拍作品照與授課照片；editorial 情境生成圖不用於影片。
+  畫面管線：轉場 shader 與分割畫格 → 離屏 FBO → 後製（景深、光暈、色差、調色、顆粒）→ 2D 字卡。
+*/
+const W = 1920, H = 1080, FPS = 30, DURATION = 60;
+const BASE = '../../website/assets/';
+const params = new URLSearchParams(location.search);
+
+// fx: 0 木紋燃痕 1 漣漪 2 木條切片 3 推鏡 4 墨韻 5 色散 6 甩鏡 7 漏光 8 開門
+// layout: 0 滿版 1 畫框（直幅照片） 2 片尾模糊
+const SHOTS = [
+  { img:'works/cherry-island-table/03.webp', at:0, z:[1.45,1.12], f:[[.52,.5],[.56,.44]], r:[.015,0] },
+  { img:'works/muki/01.webp', at:7, fx:7, d:1.0, z:[1.22,1.06], f:[[.6,.5],[.45,.55]], r:[0,0] },
+  { img:'works/ridge-table/01.webp', at:10.5, fx:4, d:1.0, z:[1.28,1.1], f:[[.62,.55],[.5,.6]], r:[.01,-.005] },
+  { img:'works/muju/04.webp', at:13.5, fx:3, d:.8, z:[1.1,1.3], f:[[.4,.5],[.6,.45]], r:[0,0] },
+  // 15.6–20.3 由分割畫格蓋住；20.3 從第一格無縫接回滿版
+  { img:'works/muyo/01.webp', at:20.3, fx:0, d:0, z:[1.06,1.2], f:[[.5,.55],[.56,.5]], r:[0,0] },
+  { img:'works/muwi/01.webp', at:23.5, fx:8, d:.6, z:[1.12,1.18], f:[[.5,.56],[.5,.54]], r:[0,0] },
+  { img:'works/warm/05.webp', at:27.5, fx:2, d:.6, z:[1.25,1.1], f:[[.55,.45],[.5,.5]], r:[0,0] },
+  { img:'works/landscape-table/01.webp', at:29, fx:5, d:.4, z:[1.12,1.2], f:[[.45,.6],[.55,.6]], r:[0,0] },
+  { img:'works/grid/01.webp', at:30, fx:6, d:.4, z:[1.12,1.22], f:[[.62,.4],[.62,.5]], r:[0,0] },
+  { img:'works/ripple/01.webp', at:31, fx:2, d:.4, z:[1.6,1.85], f:[[.5,.45],[.52,.42]], r:[.02,0] },
+  { img:'works/warm/03.webp', at:32, fx:6, d:.4, z:[1.1,1.2], f:[[.6,.35],[.6,.45]], r:[0,0] },
+  { img:'works/muki/03.webp', at:33, fx:5, d:.4, z:[1.08,1.2], f:[[.5,.5],[.45,.55]], r:[0,0] },
+  { img:'works/muki/04.webp', at:34, fx:3, d:.6, z:[1.2,1.08], f:[[.5,.5],[.5,.5]], r:[0,0] },
+  { img:'works/muju/05.webp', at:35.5, fx:7, d:.6, z:[1.15,1.05], f:[[.65,.5],[.5,.5]], r:[0,0] },
+  { img:'works/walnut-island-bar/01.webp', at:37, fx:6, d:.5, z:[1.08,1.18], f:[[.35,.5],[.6,.5]], r:[0,0] },
+  { img:'brand/real-lecture.webp', at:38.5, fx:6, d:.5, z:[1.15,1.04], f:[[.6,.45],[.5,.5]], r:[0,0] },
+  { img:'works/arch/03.webp', at:40, fx:2, d:.5, z:[1.05,1.16], f:[[.5,.5],[.5,.55]], r:[0,0] },
+  { img:'works/muyo/03.webp', at:41.5, fx:0, d:.9, layout:1, z:[1.0,1.12], f:[[.5,.6],[.5,.4]], r:[0,0] },
+  { img:'works/warm/02.webp', at:44.8, fx:4, d:.8, layout:2, z:[1.1,1.2], f:[[.5,.5],[.5,.5]], r:[0,0] },
+  { img:'works/warm/01.webp', at:48.5, fx:7, d:1.0, z:[1.3,1.08], f:[[.5,.4],[.5,.5]], r:[.02,0] },
+  { img:'works/warm/04.webp', at:51.5, fx:1, d:.9, layout:1, z:[1.0,1.1], f:[[.5,.4],[.5,.6]], r:[0,0] },
+  { img:'works/muki/02.webp', at:54, fx:3, d:.8, layout:2, z:[1.08,1.16], f:[[.5,.5],[.5,.5]], r:[0,0] }
+];
+
+// 分割畫格（01 我們可以怎麼合作？）
+const QUAD = { tin:15.6, labels:16.4, expand:19.3, full:20.3 };
+const PANELS = [
+  { img:'works/muyo/01.webp', num:'01', title:'家具採購', sub:'飛熊入夢既有家具系列', f:[.5,.55] },
+  { img:'works/muki/02.webp', num:'02', title:'企業／空間合作', sub:'辦公・商業・公共及教育空間', f:[.42,.5] },
+  { img:'works/warm/01.webp', num:'03', title:'永續合作', sub:'材料・耐久設計・維修延壽・減少浪費', f:[.5,.5] },
+  { img:'brand/real-lecture.webp', num:'04', title:'教育／文化合作', sub:'木工教育・工藝體驗・文化及企業活動', f:[.6,.5] }
+];
+
+// 章節標（左上）：[開始, 結束, 編號, 英文, 中文]
+const CHAPTERS = [
+  [13.5, 20.3, '01', 'HOW WE COLLABORATE', '合作方式'],
+  [20.3, 27.5, '02', 'FROM OUR DESIGN TO YOUR SPACE', '設計走進空間'],
+  [27.5, 34, '03', 'PROCESS', '合作流程'],
+  [34, 41.5, '04', 'SPACES', '合作場景'],
+  [41.5, 48.5, '05', 'SUSTAINABILITY', '永續設計'],
+  [48.5, 54, '06', 'AFTER SERVICE', '售後與交付']
+];
+
+// 字卡：每行 [文字, 樣式]；align left 時錨在左下，center 時置中；reveal:'char' 逐字浮現
+const ST = {
+  kicker: ['500 26px', 'latin', 'cream', 10],
+  brand: ['500 34px', 'serif', 'amber', 10],
+  hero: ['600 112px', 'serif', 'cream', 8],
+  title: ['600 104px', 'serif', 'cream', 8],
+  scene: ['600 96px', 'serif', 'cream', 8],
+  quote: ['500 66px', 'serif', 'cream', 6],
+  lead: ['500 46px', 'serif', 'cream', 6],
+  body: ['400 30px', 'sans', 'soft', 4],
+  tags: ['400 28px', 'sans', 'amber', 6]
+};
+const CAPTIONS = [
+  { tin:4.9, tout:6.75, align:'left', y:H - 380, lines:[['COLLABORATION','kicker'], ['與木一起','hero'], ['創造更好的空間','hero']] },
+  { tin:7.6, tout:10.05, align:'left', y:H - 300, lines:[['以家具設計為核心','lead'], ['結合木工技藝　數位製造與木工教育','lead']] },
+  { tin:11.1, tout:13.05, align:'left', y:H - 300, lines:[['與企業　設計單位　學校及文化組織','lead'], ['共同發展更美好的空間與生活','lead']] },
+  { tin:13.95, tout:15.2, align:'center', reveal:'char', y:H / 2 - 30, dim:.5, lines:[['我們可以怎麼合作','title'], ['不同的空間　一樣的木作溫度','body']] },
+  { tin:20.8, tout:23.05, align:'left', y:H - 380, lines:[['FROM OUR DESIGN TO YOUR SPACE','kicker'], ['從我們的設計','title'], ['走進你的空間','title']] },
+  { tin:24.1, tout:27.0, align:'left', y:H - 300, lines:[['依空間需求　適度調整','lead'], ['讓家具真正融入生活','body']] },
+  { tin:27.85, tout:28.65, align:'center', reveal:'char', y:H / 2 - 30, dim:.45, lines:[['合作流程','title'], ['簡單透明　讓合作更順利','body']] },
+  { tin:34.35, tout:35.15, align:'center', reveal:'char', y:H / 2 - 70, dim:.45, lines:[['不同的場景','quote'], ['同樣的木作價值','quote']] },
+  { tin:35.9, tout:36.7, align:'left', y:H - 300, lines:[['01 / 04','kicker'], ['企業辦公空間','scene'], ['會議桌　·　辦公桌　·　收納櫃','tags']] },
+  { tin:37.4, tout:38.2, align:'left', y:H - 300, lines:[['02 / 04','kicker'], ['商業空間','scene'], ['餐桌椅　·　展示櫃　·　空間規劃','tags']] },
+  { tin:38.9, tout:39.7, align:'left', y:H - 300, lines:[['03 / 04','kicker'], ['教育場域','scene'], ['教學桌椅　·　木作教具','tags']] },
+  { tin:40.4, tout:41.1, align:'left', y:H - 300, lines:[['04 / 04','kicker'], ['公共空間','scene'], ['圖書館　·　社區空間　·　展覽','tags']] },
+  { tin:42.2, tout:44.35, align:'left', y:H - 380, lines:[['SUSTAINABILITY','kicker'], ['永續設計 × 企業合作','quote'], ['從一件家具開始　為下一個世代設計更長久的生活','body']] },
+  { tin:49.1, tout:51.1, align:'left', y:H - 290, lines:[['一件好的家具','quote'], ['值得被長久使用','quote']] }
+];
+
+// 03 合作流程五步：[開始, 編號, 標題, 說明]
+const STEPS = [
+  [29, '01', '需求討論', '了解使用情境　空間與需求'],
+  [30, '02', '提案報價', '提出合適作品及製作方案'],
+  [31, '03', '確認細節', '確認材質　尺寸　數量與細節'],
+  [32, '04', '製作執行', '台中工坊製作與品質管控'],
+  [33, '05', '完成交付', '依作品安排運送與安裝']
+];
+const PROCESS = [28.8, 33.85];
+
+// 02 規格標註：圖片座標（左上原點，0–1）→ 標籤
+const CALLOUTS = { shot:5, tin:24.4, tout:27.05, items:[
+  { at:[.5, .37], to:[1180, 230], en:'SIZE', cn:'尺寸' },
+  { at:[.77, .66], to:[1460, 880], en:'WOOD', cn:'木材' },
+  { at:[.3, .47], to:[560, 300], en:'SPACE', cn:'使用情境' }
+] };
+
+// 05 永續四原則＋SDGs
+const SUSTAIN = { tin:45.2, tout:48.15, items:[
+  ['leaf', '責任材料', '建立木材來源與材料紀錄'],
+  ['home', '在地製造', '台中工坊・設計製作'],
+  ['loop', '耐久設計', '延長家具使用生命週期'],
+  ['renew', '維修再生', '保養・修繕與重新整理']
+], sdg:[['4','優質教育'], ['8','合適的工作與經濟成長'], ['11','永續城市與社區'], ['12','負責任的消費與生產']] };
+
+// 06 售後三項
+const SERVICES = { tin:52.0, tout:53.75, items:[
+  ['運送與安裝', '依作品尺寸與地點安排'],
+  ['作品保固', '提供售後檢查與保固服務'],
+  ['維護與修繕', '保養・修繕・重新整理']
+] };
+
+// 景深（後製模糊）：[開始, 結束, 起值, 終值]
+const FOCUS = [
+  [13.7, 14.3, 0, 2.4], [14.3, 15.5, 2.4, 2.4], [15.5, 15.9, 2.4, 0],
+  [27.6, 28.0, 0, 2.2], [28.0, 28.75, 2.2, 2.2], [28.75, 29.05, 2.2, 0],
+  [34.1, 34.5, 0, 2.2], [34.5, 35.3, 2.2, 2.2], [35.3, 35.6, 2.2, 0]
+];
+const INTRO = { words:1.0, fill:2.5, zoom:3.05, end:4.5 };
+const STORY_START = 13.5, STORY_END = 54, OUTRO = 55;
+
+/* ---------------- WebGL2 ---------------- */
+const glCanvas = document.getElementById('gl');
+const gl = glCanvas.getContext('webgl2', { antialias:false, preserveDrawingBuffer:true, premultipliedAlpha:false });
+if (!gl) { document.body.textContent = 'WebGL2 not available'; report('ERROR no webgl2'); return; }
+
+const VERT = `#version 300 es
+in vec2 p; out vec2 vUv; void main(){ vUv = p*.5+.5; gl_Position = vec4(p,0.,1.); }`;
+const COMMON = `#version 300 es
+precision highp float;
+#define PI 3.14159265
+float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return v;}
+float ease(float t){return t<.5?4.*t*t*t:1.-pow(-2.*t+2.,3.)/2.;}
+float sweep(float v,float p,float e){return smoothstep(v,v+e,p*(1.+e));}
+vec2 coverUV(vec2 uv, vec2 img, vec4 c, vec2 res){
+  float ra=res.x/res.y, ia=img.x/img.y;
+  vec2 s = ra>ia ? vec2(1., ia/ra) : vec2(ra/ia, 1.);
+  s /= c.x;
+  vec2 q = uv-.5; q.x *= ra;
+  float cs=cos(c.w), sn=sin(c.w); q = mat2(cs,-sn,sn,cs)*q; q.x /= ra;
+  vec2 room = 1.-s;
+  return (q+.5)*s + room*c.yz;
+}
+`;
+// 轉場（與 brand.html 相同的九種轉場，調色移到後製）
+const FRAG_T = COMMON + `
+in vec2 vUv; out vec4 o;
+uniform sampler2D uT0, uT1;
+uniform vec2 uRes, uS0, uS1;
+uniform vec4 uC0, uC1;
+uniform float uL0, uL1, uP, uTime;
+uniform int uFx;
+vec4 layer(sampler2D t, vec2 img, vec4 c, float L, vec2 uv){
+  if(L<.5) return texture(t, coverUV(uv,img,c,uRes));
+  if(L<1.5){
+    vec4 bg = textureLod(t, coverUV(uv,img,vec4(1.2,.5,.5,0.),uRes), 5.5);
+    bg.rgb *= .42;
+    float h=.8; float w=h*(img.x/img.y)/(uRes.x/uRes.y);
+    vec2 ctr=vec2(.94-w*.5,.5);
+    vec2 q=(uv-ctr)/vec2(w,h)+.5;
+    if(q.x>=0.&&q.x<=1.&&q.y>=0.&&q.y<=1.) return texture(t, coverUV(q,img,c,vec2(w*uRes.x,h*uRes.y)));
+    vec2 dq=max(abs(uv-ctr)-vec2(w,h)*.5,0.);
+    float sh=exp(-length(dq*vec2(uRes.x/uRes.y,1.))*28.);
+    bg.rgb *= 1.-.55*sh;
+    return bg;
+  }
+  vec4 b = textureLod(t, coverUV(uv,img,c,uRes), 3.2);
+  b.rgb *= .3;
+  return b;
+}
+vec4 A(vec2 uv){return layer(uT0,uS0,uC0,uL0,uv);}
+vec4 B(vec2 uv){return layer(uT1,uS1,uC1,uL1,uv);}
+void main(){
+  vec2 uv=vUv; float p=uP; float ra=uRes.x/uRes.y; float s=sin(p*PI);
+  vec4 col;
+  if(p<=0.){ col=A(uv); }
+  else if(p>=1.){ col=B(uv); }
+  else if(uFx==0){
+    float g=fbm(vec2(uv.x*2.2,uv.y*22.+fbm(uv*3.)*4.));
+    float v=clamp(uv.x*.62+g*.38,0.,1.);
+    float m=sweep(v,p,.08); float edge=1.-abs(m*2.-1.);
+    vec2 d=vec2(0.,(g-.5)*.05*edge);
+    col=mix(A(uv+d),B(uv-d),m);
+    col.rgb+=vec3(1.,.6,.26)*pow(edge,3.)*.65;
+  } else if(uFx==1){
+    vec2 q=(uv-.5)*vec2(ra,1.); float dist=length(q);
+    float maxR=length(vec2(ra,1.))*.5; float r=p*(maxR+.3);
+    float band=smoothstep(.28,0.,abs(dist-r))*s;
+    vec2 dir=dist>0.?q/dist:vec2(0.);
+    float w=sin(dist*38.-p*26.)*.02*band+sin(dist*12.-p*9.)*.012*s;
+    vec2 off=dir*w/vec2(ra,1.);
+    float m=1.-smoothstep(r-.14,r+.02,dist);
+    col=mix(A(uv+off),B(uv-off*1.4),m);
+    col.rgb+=vec3(1.,.9,.75)*band*.08;
+  } else if(uFx==2){
+    float n=7.; float id=floor(uv.x*n); float fx=fract(uv.x*n);
+    float delay=id/(n-1.)*.42; float lp=ease(clamp((p-delay)/.58,0.,1.));
+    float m=step(1.-lp,uv.y);
+    vec4 a=A(vec2(uv.x,uv.y+lp*.25)); a.rgb*=1.-.4*lp;
+    vec4 b=B(vec2(uv.x,uv.y-(1.-lp)*.35)); b.rgb*=mix(.7,1.,lp);
+    col=mix(a,b,m);
+    float line=smoothstep(.004,0.,abs(uv.y-(1.-lp)))*step(.001,lp)*step(lp,.999);
+    col.rgb+=vec3(1.,.82,.6)*line*.8;
+    col.rgb*=1.-smoothstep(.985,1.,fx)*.35*s;
+  } else if(uFx==3){
+    vec2 c=vec2(.5); vec4 a=vec4(0.), b=vec4(0.);
+    for(int i=0;i<16;i++){ float t=float(i)/15.; float k=1.-t*.16*s;
+      a+=A(c+(uv-c)*(1.-p*.3)*k); b+=B(c+(uv-c)*(1.-(1.-p)*.3)*k); }
+    col=mix(a/16.,b/16.,smoothstep(.38,.62,p));
+    col.rgb+=vec3(1.,.84,.62)*pow(s,5.)*.28;
+  } else if(uFx==4){
+    float n=fbm(uv*vec2(ra,1.)*2.4+vec2(0.,p*.7));
+    float v=clamp((uv.x*.55+(1.-uv.y)*.45)*.7+n*.3,0.,1.);
+    float m=sweep(v,p,.2); float edge=1.-abs(m*2.-1.);
+    vec2 d=(vec2(n)-.5)*.07*edge;
+    col=mix(A(uv+d),B(uv-d*.5),m);
+    col.rgb*=1.-edge*.5;
+  } else if(uFx==5){
+    float n=noise(vec2(uv.y*9.,3.1))*.5+noise(vec2(uv.y*42.,7.))*.18;
+    float v=clamp((1.-uv.x)*.78+n*.32,0.,1.);
+    float m=sweep(v,p,.12); float edge=1.-abs(m*2.-1.);
+    float sh=.01*s+.022*edge;
+    vec2 ua=uv+vec2(p*.08,0.), ub=uv-vec2((1.-p)*.08,0.);
+    vec4 a=vec4(A(ua+vec2(sh,0.)).r,A(ua).g,A(ua-vec2(sh,0.)).b,1.);
+    vec4 b=vec4(B(ub+vec2(sh,0.)).r,B(ub).g,B(ub-vec2(sh,0.)).b,1.);
+    col=mix(a,b,m);
+    col.rgb+=vec3(1.,.95,.9)*pow(edge,6.)*.3;
+  } else if(uFx==6){
+    vec4 a=vec4(0.), b=vec4(0.);
+    float pe=ease(p);
+    for(int i=0;i<14;i++){ float k=(float(i)/13.-.5)*s*.16;
+      a+=A(uv+vec2(pe*.55+k,0.)); b+=B(uv-vec2((1.-pe)*.55,0.)+vec2(k,0.)); }
+    col=mix(a/14.,b/14.,smoothstep(.42,.58,p));
+    col.rgb*=1.+s*.08;
+  } else if(uFx==7){
+    float m=smoothstep(.25,.75,p);
+    vec2 cc=vec2(.5);
+    col=mix(A(cc+(uv-cc)*(1.-p*.04)), B(cc+(uv-cc)*(1.+(1.-p)*.04)), m);
+    float l=fbm(uv*vec2(1.4,.7)+vec2(uTime*.35,uTime*.1));
+    vec3 leak=vec3(1.,.55,.22)*smoothstep(.35,.85,l+s*.55-uv.x*.35)*s
+             +vec3(1.,.8,.55)*smoothstep(.6,1.,1.-length((uv-vec2(.85,.75))*vec2(ra,1.)*.9))*s*.8;
+    col.rgb=1.-(1.-col.rgb)*(1.-clamp(leak*.6,0.,1.));
+  } else {
+    float gap=ease(p)*.5;
+    float top=step(.5,uv.y);
+    vec4 a=A(vec2(uv.x, uv.y + mix(gap,-gap,top)));
+    a.rgb*=1.-gap*.8;
+    vec4 b=B(.5+(uv-.5)*(1.-.12*(1.-p)));
+    float m=step(abs(uv.y-.5),gap);
+    col=mix(a,b,m);
+    float line=smoothstep(.003,0.,abs(abs(uv.y-.5)-gap))*step(.001,gap)*step(gap,.499);
+    col.rgb+=vec3(1.,.85,.65)*line*.9;
+  }
+  o=vec4(col.rgb,1.);
+}`;
+// 分割畫格：任意矩形內 cover 裁切，圓角＋透明度
+const VERT_Q = `#version 300 es
+in vec2 p; out vec2 vUv; uniform vec4 uRect; uniform vec2 uRes;
+void main(){ vUv=p*.5+.5; vec2 px=uRect.xy+vec2(vUv.x,1.-vUv.y)*uRect.zw; vec2 c=px/uRes*2.-1.; gl_Position=vec4(c.x,-c.y,0.,1.); }`;
+const FRAG_Q = COMMON + `
+in vec2 vUv; out vec4 o;
+uniform sampler2D uT; uniform vec2 uS; uniform vec4 uC, uRect; uniform float uA, uDim, uRad;
+void main(){
+  vec4 c = texture(uT, coverUV(vUv,uS,uC,uRect.zw));
+  vec2 h = uRect.zw*.5; vec2 q = abs((vUv-.5)*uRect.zw) - h + uRad;
+  float d = length(max(q,0.)) + min(max(q.x,q.y),0.) - uRad;
+  float a = clamp(.5-d,0.,1.)*uA;
+  o = vec4(c.rgb*uDim*a, a);
+}`;
+// 後製：景深、光暈、邊緣色差、暗角、暖調、S 曲線、顆粒
+const FRAG_P = COMMON + `
+in vec2 vUv; out vec4 o;
+uniform sampler2D uS; uniform vec2 uRes; uniform float uBlur, uTime, uBloom;
+void main(){
+  vec2 uv=vUv; float ra=uRes.x/uRes.y; vec3 col;
+  vec2 dc=uv-.5;
+  if(uBlur>.02){
+    col=vec3(0.);
+    for(int i=0;i<24;i++){ float fi=float(i); float r=sqrt((fi+.5)/24.)*uBlur*.011; float a=fi*2.39996;
+      col+=textureLod(uS, uv+vec2(cos(a),sin(a))*r*vec2(1./ra,1.), uBlur*1.1).rgb; }
+    col/=24.;
+  } else {
+    float ca=dot(dc,dc)*.006;
+    col=vec3(texture(uS,uv-dc*ca).r, texture(uS,uv).g, texture(uS,uv+dc*ca).b);
+  }
+  vec3 bl=textureLod(uS,uv,4.).rgb*.45+textureLod(uS,uv,6.).rgb*.55;
+  col+=max(bl-.58,0.)*uBloom*vec3(1.,.82,.6);
+  vec2 vq=dc*vec2(ra*.8,1.);
+  col*=mix(.68,1.,smoothstep(.95,.25,length(vq)));
+  col=mix(col,col*vec3(1.05,1.,.92),.55);
+  col=mix(col, smoothstep(0.,1.,col), .25);
+  col+=(hash(uv*uRes+fract(uTime*7.31)*100.)-.5)*.03;
+  o=vec4(col,1.);
+}`;
+
+function compile(type, src) {
+  const sh = gl.createShader(type); gl.shaderSource(sh, src); gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+  return sh;
+}
+function program(vs, fs, names) {
+  const pr = gl.createProgram();
+  gl.attachShader(pr, compile(gl.VERTEX_SHADER, vs));
+  gl.attachShader(pr, compile(gl.FRAGMENT_SHADER, fs));
+  gl.bindAttribLocation(pr, 0, 'p');
+  gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+  const u = {};
+  names.forEach((n) => { u[n] = gl.getUniformLocation(pr, n); });
+  return { pr, u };
+}
+const PT = program(VERT, FRAG_T, ['uT0','uT1','uRes','uS0','uS1','uC0','uC1','uL0','uL1','uP','uTime','uFx']);
+const PQ = program(VERT_Q, FRAG_Q, ['uT','uS','uC','uRect','uRes','uA','uDim','uRad']);
+const PP = program(VERT, FRAG_P, ['uS','uRes','uBlur','uTime','uBloom']);
+const vbo = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+gl.useProgram(PT.pr); gl.uniform1i(PT.u.uT0, 0); gl.uniform1i(PT.u.uT1, 1); gl.uniform2f(PT.u.uRes, W, H);
+gl.useProgram(PQ.pr); gl.uniform1i(PQ.u.uT, 0); gl.uniform2f(PQ.u.uRes, W, H);
+gl.useProgram(PP.pr); gl.uniform1i(PP.u.uS, 0); gl.uniform2f(PP.u.uRes, W, H);
+gl.viewport(0, 0, W, H);
+gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+// 離屏場景緩衝（含 mipmap 供景深與光暈取樣）
+const sceneTex = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, sceneTex);
+gl.texStorage2D(gl.TEXTURE_2D, 1 + Math.floor(Math.log2(Math.max(W, H))), gl.RGBA8, W, H);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+const fbo = gl.createFramebuffer();
+gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, sceneTex, 0);
+gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+/* ---------------- assets ---------------- */
+const loadImage = (src) => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('load ' + src)); im.src = src; });
+const cache = new Map();
+async function asset(src) {
+  if (!cache.has(src)) {
+    const im = await loadImage(BASE + src);
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    cache.set(src, { tex:t, w:im.naturalWidth, h:im.naturalHeight });
+  }
+  return cache.get(src);
+}
+for (const s of SHOTS) s.asset = await asset(s.img);
+for (const p of PANELS) p.asset = await asset(p.img);
+const logoImg = await loadImage('../../website/public/logo-transparent.png');
+const logo = document.createElement('canvas');
+logo.width = logoImg.naturalWidth; logo.height = logoImg.naturalHeight;
+{ const c = logo.getContext('2d'); c.drawImage(logoImg, 0, 0); c.globalCompositeOperation = 'source-in'; c.fillStyle = '#f3ece2'; c.fillRect(0, 0, logo.width, logo.height); }
+const shine = document.createElement('canvas');
+shine.width = logo.width; shine.height = logo.height;
+const shineCtx = shine.getContext('2d');
+
+const SERIF = '"Noto Serif TC"', SANS = '"Noto Sans TC"', LATIN = '"Cormorant Garamond"';
+const allText = CAPTIONS.map((c) => c.lines.map((l) => l[0]).join('')).join('') + CHAPTERS.map((c) => c.slice(2).join('')).join('') +
+  PANELS.map((p) => p.title + p.sub).join('') + STEPS.map((s) => s[2] + s[3]).join('') + CALLOUTS.items.map((c) => c.cn).join('') +
+  SUSTAIN.items.map((s) => s[1] + s[2]).join('') + SUSTAIN.sdg.map((s) => s[1]).join('') + SERVICES.items.map((s) => s.join('')).join('') +
+  '與木一起與我們談合作電話手機官方信箱家具設計木工教育數位製造・—×／0123456789@.-';
+const LATIN_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/&’—@.-';
+await Promise.all([
+  document.fonts.load(`600 100px ${SERIF}`, allText), document.fonts.load(`500 100px ${SERIF}`, allText),
+  document.fonts.load(`400 40px ${SANS}`, allText), document.fonts.load(`300 40px ${SANS}`, allText), document.fonts.load(`500 40px ${SANS}`, allText),
+  document.fonts.load(`300 40px ${LATIN}`, LATIN_SET), document.fonts.load(`400 40px ${LATIN}`, LATIN_SET), document.fonts.load(`500 40px ${LATIN}`, LATIN_SET)
+]);
+
+/* ---------------- timeline ---------------- */
+const clamp01 = (x) => Math.min(Math.max(x, 0), 1);
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
+const easeInOutCubic = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeOutExpo = (t) => t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
+const easeInCubic = (t) => t * t * t;
+const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+const easeInOutQuint = (t) => t < .5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2;
+
+SHOTS.forEach((s, i) => {
+  const next = SHOTS[i + 1];
+  s.from = s.at - (s.d || 0) / 2;
+  s.to = next ? next.at + next.d / 2 : DURATION;
+});
+
+function camera(s, t) {
+  const u = easeInOutSine(clamp01((t - s.from) / (s.to - s.from)));
+  return [lerp(s.z[0], s.z[1], u), lerp(s.f[0][0], s.f[1][0], u), 1 - lerp(s.f[0][1], s.f[1][1], u), lerp(s.r[0], s.r[1], u)];
+}
+// 圖片座標 → 畫面像素（coverUV 的反函數，用於標註線）
+function imgToScreen(s, t, ix, iy) {
+  const [z, fx, fy, r] = camera(s, t);
+  const ra = W / H, ia = s.asset.w / s.asset.h;
+  let sx = ra > ia ? 1 : ra / ia, sy = ra > ia ? ia / ra : 1;
+  sx /= z; sy /= z;
+  let qx = (ix - (1 - sx) * fx) / sx - .5, qy = ((1 - iy) - (1 - sy) * fy) / sy - .5;
+  qx *= ra;
+  const cs = Math.cos(r), sn = Math.sin(r);
+  const ux = (cs * qx - sn * qy) / ra, uy = sn * qx + cs * qy;
+  return [(ux + .5) * W, (1 - (uy + .5)) * H];
+}
+
+function focusAt(t) {
+  for (const [a, b, v0, v1] of FOCUS) if (t >= a && t < b) return lerp(v0, v1, easeInOutSine((t - a) / (b - a)));
+  return 0;
+}
+
+// 分割畫格的矩形與相機
+const GAP = 12, COL = (W - GAP * 3) / 4;
+function panelState(i, t) {
+  const p = PANELS[i];
+  const k = easeOutExpo(clamp01((t - QUAD.tin - i * .11) / 1.0));
+  const x0 = i * (COL + GAP), y0 = (1 - k) * (H + 40);
+  const drift = (t - QUAD.tin) * .012;
+  let rect = [x0, y0, COL, H], z = 1.06, f = [p.f[0], p.f[1] + (1 - k) * .18 - (i === 0 ? 0 : drift)], dim = 1, rad = 0;
+  if (t >= QUAD.expand) {
+    const e = easeInOutQuint(clamp01((t - QUAD.expand) / (QUAD.full - QUAD.expand)));
+    if (i === 0) rect = [lerp(x0, 0, e), 0, lerp(COL, W, e), H];
+    else { rect = [x0 + e * (W - x0 + GAP) * .35, 0, COL, H]; dim = 1 - e * .7; }
+  }
+  return { rect, cam:[z, f[0], 1 - f[1], 0], dim, rad, k };
+}
+function quadActive(t) { return t >= QUAD.tin && t < QUAD.full; }
+
+function drawShots(t) {
+  let i = SHOTS.length - 1;
+  while (i > 0 && t < SHOTS[i].at) i--;
+  let a = SHOTS[i], b = a, p = 0, fx = 0;
+  const next = SHOTS[i + 1];
+  if (next && next.d && t >= next.at - next.d / 2) { b = next; p = (t - (next.at - next.d / 2)) / next.d; fx = next.fx; }
+  else if (i > 0 && a.d && t < a.at + a.d / 2) { b = a; a = SHOTS[i - 1]; p = (t - (b.at - b.d / 2)) / b.d; fx = b.fx; }
+  p = easeInOutCubic(clamp01(p));
+  gl.useProgram(PT.pr);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, a.asset.tex);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, b.asset.tex);
+  gl.uniform2f(PT.u.uS0, a.asset.w, a.asset.h); gl.uniform2f(PT.u.uS1, b.asset.w, b.asset.h);
+  gl.uniform4f(PT.u.uC0, ...camera(a, t)); gl.uniform4f(PT.u.uC1, ...camera(b, t));
+  gl.uniform1f(PT.u.uL0, a.layout || 0); gl.uniform1f(PT.u.uL1, b.layout || 0);
+  gl.uniform1f(PT.u.uP, b === a ? 0 : p);
+  gl.uniform1i(PT.u.uFx, fx);
+  gl.uniform1f(PT.u.uTime, t);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+function drawPanels(t) {
+  gl.useProgram(PQ.pr);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  gl.activeTexture(gl.TEXTURE0);
+  [3, 2, 1, 0].forEach((i) => {
+    const st = panelState(i, t), a = PANELS[i].asset;
+    if (st.rect[1] >= H) return;
+    gl.bindTexture(gl.TEXTURE_2D, a.tex);
+    gl.uniform2f(PQ.u.uS, a.w, a.h);
+    gl.uniform4f(PQ.u.uC, ...st.cam);
+    gl.uniform4f(PQ.u.uRect, ...st.rect);
+    gl.uniform1f(PQ.u.uA, 1); gl.uniform1f(PQ.u.uDim, st.dim); gl.uniform1f(PQ.u.uRad, st.rad);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  });
+  gl.disable(gl.BLEND);
+}
+
+function drawGL(t) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.viewport(0, 0, W, H);
+  const covered = t >= QUAD.tin + 1.1 && t < QUAD.full;
+  if (covered) { gl.clearColor(.055, .043, .035, 1); gl.clear(gl.COLOR_BUFFER_BIT); }
+  else drawShots(t);
+  if (quadActive(t)) drawPanels(t);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.useProgram(PP.pr);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, sceneTex);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.uniform1f(PP.u.uBlur, focusAt(t));
+  gl.uniform1f(PP.u.uBloom, .55);
+  gl.uniform1f(PP.u.uTime, t);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+
+/* ---------------- typography overlay ---------------- */
+const out = document.getElementById('out');
+const ctx = out.getContext('2d');
+const CREAM = '#f8f6f2', SOFT = 'rgba(248,246,242,.72)', FAINT = 'rgba(248,246,242,.4)', AMBER = '#d9a46a';
+const M = 110; // safe margin
+
+// 由下往上遮罩進場、往上退場
+function phase(t, tin, tout, inDur = .7, outDur = .35) {
+  if (t < tin) return null;
+  if (tout != null && t >= tout + outDur) return null;
+  const ein = easeOutExpo(clamp01((t - tin) / inDur));
+  const eout = tout != null ? easeInCubic(clamp01((t - tout) / outDur)) : 0;
+  return { off: eout > 0 ? -eout : 1 - ein, alpha: ein * (1 - eout) };
+}
+function maskText(text, x, y, font, color, ph, opts = {}) {
+  if (!ph) return 0;
+  ctx.save();
+  ctx.font = font;
+  ctx.letterSpacing = opts.spacing || '0px';
+  ctx.textAlign = opts.align || 'left';
+  ctx.textBaseline = 'alphabetic';
+  const m = ctx.measureText(text);
+  const asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+  const h = asc + desc;
+  const left = opts.align === 'center' ? x - m.width / 2 : opts.align === 'right' ? x - m.width : x;
+  ctx.beginPath(); ctx.rect(left - 20, y - asc - 6, m.width + 40, h + 14); ctx.clip();
+  ctx.globalAlpha = Math.max(ph.alpha, 0) * (opts.alpha ?? 1);
+  ctx.fillStyle = color;
+  ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 18;
+  ctx.fillText(text, x, y + ph.off * (h + 14));
+  ctx.restore();
+  return m.width;
+}
+// 逐字浮現：每個字由模糊、下沉淡入，退場時上飄並模糊
+function charText(text, x, y, font, color, t, tin, tout, opts = {}) {
+  if (t < tin || (tout != null && t > tout + .5)) return;
+  ctx.save();
+  ctx.font = font; ctx.letterSpacing = '0px'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = color;
+  const sp = opts.spacing || 0, chars = [...text];
+  const ws = chars.map((c) => ctx.measureText(c).width);
+  const total = ws.reduce((a, b) => a + b, 0) + sp * (chars.length - 1);
+  let cx = opts.align === 'center' ? x - total / 2 : x;
+  const stagger = opts.stagger ?? .045;
+  chars.forEach((c, i) => {
+    const e = easeOutCubic(clamp01((t - tin - i * stagger) / .8));
+    const o = tout != null ? easeInCubic(clamp01((t - tout - i * stagger * .4) / .4)) : 0;
+    const alpha = e * (1 - o);
+    if (alpha > .002) {
+      const blur = (1 - e) * 16 + o * 12;
+      ctx.globalAlpha = alpha;
+      ctx.filter = blur > .4 ? `blur(${blur.toFixed(1)}px)` : 'none';
+      ctx.fillText(c, cx, y + (1 - e) * 28 - o * 20);
+    }
+    cx += ws[i] + sp;
+  });
+  ctx.restore();
+}
+function line(x, y, w, color, k, alpha = 1, origin = 'left') {
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = color;
+  const ww = w * k;
+  ctx.fillRect(origin === 'center' ? x - ww / 2 : x, y, ww, 2);
+  ctx.restore();
+}
+const inOut = (t, tin, tout, a = .7, b = .35) => easeOutExpo(clamp01((t - tin) / a)) * (1 - easeInCubic(clamp01((t - tout) / b)));
+
+const FAMILY = { serif:SERIF, sans:SANS, latin:LATIN };
+const COLOR = { cream:CREAM, soft:SOFT, amber:AMBER };
+
+function drawCaption(c, t) {
+  if (t < c.tin || t > c.tout + .7) return;
+  const specs = c.lines.map(([text, style]) => {
+    const [font, fam, color, spacing] = ST[style];
+    const size = parseInt(font.split(' ')[1], 10);
+    return { text, font:`${font} ${FAMILY[fam]}`, color:COLOR[color], spacing, size };
+  });
+  const x = c.align === 'center' ? W / 2 : M;
+  let y = c.y;
+  specs.forEach((s, k) => {
+    if (k > 0) y += Math.max(specs[k - 1].size * .35, 14) + s.size * 1.15;
+    if (c.reveal === 'char') charText(s.text, x, y, s.font, s.color, t, c.tin + k * .35, c.tout + k * .05, { align:c.align, spacing:s.spacing });
+    else maskText(s.text, x, y, s.font, s.color, phase(t, c.tin + k * .09, c.tout + k * .04, .85, .32), { align:c.align, spacing:s.spacing + 'px' });
+  });
+}
+
+/* ---------- 開場：「與木一起」→ 木字填入木紋 → 鏡頭穿過木字 ---------- */
+const glyph = (() => {
+  const S = 420, c = document.createElement('canvas'); c.width = c.height = S * 1.4;
+  const g = c.getContext('2d', { willReadFrequently:true });
+  g.font = `600 ${S}px ${SERIF}`; g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.fillStyle = '#fff';
+  const bx = c.width / 2, by = c.height * .8;
+  g.fillText('木', bx, by);
+  const m = g.measureText('木');
+  const top = by - m.actualBoundingBoxAscent, bot = by + m.actualBoundingBoxDescent;
+  // 在字高 72% 處找中央直筆：取最接近中線的填色區段
+  const yy = Math.round(top + (bot - top) * .72);
+  const row = g.getImageData(0, yy, c.width, 1).data;
+  let best = null, run = null;
+  for (let x = 0; x < c.width; x++) {
+    const on = row[x * 4 + 3] > 128;
+    if (on && !run) run = [x, x];
+    if (on) run[1] = x;
+    if ((!on || x === c.width - 1) && run) {
+      const mid = (run[0] + run[1]) / 2;
+      if (!best || Math.abs(mid - bx) < Math.abs((best[0] + best[1]) / 2 - bx)) best = run;
+      run = null;
+    }
+  }
+  const sw = best ? best[1] - best[0] + 1 : S * .08;
+  const ax = best ? (best[0] + best[1]) / 2 : bx;
+  // 相對字型大小與基線位置的錨點
+  return { ax:(ax - bx) / S, ay:(yy - by) / S, sw:sw / S };
+})();
+const introMask = document.createElement('canvas'); introMask.width = W; introMask.height = H;
+const im = introMask.getContext('2d');
+
+function drawIntro(t) {
+  const SIZE = 170, by = H / 2 + 60, gap = 34;
+  const font = `600 ${SIZE}px ${SERIF}`;
+  ctx.fillStyle = '#0b0907'; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.font = font;
+  const wMu = ctx.measureText('木').width, wYu = ctx.measureText('與').width, wQi = ctx.measureText('一起').width;
+  ctx.restore();
+  const cx = W / 2;
+  const ax = cx + glyph.ax * SIZE, ay = by + glyph.ay * SIZE;
+  const zk = clamp01((t - INTRO.zoom) / (INTRO.end - INTRO.zoom));
+  const sEnd = (W * 3.2) / (glyph.sw * SIZE);
+  const s = Math.exp(Math.log(sEnd) * Math.pow(zk, 2.6));
+  const side = 1 - easeInOutCubic(clamp01((t - INTRO.fill) / .55));
+  const fill = easeInOutSine(clamp01((t - INTRO.fill) / .6));
+  const apply = (g) => { g.translate(ax, ay); g.scale(s, s); g.translate(-ax, -ay); };
+
+  // 小字標
+  maskText('BEAR’S FANTASYLAND　/　COLLABORATION', cx, by - SIZE - 40, `500 24px ${LATIN}`, AMBER, phase(t, INTRO.words - .2, INTRO.fill - .1, .9, .4), { align:'center', spacing:'10px' });
+
+  ctx.save(); apply(ctx);
+  ctx.font = font; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = CREAM;
+  const showWord = (txt, x, i) => {
+    const e = easeOutCubic(clamp01((t - INTRO.words - i * .14) / .9));
+    const a = e * (txt === '木' ? 1 - fill : side);
+    if (a <= .002) return;
+    ctx.save(); ctx.globalAlpha = a; ctx.filter = e < .98 ? `blur(${((1 - e) * 18).toFixed(1)}px)` : 'none';
+    const drift = txt === '木' ? 0 : (1 - side) * (x < cx ? -60 : 60);
+    ctx.fillText(txt, x + drift, by + (1 - e) * 30);
+    ctx.restore();
+  };
+  showWord('與', cx - wMu / 2 - gap - wYu, 0);
+  showWord('木', cx - wMu / 2, 1);
+  showWord('一起', cx + wMu / 2 + gap, 2);
+  ctx.restore();
+
+  if (fill > 0) {
+    im.save(); im.clearRect(0, 0, W, H); apply(im);
+    im.font = font; im.textAlign = 'left'; im.textBaseline = 'alphabetic'; im.fillStyle = '#fff';
+    im.fillText('木', cx - wMu / 2, by);
+    im.restore();
+    im.save(); im.globalCompositeOperation = 'source-in'; im.drawImage(glCanvas, 0, 0); im.restore();
+    ctx.save(); ctx.globalAlpha = fill; ctx.drawImage(introMask, 0, 0); ctx.restore();
+  }
+  const full = clamp01((zk - .88) / .12);
+  if (full > 0) { ctx.save(); ctx.globalAlpha = full; ctx.drawImage(glCanvas, 0, 0); ctx.restore(); }
+}
+
+/* ---------- 01 分割畫格的文字 ---------- */
+function drawPanelLabels(t) {
+  if (!quadActive(t)) return;
+  const fadeOut = 1 - clamp01((t - QUAD.expand + .25) / .35);
+  if (fadeOut <= 0) return;
+  PANELS.forEach((p, i) => {
+    const st = panelState(i, t);
+    const [x, y, w] = st.rect;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x, y, w, H); ctx.clip();
+    ctx.globalAlpha = fadeOut * st.k;
+    const g = ctx.createLinearGradient(0, H, 0, H * .5);
+    g.addColorStop(0, 'rgba(14,11,9,.82)'); g.addColorStop(1, 'rgba(14,11,9,0)');
+    ctx.fillStyle = g; ctx.fillRect(x, y, w, H);
+    ctx.restore();
+    const tin = QUAD.labels + i * .14, tout = QUAD.expand - .3;
+    const lx = x + 40, ly = y + H - 190;
+    maskText(p.num, lx, ly, `400 34px ${LATIN}`, AMBER, phase(t, tin, tout, .8, .3), { spacing:'2px' });
+    line(lx + 52, ly - 11, 40, AMBER, inOut(t, tin + .1, tout, .7, .3), .9);
+    maskText(p.title, lx, ly + 66, `600 42px ${SERIF}`, CREAM, phase(t, tin + .06, tout, .8, .3), { spacing:'4px' });
+    maskText(p.sub, lx, ly + 112, `400 21px ${SANS}`, SOFT, phase(t, tin + .12, tout, .8, .3), { spacing:'2px' });
+  });
+}
+
+/* ---------- 02 規格標註線 ---------- */
+function drawCallouts(t) {
+  const { shot, tin, tout, items } = CALLOUTS;
+  if (t < tin || t > tout + .5) return;
+  const s = SHOTS[shot];
+  items.forEach((c, i) => {
+    const t0 = tin + i * .3;
+    const [px, py] = imgToScreen(s, t, c.at[0], c.at[1]);
+    const [lx, ly] = c.to;
+    const o = 1 - easeInCubic(clamp01((t - tout - i * .05) / .35));
+    const dot = easeOutExpo(clamp01((t - t0) / .5));
+    const ln = easeInOutCubic(clamp01((t - t0 - .15) / .55));
+    if (dot <= 0) return;
+    ctx.save(); ctx.globalAlpha = o;
+    // 呼吸光圈
+    const pulse = ((t - t0) % 1.6) / 1.6;
+    ctx.strokeStyle = `rgba(217,164,106,${(1 - pulse) * .7})`; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(px, py, 10 + pulse * 22, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = CREAM; ctx.beginPath(); ctx.arc(px, py, 6 * dot, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = AMBER; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(px, py, 11 * dot, 0, Math.PI * 2); ctx.stroke();
+    // 折線：先斜後橫
+    if (ln > 0) {
+      const ex = lx - 20, ey = ly;
+      const seg1 = Math.hypot(ex - px, ey - py), seg2 = 180, tot = seg1 + seg2;
+      const d = ln * tot;
+      ctx.strokeStyle = 'rgba(248,246,242,.85)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(px, py);
+      if (d <= seg1) ctx.lineTo(px + (ex - px) * d / seg1, py + (ey - py) * d / seg1);
+      else { ctx.lineTo(ex, ey); ctx.lineTo(ex + (d - seg1), ey); }
+      ctx.stroke();
+    }
+    ctx.restore();
+    // 深色底片讓標籤在淺色背景上也清楚
+    const chip = inOut(t, t0 + .45, tout + i * .05, .6, .3);
+    if (chip > 0) {
+      ctx.save(); ctx.font = `600 40px ${SERIF}`; ctx.letterSpacing = '4px';
+      const cw = Math.max(ctx.measureText(c.cn).width, 110) + 44;
+      ctx.globalAlpha = chip * .62; ctx.fillStyle = '#16110d';
+      ctx.beginPath(); ctx.roundRect(lx - 8, ly - 66, cw, 112, 14); ctx.fill();
+      ctx.restore();
+    }
+    maskText(c.cn, lx + 14, ly - 16, `600 40px ${SERIF}`, CREAM, phase(t, t0 + .55, tout + i * .05, .8, .3), { spacing:'4px' });
+    maskText(c.en, lx + 14, ly + 28, `500 20px ${LATIN}`, AMBER, phase(t, t0 + .65, tout + i * .05, .8, .3), { spacing:'8px' });
+  });
+}
+
+/* ---------- 03 合作流程 ---------- */
+function drawProcess(t) {
+  const [a, b] = PROCESS;
+  if (t < a || t > b + .5) return;
+  const vis = inOut(t, a, b, .6, .35);
+  const x0 = M, x1 = W - M, ly = H - 205;
+  const n = STEPS.length;
+  const nodeX = (i) => lerp(x0, x1, i / (n - 1));
+  let cur = 0;
+  STEPS.forEach((s, i) => { if (t >= s[0]) cur = i; });
+  const prog = clamp01((t - STEPS[0][0]) / (STEPS[n - 1][0] - STEPS[0][0]));
+  ctx.save(); ctx.globalAlpha = vis;
+  ctx.fillStyle = 'rgba(248,246,242,.25)'; ctx.fillRect(x0, ly, (x1 - x0) * easeOutExpo(clamp01((t - a) / .9)), 2);
+  ctx.fillStyle = AMBER; ctx.fillRect(x0, ly, (x1 - x0) * easeInOutSine(prog), 2);
+  STEPS.forEach((s, i) => {
+    const on = t >= s[0];
+    const k = easeOutExpo(clamp01((t - s[0]) / .5));
+    const x = nodeX(i);
+    ctx.fillStyle = on ? AMBER : '#3a3029';
+    ctx.strokeStyle = on ? AMBER : 'rgba(248,246,242,.5)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, ly + 1, 7 + k * 3 * (i === cur ? 1 : 0), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    if (i === cur && on) {
+      ctx.strokeStyle = `rgba(217,164,106,${(1 - k) * .8})`;
+      ctx.beginPath(); ctx.arc(x, ly + 1, 10 + k * 26, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.font = `500 24px ${SERIF}`; ctx.letterSpacing = '4px';
+    ctx.textAlign = i === 0 ? 'left' : i === n - 1 ? 'right' : 'center';
+    ctx.fillStyle = i === cur && on ? CREAM : on ? SOFT : FAINT;
+    ctx.fillText(s[2], x, ly + 52);
+    ctx.font = `400 20px ${LATIN}`; ctx.letterSpacing = '4px';
+    ctx.fillStyle = on ? AMBER : FAINT;
+    ctx.fillText(s[1], x, ly - 22);
+  });
+  ctx.restore();
+  // 大號步驟字卡
+  STEPS.forEach((s, i) => {
+    const tin = s[0] + .08, tout = i < n - 1 ? STEPS[i + 1][0] - .2 : b - .1;
+    const y = H - 360;
+    maskText(s[1], M - 6, y + 10, `300 210px ${LATIN}`, CREAM, phase(t, tin, tout, .7, .2), { alpha:.95 });
+    maskText(s[2], M + 300, y - 70, `600 76px ${SERIF}`, CREAM, phase(t, tin + .06, tout, .7, .2), { spacing:'8px' });
+    maskText(s[3], M + 304, y - 2, `400 30px ${SANS}`, SOFT, phase(t, tin + .12, tout, .7, .2), { spacing:'4px' });
+  });
+}
+
+/* ---------- 05 永續四原則：線條圖示描繪 ---------- */
+const ICONS = (() => {
+  const leaf = new Path2D('M32 6 C10 18 10 46 32 58 C54 46 54 18 32 6 Z M32 14 L32 62 M32 30 L22 22 M32 40 L43 31');
+  const home = new Path2D('M6 30 L32 9 L58 30 M13 25 L13 56 L51 56 L51 25 M26 56 L26 40 L38 40 L38 56');
+  const loop = new Path2D('M32 32 C24 19 7 19 7 32 C7 45 24 45 32 32 C40 19 57 19 57 32 C57 45 40 45 32 32 Z');
+  const renew = new Path2D();
+  renew.arc(32, 32, 22, -Math.PI * .3, Math.PI * 1.45);
+  renew.moveTo(41, 4); renew.lineTo(51.5, 14.5); renew.lineTo(37, 18);
+  return { leaf:[leaf, 240], home:[home, 260], loop:[loop, 190], renew:[renew, 200] };
+})();
+function drawSustain(t) {
+  const { tin, tout, items, sdg } = SUSTAIN;
+  if (t < tin || t > tout + .6) return;
+  const colW = 380, x0 = W / 2 - colW * 2, y = H / 2 - 120;
+  items.forEach(([icon, title, sub], i) => {
+    const t0 = tin + i * .22;
+    const cx = x0 + colW * i + colW / 2;
+    const o = 1 - easeInCubic(clamp01((t - tout - i * .04) / .35));
+    const k = easeInOutCubic(clamp01((t - t0) / 1.1));
+    const [path, len] = ICONS[icon];
+    if (k > 0) {
+      ctx.save(); ctx.globalAlpha = o;
+      ctx.translate(cx - 54, y - 64); ctx.scale(1.7, 1.7);
+      ctx.strokeStyle = AMBER; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.setLineDash([len, len]); ctx.lineDashOffset = len * (1 - k);
+      ctx.shadowColor = 'rgba(217,164,106,.55)'; ctx.shadowBlur = 12 * k;
+      ctx.stroke(path);
+      ctx.restore();
+    }
+    if (i > 0) { ctx.save(); ctx.globalAlpha = o * easeOutExpo(clamp01((t - t0) / .8)) * .3; ctx.fillStyle = CREAM; ctx.fillRect(x0 + colW * i, y - 40, 1, 220); ctx.restore(); }
+    maskText(title, cx, y + 110, `600 44px ${SERIF}`, CREAM, phase(t, t0 + .35, tout + i * .04, .8, .3), { align:'center', spacing:'6px' });
+    maskText(sub, cx, y + 158, `400 23px ${SANS}`, SOFT, phase(t, t0 + .45, tout + i * .04, .8, .3), { align:'center', spacing:'2px' });
+  });
+  // SDGs
+  const t1 = tin + 1.35, sy = H - 230;
+  maskText('SDGs', W / 2, sy - 70, `500 22px ${LATIN}`, AMBER, phase(t, t1, tout, .8, .3), { align:'center', spacing:'10px' });
+  line(W / 2, sy - 50, 120, AMBER, inOut(t, t1 + .1, tout, .8, .3), .7, 'center');
+  ctx.save(); ctx.font = `400 22px ${SANS}`; ctx.letterSpacing = '2px';
+  const parts = sdg.map(([n, l]) => ({ n, l, w: 64 + ctx.measureText(l).width }));
+  ctx.restore();
+  const tot = parts.reduce((a, p) => a + p.w, 0) + 64 * (parts.length - 1);
+  let x = W / 2 - tot / 2;
+  parts.forEach((p, i) => {
+    const ph = phase(t, t1 + .2 + i * .12, tout, .8, .3);
+    const nw = maskText(p.n, x, sy + 4, `500 46px ${LATIN}`, CREAM, ph);
+    maskText(p.l, x + Math.max(nw, 28) + 12, sy, `400 22px ${SANS}`, SOFT, ph, { spacing:'2px' });
+    x += p.w + 64;
+  });
+}
+
+/* ---------- 06 售後三項 ---------- */
+function drawServices(t) {
+  const { tin, tout, items } = SERVICES;
+  if (t < tin || t > tout + .6) return;
+  const x = M, y0 = H / 2 - 170, row = 150, w = 760;
+  maskText('AFTER SERVICE', x, y0 - 40, `500 26px ${LATIN}`, AMBER, phase(t, tin - .2, tout, .8, .3), { spacing:'10px' });
+  items.forEach(([title, sub], i) => {
+    const t0 = tin + i * .18, y = y0 + i * row;
+    line(x, y, w, 'rgba(248,246,242,.35)', inOut(t, t0, tout + i * .04, .9, .3));
+    maskText('0' + (i + 1), x, y + 76, `400 34px ${LATIN}`, AMBER, phase(t, t0 + .1, tout + i * .04, .8, .3), { spacing:'2px' });
+    maskText(title, x + 90, y + 78, `600 52px ${SERIF}`, CREAM, phase(t, t0 + .16, tout + i * .04, .8, .3), { spacing:'6px' });
+    maskText(sub, x + 92, y + 122, `400 26px ${SANS}`, SOFT, phase(t, t0 + .22, tout + i * .04, .8, .3), { spacing:'3px' });
+  });
+  line(x, y0 + items.length * row, w, 'rgba(248,246,242,.35)', inOut(t, tin + .54, tout + .12, .9, .3));
+}
+
+/* ---------- 片尾：Logo 掃光＋合作洽詢 ---------- */
+function drawOutro(t) {
+  if (t < OUTRO - .2) return;
+  const k = easeOutExpo(clamp01((t - OUTRO) / 1.2));
+  const lw = 640, lh = lw * logo.height / logo.width;
+  const sc = lerp(.94, 1, k);
+  // 掃光帶
+  const sp = clamp01((t - OUTRO - .9) / 1.3);
+  shineCtx.clearRect(0, 0, shine.width, shine.height);
+  shineCtx.globalCompositeOperation = 'source-over';
+  shineCtx.drawImage(logo, 0, 0);
+  if (sp > 0 && sp < 1) {
+    shineCtx.globalCompositeOperation = 'source-atop';
+    const bx = lerp(-.4, 1.4, easeInOutSine(sp)) * shine.width, bw = shine.width * .22;
+    const g = shineCtx.createLinearGradient(bx - bw, 0, bx + bw, shine.height * .3);
+    g.addColorStop(0, 'rgba(255,214,160,0)'); g.addColorStop(.5, 'rgba(255,226,186,.95)'); g.addColorStop(1, 'rgba(255,214,160,0)');
+    shineCtx.fillStyle = g; shineCtx.fillRect(0, 0, shine.width, shine.height);
+  }
+  ctx.save(); ctx.globalAlpha = k;
+  ctx.translate(W / 2, H / 2 - 150); ctx.scale(sc, sc);
+  ctx.drawImage(shine, -lw / 2, -lh / 2, lw, lh);
+  ctx.restore();
+  line(W / 2, H / 2 - 10, 300, AMBER, easeOutExpo(clamp01((t - OUTRO - .4) / .9)), .9, 'center');
+  charText('與我們談合作', W / 2, H / 2 + 92, `600 64px ${SERIF}`, CREAM, t, OUTRO + .55, null, { align:'center', spacing:14, stagger:.06 });
+  maskText('家具採購　·　空間合作　·　永續合作　·　教育／文化合作', W / 2, H / 2 + 160, `400 26px ${SANS}`, AMBER, phase(t, OUTRO + 1.1, null, .9), { align:'center', spacing:'6px' });
+  const cy = H / 2 + 270;
+  line(W / 2, cy - 52, 1080, 'rgba(248,246,242,.25)', easeOutExpo(clamp01((t - OUTRO - 1.4) / 1.0)), 1, 'center');
+  const items = [['電話', '04-24616373'], ['手機', '0921 747 056'], ['LINE', '@iaz2765b'], ['EMAIL', 'bearlovearth@gmail.com']];
+  const colW = 270, x0 = W / 2 - colW * 2;
+  items.forEach(([label, val], i) => {
+    const cx = x0 + colW * i + colW / 2;
+    const ph = phase(t, OUTRO + 1.5 + i * .1, null, .9);
+    maskText(label, cx, cy - 8, `500 20px ${/[A-Z]/.test(label) ? LATIN : SANS}`, AMBER, ph, { align:'center', spacing:'6px' });
+    maskText(val, cx, cy + 32, `400 ${i === 3 ? 25 : 28}px ${SANS}`, CREAM, phase(t, OUTRO + 1.56 + i * .1, null, .9), { align:'center', spacing:'1px' });
+  });
+}
+
+function drawOverlay(t) {
+  ctx.clearRect(0, 0, W, H);
+  if (t < INTRO.end) drawIntro(t);
+  else ctx.drawImage(glCanvas, 0, 0);
+
+  // 左下壓暗讓字清楚；置中字卡另外整體壓暗；分割畫格與片尾除外
+  const quadK = quadActive(t) ? clamp01((t - QUAD.tin - .3) / .6) * (1 - clamp01((t - QUAD.full + .1) / .3)) : 0;
+  const presence = clamp01((t - INTRO.end + .2) / .7) * (1 - clamp01((t - OUTRO + .6) / .6)) * (1 - quadK);
+  if (presence > 0) {
+    ctx.save(); ctx.globalAlpha = presence;
+    let g = ctx.createLinearGradient(0, 0, W * .62, 0);
+    g.addColorStop(0, 'rgba(18,14,11,.66)'); g.addColorStop(1, 'rgba(18,14,11,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    g = ctx.createLinearGradient(0, H, 0, H * .45);
+    g.addColorStop(0, 'rgba(18,14,11,.72)'); g.addColorStop(1, 'rgba(18,14,11,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    g = ctx.createLinearGradient(0, 0, 0, H * .28);
+    g.addColorStop(0, 'rgba(18,14,11,.5)'); g.addColorStop(1, 'rgba(18,14,11,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+  }
+  let dim = 0;
+  CAPTIONS.forEach((c) => {
+    if (!c.dim) return;
+    const k = clamp01((t - c.tin + .5) / .6) * (1 - clamp01((t - c.tout - .2) / .6));
+    dim = Math.max(dim, c.dim * k);
+  });
+  // 永續四原則與售後列表需要較暗的底
+  dim = Math.max(dim, .3 * inOut(t, SUSTAIN.tin - .3, SUSTAIN.tout, .8, .5));
+  if (dim > 0) { ctx.fillStyle = `rgba(14,11,9,${dim})`; ctx.fillRect(0, 0, W, H); }
+
+  drawPanelLabels(t);
+
+  // 章節標（分割畫格期間上移到畫格之上仍保留）
+  CHAPTERS.forEach(([a, b, num, en, cn]) => {
+    const tin = a + .1, tout = b - .35;
+    const ph = phase(t, tin, tout, .8, .3);
+    if (!ph) return;
+    const y = 132;
+    maskText(num, M, y, `400 34px ${LATIN}`, AMBER, ph, { spacing:'2px' });
+    const lk = easeOutExpo(clamp01((t - tin - .1) / .7)) * (1 - easeInCubic(clamp01((t - tout) / .3)));
+    line(M + 58, y - 11, 56, AMBER, lk, .9);
+    const w = maskText(cn, M + 136, y, `500 30px ${SERIF}`, CREAM, phase(t, tin + .06, tout, .8, .3), { spacing:'4px' });
+    maskText(en, M + 136 + w + 22, y - 2, `400 20px ${LATIN}`, SOFT, phase(t, tin + .12, tout, .8, .3), { spacing:'6px' });
+  });
+
+  CAPTIONS.forEach((c) => drawCaption(c, t));
+  drawCallouts(t);
+  drawProcess(t);
+  drawSustain(t);
+  drawServices(t);
+
+  // 故事進度線
+  if (t > STORY_START - .4 && t < STORY_END + .6) {
+    const k = clamp01((t - STORY_START + .4) / .5) * (1 - clamp01((t - STORY_END) / .5));
+    const prog = clamp01((t - STORY_START) / (STORY_END - STORY_START));
+    ctx.save(); ctx.globalAlpha = k;
+    ctx.fillStyle = 'rgba(248,246,242,.22)'; ctx.fillRect(M, H - 70, W - M * 2, 2);
+    ctx.fillStyle = CREAM; ctx.fillRect(M, H - 70, (W - M * 2) * prog, 2);
+    ctx.restore();
+  }
+
+  drawOutro(t);
+
+  const black = Math.max(1 - clamp01(t / .5), clamp01((t - (DURATION - .6)) / .6));
+  if (black > 0) { ctx.fillStyle = `rgba(0,0,0,${black})`; ctx.fillRect(0, 0, W, H); }
+}
+
+function renderFrame(t) { drawGL(t); drawOverlay(t); }
+
+function report(msg) { return fetch('/log', { method:'POST', body:String(msg) }).catch(() => {}); }
+
+/* ---------------- modes ---------------- */
+const hud = document.getElementById('hud');
+if (params.has('render')) {
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  await report('GL ' + (dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)));
+  const total = Math.round(DURATION * FPS);
+  for (let f = 0; f < total; f++) {
+    renderFrame(f / FPS);
+    const data = ctx.getImageData(0, 0, W, H).data;
+    const r = await fetch('/frame', { method:'POST', body:data.buffer });
+    if (!r.ok) { await report('ERROR frame ' + f); return; }
+    if (f % 30 === 0) await report(`frame ${f}/${total}`);
+  }
+  await fetch('/done', { method:'POST' });
+} else if (params.has('t')) {
+  renderFrame(Number(params.get('t')) || 0);
+  hud.textContent = 't=' + params.get('t');
+  document.title = 'ready';
+} else {
+  const start = performance.now();
+  const loop = (now) => {
+    const t = ((now - start) / 1000) % DURATION;
+    renderFrame(t);
+    hud.textContent = t.toFixed(2) + 's';
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+})().catch((err) => {
+  document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f88;position:fixed;top:0">${err.stack}</pre>`);
+  fetch('/log', { method:'POST', body:'ERROR ' + err.stack }).catch(() => {});
+});
+</script>
+</body>
+</html>
