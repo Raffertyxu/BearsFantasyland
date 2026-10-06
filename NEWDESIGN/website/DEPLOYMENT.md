@@ -4,6 +4,14 @@
 正式站：https://a1.haotaimaker.com/  
 目前最新核對：主題「飛熊入夢」`1.3.35` 為啟用主題，外掛「飛熊入夢 NEWDESIGN 官網」`0.5.36` 維持啟用。部署及驗收紀錄見下方最新段落；其後較早版本條目是歷史記錄，不代表目前版本。
 
+## 2026-10-06 主題 1.3.37 商品頁版型（部署前候選，尚未上線）
+
+- 分支 `claude/product-page-design-2cb8d1`，以正式站 `1.3.35`（commit `debd74f`）為基底。主題來源 `1.3.37`：WooCommerce 單一商品頁改用作品頁語言（左圖庫＋右側黏性購買區、`01 / ABOUT` 商品介紹、`02 / SPECIFICATION` 規格、`03 / REVIEWS` 評價、搭配推薦／相關商品、詢問 CTA；無內容的區塊自動隱藏）。保留 Woo 摘要 hook（加入購物車、付款按鈕、結構化資料）。新增 `public/product.css`（僅 `is_product()` 載入）、gallery slider／lightbox；`style.css` 末尾商店卡特價標籤與價格改品牌樣式。
+- 版本跳過 `1.3.36`：另一個工作樹 `claude/upload-plugin-theme-files-15c122` 有未提交、未上線的 `1.3.36`（作品可加入購物車），不含本商品頁。**下一版必須以 1.3.37 為基底合併**，否則會覆蓋商品頁。
+- 驗證：`php -l`、`npm run check` 通過；以 stub 執行真實 `bfnd_render_product_page()`、套正式站 Woo 標記與 CSS，在 390／768／1440／2560px 截圖無水平溢出；獨立審查 5 項問題已修 4 項，第 5 項為升版號（已升）。未在正式站驗證。
+- 套件：`NEWDESIGN/theme/dist/bears-fantasyland-1.3.37.zip`（SHA-256 `3a5662933430f4b681b514281a1e2a9f7ed5e8376e73c343b21f554304942370`）。回退用 `bears-fantasyland-1.3.35.zip`。
+- 正式站商品目前皆為「簡單商品」、無木種屬性，因此頁面不會出現木種選項；需在後台改為可變商品並建立「木種」變化。
+
 ## 2026-10-06 大螢幕等比例縮放（0.5.36／1.3.35 部署前候選紀錄）
 
 - 主題來源 `1.3.35`、外掛來源 `0.5.36`：前台 CSS 全部長度改為 `calc(N*var(--bfnd-px))`，1920px 以上整站以 1920 版面等比例放大；移除 2560／3840／6000px 補丁層（含 25% 縮放可讀性 `--bfnd-wide-*` 區塊）。轉換腳本 `scripts/scale_px_units.py`，單位檢查 `scripts/lint_css_units.py`（已併入 `npm run check`），版面檢查 `npm run check:layout`（`scripts/check_layout.mjs`，用本機 Chrome）。
