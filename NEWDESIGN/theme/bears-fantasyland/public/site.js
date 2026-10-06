@@ -41,6 +41,30 @@
     iframe.focus();
   });
 
+  // Required on the live site: saved 網站版面 text overrides on the
+  // collaboration page are shifted by one row, so the server renders the
+  // form note in place of the landline. Remove the misplaced note row and
+  // restore the landline until those overrides are re-saved.
+  document.querySelectorAll('.bf-inquiry-grid').forEach((section) => {
+    const contact = section.querySelector('.bf-direct-contact');
+    if (!contact) return;
+    const note = section.querySelector('.bf-form-note')?.textContent.trim();
+    contact.querySelectorAll('.bf-direct-contact-row').forEach((row) => {
+      if (note && row.textContent.trim() === note) row.remove();
+    });
+    if (!contact.querySelector('a[href="tel:+886424616373"]')) {
+      const row = document.createElement('p');
+      row.className = 'bf-direct-contact-row';
+      const label = document.createElement('span');
+      label.textContent = '電話';
+      const link = document.createElement('a');
+      link.href = 'tel:+886424616373';
+      link.textContent = '04-24616373';
+      row.append(label, link);
+      contact.prepend(row);
+    }
+  });
+
   const schoolMenu = document.querySelector('.bf-nav-school');
   const schoolToggle = schoolMenu?.querySelector('.bf-nav-school-toggle');
   const menu = document.querySelector('.bf-menu-button');
