@@ -10,10 +10,10 @@
 | 項目 | 狀態 |
 |---|---|
 | 正式站 | https://a1.haotaimaker.com/ （WordPress + WooCommerce 11.1.2 + Yoast + Wordfence + 綠界 ECPay） |
-| 啟用主題 | 「飛熊入夢」**1.3.42**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.42.zip`） |
-| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.40**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.40.zip`） |
-| 與正式站一致的程式碼 | `claude/batch1-inquiry-shop-link-filter` 分支（**尚未併入 `main`**） |
-| 回退用 ZIP | 主題 1.3.35～1.3.41、外掛 0.5.36／0.5.38／0.5.39 都在 `dist/`（Git LFS） |
+| 啟用主題 | 「飛熊入夢」**1.3.43**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.43.zip`） |
+| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.41**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.41.zip`） |
+| 與正式站一致的程式碼 | `main` 分支 |
+| 回退用 ZIP | 主題 1.3.35～1.3.42、外掛 0.5.36／0.5.38～0.5.40 都在 `dist/`（Git LFS） |
 | 綠界 | **正式收款模式**（「啟用測試模式」關閉）。刷卡測試會真的扣款 |
 
 每次上線的完整紀錄、SHA-256 與即時驗收結果：`NEWDESIGN/website/DEPLOYMENT.md` 最上面幾段。
@@ -37,7 +37,7 @@
   - [ ] 🔴 主機上來源不明的 `wp-content/mu-plugins/customize-controlsse.php`：每次請求都會執行，9/17 起就記錄，至今未查明。需主機權限下載檢視，或請主機商協助。**不可宣稱已確認是惡意或已確認根因**（見 `PM-AUDIT.md`）。使用者可能需要一份給主機商的說明。
   - [x] （外掛 0.5.40，**2026-10-07 已上線**，限流未在正式站實測：每 IP 10 分鐘 5 次、全站每小時 40 次、欄位長度上限）🟠 詢問表單沒有頻率限制與伺服器端長度限制（外掛 `src/admin.php` 約 500 行 `bfnd_inquiry`），可能被灌單。可加 transient 依 IP 限流＋欄位長度上限。
   - [ ] 🟠 `xmlrpc.php` 開啟。先確認 Jetpack 是否在用，再用 Wordfence 關閉 XML-RPC 驗證。改設定前要問使用者。
-  - [ ] 低風險 10 條見報告。分支 `claude/batch2-security-hardening`（主題 1.3.43／外掛 0.5.41，**待上線**）已修程式能修的 7 條：
+  - [ ] 低風險 10 條見報告。分支 `claude/batch2-security-hardening`（主題 1.3.43／外掛 0.5.41，**2026-10-07 已上線**）已修程式能修的 7 條：
     - L1 匯入頁不再因 `run=1` 連結自動送出；L2 詢問表單 `?work=`／`?course=` 只接受已發布內容；L3 前台私密作品／課程改看 `read_private_posts`；
     - L5 主題 ZIP 不含 README.md，外掛 `data/` 加 `.htaccess` 禁止直接讀 `content.json`（上線後要驗證回 403）；
     - L8 一次性搬移改在管理員的後台請求執行（`bfnd_run_pending_migrations`，`admin_init`），訪客請求不再跑；
@@ -90,8 +90,8 @@
 
 | 分支 | 內容 | 處置 |
 |---|---|---|
-| `main` | 主題 1.3.41／外掛 0.5.39（落後正式站一版） | 從這裡開新分支 |
-| `claude/batch1-inquiry-shop-link-filter` | = 正式站（主題 1.3.42／外掛 0.5.40） | 待併入 main |
+| `main` | = 正式站（主題 1.3.43／外掛 0.5.41） | 從這裡開新分支 |
+| `claude/batch1-inquiry-shop-link-filter`、`claude/batch2-security-hardening` | 已併入 main | 可刪 |
 | `claude/product-page-design-2cb8d1` | 本 session 的工作，已併入 main | 可刪 |
 | `claude/website-rwd-large-screens-777491` | 1.3.35 大螢幕等比例縮放，已包含在 main | 可刪 |
 | `claude/upload-plugin-theme-files-15c122` | 未上線的 1.3.36／0.5.37「作品加入購物車」（WIP commit） | **不要合併**，見 1.4 |

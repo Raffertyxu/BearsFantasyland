@@ -2,7 +2,16 @@
 
 初次上線日期：2026-09-18
 正式站：https://a1.haotaimaker.com/  
-目前最新核對：主題「飛熊入夢」`1.3.42` 為啟用主題，外掛「飛熊入夢 NEWDESIGN 官網」`0.5.40` 為啟用外掛。部署及驗收紀錄見下方最新段落；其後較早版本條目是歷史記錄，不代表目前版本。
+目前最新核對：主題「飛熊入夢」`1.3.43` 為啟用主題，外掛「飛熊入夢 NEWDESIGN 官網」`0.5.41` 為啟用外掛。部署及驗收紀錄見下方最新段落；其後較早版本條目是歷史記錄，不代表目前版本。
+
+## 2026-10-07 主題 1.3.43、外掛 0.5.41：資安審查低風險項目
+
+- 來源：分支 `claude/batch2-security-hardening` commit `be8b1df`。使用者當次授權後，由 Claude 從已登入的 Chrome 後台上傳，頁內 SHA-256 比對一致。
+- 主題 `1.3.42 → 1.3.43`（SHA-256 `0ee481f294243ae7ef77116d93a91098d276e8060a55e8e54e2a7e94947167a2`）、外掛 `0.5.40 → 0.5.41`（SHA-256 `b20b5c7b66d47519d1b49b8a4b98fc8d50adb655332460bc84ab56e992c1cb5b`）：後台皆回報「已成功更新」，外掛清單顯示 0.5.41 且為啟用。
+- 內容：資安報告 L1、L2、L3、L5、L8、L9、L10（見 `SECURITY-AUDIT-2026-10-06.md`）。
+- 即時驗收：`Version: 1.3.43`、作品頁外掛資源 `?ver=0.5.41`；`check_live_routes.py` 32 項、`check_live_content.py` 全部通過。未登入 `/collaboration/?course=1662`（私密課程）不再預填課程名稱，`?course=1418`（公開）仍預填「我想詢問課程｜木工基礎入門班」。外掛 `data/content.json` 與主題 `README.md` 公開網址皆回 404（`work-options.js` 仍 200）。登入後匯入頁不再輸出自動送出腳本；「飛熊商務設定」頁 200。
+- 上線前唯讀確認：6 個搬移完成旗標（`bfnd_banner_carousels_v1`、`bfnd_clean_slugs_v1`、`bfnd_course_catalog_v2`、`bfnd_course_editor_fields_v1`、`bfnd_meeting_product_categories_v1`、`bfnd_native_journal_categories_v1`）在 wp_options 均為 1。
+- 未驗：L9 以商店經理帳號實際儲存、L10 貨到付款情境（正式站沒有啟用這類付款方式）。
 
 ## 2026-10-07 主題 1.3.42、外掛 0.5.40：詢問限流、作品連商品、系列下拉、隱藏空貨號
 
