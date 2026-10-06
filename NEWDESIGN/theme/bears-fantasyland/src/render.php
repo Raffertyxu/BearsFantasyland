@@ -11,7 +11,8 @@ if (!function_exists('bfnd_course_registration_action')) {
         if (!$id || !function_exists('wc_get_product')) { return false; }
         $product = wc_get_product($id);
         if (!$product || !in_array($product->get_type(), array('simple', 'variable'), true)
-            || !$product->is_virtual() || get_post_status($id) !== 'publish'
+            || !($product->is_type('variable') ? ($product->get_children() && !array_filter(array_map('wc_get_product', $product->get_children()), function ($child) { return !$child || !$child->is_virtual(); })) : $product->is_virtual())
+            || get_post_status($id) !== 'publish'
             || get_post_meta($id, '_bfnd_course_product', true) !== 'yes') { return false; }
         return $product;
     }
@@ -538,7 +539,9 @@ function bfnd_journal_card($post) {
 }
 function bfnd_render_journal_teaser() {
     $q = bfnd_journal_query(3);
-    if (!$q->have_posts()) { return; }
+    // Keep an empty placeholder when there are no posts: the 網站版面 editor maps saved text to
+    // sections by position (page-editor.php section_N), so a missing section shifts every later one.
+    if (!$q->have_posts()) { echo '<section class="bf-journal-teaser-empty" hidden aria-hidden="true" style="display:none"></section>'; return; }
     echo '<section class="bf-section bf-wrap">'; bfnd_section_head('JOURNAL', '飛熊日誌', bfnd_page_url('journal'), '閱讀更多'); echo '<p class="bf-section-intro">記錄木作、設計，以及工坊裡正在發生的事。</p>';
     echo '<div class="bf-journal-grid">'; foreach ($q->posts as $post) { bfnd_journal_card($post); } echo '</div>';
     echo '</section>';

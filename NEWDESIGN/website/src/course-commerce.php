@@ -5,8 +5,23 @@ if (!defined('ABSPATH')) { exit; }
 function bfnd_course_product_is_eligible($product) {
     if (!$product || !is_object($product) || !method_exists($product, 'is_type')) { return false; }
     if (!in_array($product->get_type(), array('simple', 'variable'), true)) { return false; }
-    if (get_post_status($product->get_id()) !== 'publish' || !$product->is_virtual()) { return false; }
+    if (get_post_status($product->get_id()) !== 'publish' || !bfnd_course_product_is_virtual($product)) { return false; }
     return get_post_meta($product->get_id(), '_bfnd_course_product', true) === 'yes';
+}
+
+/**
+ * WooCommerce never stores "virtual" on a variable product's parent (only on its
+ * variations), so a variable course product counts as virtual when every variation is.
+ */
+function bfnd_course_product_is_virtual($product) {
+    if (!$product->is_type('variable')) { return $product->is_virtual(); }
+    $children = $product->get_children();
+    if (!$children) { return false; }
+    foreach ($children as $child_id) {
+        $child = wc_get_product($child_id);
+        if (!$child || !$child->is_virtual()) { return false; }
+    }
+    return true;
 }
 
 function bfnd_course_product_is_assigned($product_id, $except_course_id = 0) {
@@ -91,6 +106,12 @@ function bfnd_save_course_product($product) {
         }
         update_post_meta($product->get_id(), '_bfnd_course_product', 'yes');
         $product->set_virtual(true);
+        if ($product->is_type('variable')) {
+            foreach ($product->get_children() as $child_id) {
+                $child = wc_get_product($child_id);
+                if ($child && !$child->is_virtual()) { $child->set_virtual(true); $child->save(); }
+            }
+        }
         $product->set_catalog_visibility('hidden');
     } else {
         delete_post_meta($product->get_id(), '_bfnd_course_product');
