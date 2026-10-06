@@ -186,3 +186,47 @@ body.bfnd-body [data-bf-work-inquiry][aria-busy="true"] {
     transition-duration: .01ms;
   }
 }
+
+/* Wood choices linked to a WooCommerce variable product. */
+body.bfnd-body .bf-work-buy-choices .bf-work-choice > span {
+  flex-direction: column;
+  gap: calc(2*var(--bfnd-px));
+}
+
+body.bfnd-body .bf-work-choice-price {
+  color: var(--bf-muted);
+  font-size: calc(12*var(--bfnd-px));
+  line-height: 1.3;
+}
+
+body.bfnd-body .bf-work-choice-price del {
+  opacity: .6;
+}
+
+body.bfnd-body .bf-work-choice-price ins {
+  text-decoration: none;
+}
+
+body.bfnd-body .bf-work-choice.is-sold-out {
+  cursor: not-allowed;
+}
+
+body.bfnd-body .bf-work-choice.is-sold-out > span {
+  opacity: .5;
+}
+
+body.bfnd-body .bf-work-buy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: calc(14*var(--bfnd-px)) calc(28*var(--bfnd-px));
+}
+
+body.bfnd-body .bf-work-buy-form {
+  margin: 0;
+}
+
+body.bfnd-body .bf-work-buy-form .bf-button {
+  border: 0;
+  cursor: pointer;
+}

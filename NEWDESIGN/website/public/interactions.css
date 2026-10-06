@@ -266,6 +266,36 @@ body.bfnd-body .bf-footer-social > .bf-footer-line:focus-visible {
   outline-color: var(--bf-line-deep);
 }
 
+/* Site-level Additional CSS styles every footer social link with
+   (0,4,1) selectors and prints after this file, which turned the LINE
+   hover into brown text on green. These selectors outrank it. */
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line {
+  border-color: var(--bf-line-green);
+  background: var(--bf-white);
+  color: var(--bf-line-ink);
+}
+
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line img {
+  display: block;
+}
+
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line::before,
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line::after {
+  content: none;
+}
+
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line:hover,
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line:focus-visible {
+  border-color: var(--bf-line-deep);
+  background: var(--bf-line-deep);
+  color: var(--bf-white);
+}
+
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line:hover img,
+body.bfnd-body .bf-footer .bf-footer-main .bf-footer-social > .bf-footer-line:focus-visible img {
+  background: var(--bf-white);
+}
+
 @media (max-width: 760px) {
   body.bfnd-body .bf-footer-social {
     gap: calc(6*var(--bfnd-px));

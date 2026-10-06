@@ -39,7 +39,7 @@ function bfnd_migrate_native_journal_categories() {
 
 function bfnd_fields($type) {
     $shared = array('english' => '英文名稱', 'tagline' => '一句話介紹', 'seo_title' => 'SEO Title', 'seo_description' => 'SEO Description');
-    if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
+    if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'woo_id' => '購買商品（WooCommerce 變化商品，每個木種一個變化）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
     if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / program / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price_label' => '價格標籤（例如：優惠價）', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'course_access_url' => '線上課程 YouTube 連結（付款後寄給購買者）', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
     if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'size' => '參考尺寸', 'gallery_ids' => '作品照片')); }
     return array();
@@ -78,6 +78,28 @@ function bfnd_meta_box($post) {
                     echo '<option value="' . esc_attr($current_product_id) . '" selected>目前連結：' . esc_html($legacy_name) . '（需改設為虛擬課程商品）</option>';
                 }
                 echo '</select><p class="description">先到「商品」編輯簡單或變化商品，勾選「木作課程／會員方案商品」並儲存；系統會自動設為虛擬商品及隱藏於一般商店清單。變化商品可設定不同梯次、方案及名額；單一商品採 WooCommerce 售價與庫存。每個商品只能綁一堂課。</p></div>';
+            }
+            continue;
+        }
+        if ($post->post_type === 'bf_work' && $key === 'woo_id') {
+            $current_product_id = absint($value);
+            echo '<div class="bfnd-course-product-field"><label for="bfnd_woo_id"><strong>' . esc_html($label) . '</strong></label><br>';
+            if (!function_exists('wc_get_product')) {
+                echo '<select id="bfnd_woo_id" name="bfnd[woo_id]" disabled style="width:100%;max-width:780px"><option>請先啟用 WooCommerce</option></select></div>';
+            } else {
+                echo '<select id="bfnd_woo_id" name="bfnd[woo_id]" style="width:100%;max-width:780px"><option value="">不開放購買（只顯示作品諮詢）</option>';
+                $selectable_ids = array();
+                foreach (bfnd_work_products($post->ID) as $product) {
+                    $selectable_ids[] = $product->get_id();
+                    $price_label = wp_strip_all_tags($product->get_price_html());
+                    echo '<option value="' . esc_attr($product->get_id()) . '" ' . selected($current_product_id, $product->get_id(), false) . '>' . esc_html($product->get_name() . ($price_label !== '' ? '（' . $price_label . '）' : '')) . '</option>';
+                }
+                if ($current_product_id && !in_array($current_product_id, $selectable_ids, true)) {
+                    $current_product = wc_get_product($current_product_id);
+                    $legacy_name = $current_product ? $current_product->get_name() : '已不存在的商品';
+                    echo '<option value="' . esc_attr($current_product_id) . '" selected>目前連結：' . esc_html($legacy_name) . '（需為已勾選「家具作品購買商品」的變化商品）</option>';
+                }
+                echo '</select><p class="description">先到「商品」新增變化商品，以「木種」屬性為每種木材建立變化並填售價，右側勾選「家具作品購買商品」後儲存。綁定後，作品頁的木材欄會列出各木種與價格，客人選好即可加入購物車；未綁定時維持「可選木材」與作品諮詢。</p></div>';
             }
             continue;
         }
@@ -136,7 +158,7 @@ function bfnd_save_meta($post_id) {
         $value = in_array($key, array('features', 'audience', 'learning', 'tools', 'outcomes', 'schedule', 'notices', 'material_options', 'size_options'), true)
             ? sanitize_textarea_field($raw_value)
             : sanitize_text_field($raw_value);
-        if ($type === 'bf_course' && $key === 'woo_id') { $value = absint($raw_value); }
+        if ($key === 'woo_id') { $value = absint($raw_value); }
         if ($type === 'bf_course' && $key === 'course_access_url') { $value = bfnd_sanitize_course_access_url($raw_value); }
         if ($key === 'gallery_ids' || $key === 'related_ids') { $value = array_values(array_filter(array_map('absint', explode(',', $value)))); }
         if ($key === 'featured') { $value = $value === '1' ? '1' : '0'; }

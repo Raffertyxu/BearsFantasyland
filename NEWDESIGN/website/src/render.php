@@ -195,7 +195,8 @@ function bfnd_render_work($id) {
     echo '<section class="bf-spec-section" data-bf-work-choice-detail data-work-id="' . esc_attr($id) . '"><div class="bf-wrap"><span class="bf-index">02 / SPECIFICATION</span><h2>作品規格</h2><div class="bf-spec-grid">';
     foreach ($specs as $label => $value) { if ($value) { echo '<div><dt>' . bfnd_e($label) . '</dt><dd>' . bfnd_e($value) . '</dd></div>'; } }
     echo '<div><dt>木材／材質</dt><dd>';
-    if (!bfnd_render_work_choice_group($id, 'material', '木材／材質')) { echo bfnd_e(bfnd_public_material($id)); }
+    $buyable = function_exists('bfnd_render_work_purchase_choices') && bfnd_render_work_purchase_choices($id);
+    if (!$buyable && !bfnd_render_work_choice_group($id, 'material', '木材／材質')) { echo bfnd_e(bfnd_public_material($id)); }
     echo '</dd></div>';
     if ($size_options) {
         echo '<div><dt>尺寸</dt><dd>';
@@ -224,10 +225,16 @@ function bfnd_render_work($id) {
         foreach ($steps as $i => $step) { $step = trim($step); if ($step) { echo '<li><span>' . sprintf('%02d', $i + 1) . '</span>' . bfnd_e($step) . '</li>'; } }
         echo '</ol></div></div></div></section>';
     }
-    echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">WORKS INQUIRY</span><h2>喜歡這件作品？</h2><p>歡迎詢問作品尺寸、木種、製作方式與現有規格。</p>';
+    echo '<section class="bf-cta"><div class="bf-wrap"><span class="bf-kicker">' . ($buyable ? 'ORDER THIS WORK' : 'WORKS INQUIRY') . '</span><h2>喜歡這件作品？</h2><p>' . ($buyable ? '在「作品規格」選好木種即可加入購物車；尺寸或細節想調整，也歡迎先諮詢。' : '歡迎詢問作品尺寸、木種、製作方式與現有規格。') . '</p>';
     if (bfnd_meta($id, 'size_adjustable') === '1') { echo '<p>部分作品可依空間需求調整尺寸，實際製作方式歡迎與我們討論。</p>'; }
     $inquiry_url = add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry';
-    echo '<a class="bf-button" data-bf-work-inquiry data-bf-work-id="' . esc_attr($id) . '" href="' . esc_url($inquiry_url) . '"><span>作品諮詢</span><span aria-hidden="true">↗</span></a></div></section>';
+    if ($buyable) {
+        echo '<div class="bf-work-buy-actions">';
+        bfnd_render_work_purchase_form($id);
+        echo '<a class="bf-text-link" href="' . esc_url($inquiry_url) . '">尺寸或細節客製諮詢 ↗</a></div></div></section>';
+    } else {
+        echo '<a class="bf-button" data-bf-work-inquiry data-bf-work-id="' . esc_attr($id) . '" href="' . esc_url($inquiry_url) . '"><span>作品諮詢</span><span aria-hidden="true">↗</span></a></div></section>';
+    }
     echo '<dialog id="bf-image-dialog" class="bf-image-dialog" aria-label="作品照片放大檢視"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="作品照片放大檢視"></dialog>';
 }
 
