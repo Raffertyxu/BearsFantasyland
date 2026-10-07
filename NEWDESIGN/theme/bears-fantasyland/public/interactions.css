@@ -470,3 +470,9 @@ body.bfnd-body .bf-direct-contact-row>a{color:var(--bf-wood)}
 body.bfnd-body .bf-direct-contact-row>a:hover{color:var(--bf-ink)}
 body.bfnd-body .bf-form-shell input::placeholder,body.bfnd-body .bf-form-shell textarea::placeholder{color:var(--bf-muted);opacity:1}
 @media (max-width:768px){body.bfnd-body .bf-home-hero-shade{background:rgba(26,18,13,.68)}}
+
+/* Home split promos: the whole tile is a link, so its button and photo respond to hover/focus. */
+body.bfnd-body .bf-promo-copy .bf-plain-link{transition:background-color .2s ease,color .2s ease,border-color .2s ease}
+body.bfnd-body .bf-split-promos>a:hover .bf-plain-link,body.bfnd-body .bf-split-promos>a:focus-visible .bf-plain-link{background:var(--bf-white);border-color:var(--bf-white);color:var(--bf-ink)!important}
+body.bfnd-body .bf-split-promos>a:hover .bf-promo-image img,body.bfnd-body .bf-split-promos>a:focus-visible .bf-promo-image img{transform:scale(1.04)}
+@media (prefers-reduced-motion:reduce){body.bfnd-body .bf-split-promos>a:hover .bf-promo-image img,body.bfnd-body .bf-split-promos>a:focus-visible .bf-promo-image img{transform:none}}
