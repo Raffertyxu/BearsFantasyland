@@ -38,13 +38,7 @@ function bfnd_admin_guide_rows() {
 
 add_action('wp_dashboard_setup', function () {
     if (!current_user_can('edit_posts')) { return; }
-    wp_add_dashboard_widget('bfnd_admin_guide', '飛熊入夢後台操作指南（要改什麼、去哪裡改）', 'bfnd_render_admin_guide');
-    // Keep the guide first in the left column.
-    global $wp_meta_boxes;
-    $normal = $wp_meta_boxes['dashboard']['normal']['core'] ?? array();
-    if (isset($normal['bfnd_admin_guide'])) {
-        $wp_meta_boxes['dashboard']['normal']['core'] = array('bfnd_admin_guide' => $normal['bfnd_admin_guide']) + $normal;
-    }
+    wp_add_dashboard_widget('bfnd_admin_guide', '飛熊入夢後台操作指南（要改什麼、去哪裡改）', 'bfnd_render_admin_guide', null, null, 'normal', 'high');
 });
 
 function bfnd_render_admin_guide() {
