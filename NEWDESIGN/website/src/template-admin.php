@@ -25,11 +25,19 @@ function bfnd_template_sections($key, $post_id) {
     return $sections;
 }
 
+// The journal page header lives with its articles under 飛熊日誌 (native posts), not under 網站版面,
+// so editors have one place for everything journal-related.
+function bfnd_layout_admin_url($key) {
+    return $key === 'journal' ? admin_url('edit.php?page=bfnd-layout-journal') : admin_url('admin.php?page=bfnd-layout-' . $key);
+}
+
 function bfnd_template_menu() {
     add_menu_page('網站版面', '網站版面', 'edit_pages', 'bfnd-layout-overview', 'bfnd_template_dashboard', 'dashicons-layout', 24);
     add_submenu_page('bfnd-layout-overview', 'Banner 輪播', 'Banner 輪播', 'edit_pages', 'bfnd-banner-manager', 'bfnd_banner_manager');
     foreach (bfnd_pages() as $key => $info) {
-        add_submenu_page('bfnd-layout-overview', $info[0], $info[0], 'edit_pages', 'bfnd-layout-' . $key, function () use ($key) {
+        $parent = $key === 'journal' ? 'edit.php' : 'bfnd-layout-overview';
+        $title = $key === 'journal' ? '日誌頁面設定' : $info[0];
+        add_submenu_page($parent, $title, $title, 'edit_pages', 'bfnd-layout-' . $key, function () use ($key) {
             bfnd_template_editor($key);
         });
     }
@@ -115,7 +123,7 @@ function bfnd_template_content_links($key) {
     if (isset($lists[$key]['post'])) {
         // Journal articles are native WordPress posts; this screen only holds the page's fixed text and images.
         $journal_notes = array(
-            'journal' => '這一頁只改日誌頁<strong>最上方的標題、介紹文字與主圖</strong>。',
+            'journal' => '這一頁只改日誌頁<strong>最上方的標題、介紹文字與主圖</strong>（也可從左側「飛熊日誌 → 日誌頁面設定」進來）。',
             'home' => '首頁的「飛熊日誌」區塊會自動顯示最新 3 篇文章，不用在這裡編輯文章。',
             'collaboration' => '合作頁的「飛熊日誌」區塊會自動顯示最新 3 篇文章，不用在這裡編輯文章。',
         );
@@ -164,7 +172,11 @@ function bfnd_template_dashboard() {
         $page = bfnd_page_post($key);
         $ready = $page && bfnd_template_page_is_shortcode_only($page, $key) && is_array(get_option('bfnd_page_design_' . $key, null));
         if (!$ready) { $pending++; }
-        echo '<div class="bfnd-template-card"><h2>' . esc_html($info[0]) . '</h2><p>' . ($ready ? '版型已連接，可在此管理內容。' : '尚待轉換；原頁內容仍保留。') . '</p><a class="button button-primary" href="' . esc_url(admin_url('admin.php?page=bfnd-layout-' . $key)) . '">編輯版面</a> ';
+        if ($key === 'journal') {
+            echo '<div class="bfnd-template-card"><h2>' . esc_html($info[0]) . '</h2><p>日誌頁的標題、介紹與主圖，和日誌文章放在一起：左側「飛熊日誌 → 日誌頁面設定」。</p><a class="button" href="' . esc_url(bfnd_layout_admin_url($key)) . '">前往日誌頁面設定</a></div>';
+            continue;
+        }
+        echo '<div class="bfnd-template-card"><h2>' . esc_html($info[0]) . '</h2><p>' . ($ready ? '版型已連接，可在此管理內容。' : '尚待轉換；原頁內容仍保留。') . '</p><a class="button button-primary" href="' . esc_url(bfnd_layout_admin_url($key)) . '">編輯版面</a> ';
         if ($page) { echo '<a class="button" href="' . esc_url(get_permalink($page)) . '" target="_blank" rel="noopener noreferrer">查看前台</a>'; }
         echo '</div>';
     }
@@ -202,7 +214,7 @@ function bfnd_template_editor($key) {
     echo '<p>在這裡修改手稿固定版型的文字與圖片。圖片使用 WordPress 媒體庫；恢復預設會使用原始版型內容。家具作品、生活木作作品、課程與飛熊日誌的內容請在各自的 WordPress 清單新增、編輯或移到回收桶。</p>';
     bfnd_template_shared_layout_notice();
     bfnd_template_content_links($key);
-    echo '<p><a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-overview')) . '">← 返回網站版面</a>　<a href="' . esc_url(get_permalink($page)) . '" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></p>';
+    echo '<p>' . ($key === 'journal' ? '<a href="' . esc_url(admin_url('edit.php')) . '">← 返回飛熊日誌文章</a>' : '<a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-overview')) . '">← 返回網站版面</a>') . '　<a href="' . esc_url(get_permalink($page)) . '" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></p>';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_save_template"><input type="hidden" name="page_key" value="' . esc_attr($key) . '">';
     wp_nonce_field('bfnd_save_template_' . $key);
     bfnd_template_seo_fields($page);
@@ -294,7 +306,7 @@ function bfnd_save_template_action() {
     }
     if (isset($_POST['bfnd_yoast_title']) && is_string($_POST['bfnd_yoast_title'])) { delete_post_meta($page->ID, '_bfnd_seo_title'); }
     if (isset($_POST['bfnd_yoast_description']) && is_string($_POST['bfnd_yoast_description'])) { delete_post_meta($page->ID, '_bfnd_seo_description'); }
-    wp_safe_redirect(add_query_arg('updated', '1', admin_url('admin.php?page=bfnd-layout-' . $key)));
+    wp_safe_redirect(add_query_arg('updated', '1', bfnd_layout_admin_url($key)));
     exit;
 }
 
@@ -372,14 +384,14 @@ function bfnd_template_admin_bar($bar) {
     $bar->add_node(array(
         'id' => 'edit',
         'title' => '編輯版面',
-        'href' => admin_url('admin.php?page=bfnd-layout-' . $key),
+        'href' => bfnd_layout_admin_url($key),
     ));
 }
 
 function bfnd_template_page_row_action($actions, $post) {
     $key = get_post_meta($post->ID, '_bfnd_page', true);
     if (isset(bfnd_pages()[$key]) && current_user_can('edit_post', $post->ID)) {
-        $actions['bfnd_template'] = '<a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-' . $key)) . '">管理版面內容</a>';
+        $actions['bfnd_template'] = '<a href="' . esc_url(bfnd_layout_admin_url($key)) . '">管理版面內容</a>';
     }
     return $actions;
 }
