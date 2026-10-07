@@ -105,6 +105,18 @@ function bfnd_link_html($link, $attrs = '') {
     $target = !empty($link['target']) ? ' target="' . esc_attr($link['target']) . '" rel="noopener noreferrer"' : '';
     return '<a' . $attrs . $target . ' href="' . esc_url($link['url']) . '">' . bfnd_e($link['title']) . '</a>';
 }
+// 木作學堂 dropdown, built from published 木作課程 posts so it follows the courses edited in the admin.
+function bfnd_school_menu_html($school) {
+    $courses = get_posts(array('post_type' => 'bf_course', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'menu_order', 'order' => 'ASC'));
+    $onsite = $online = '';
+    foreach ($courses as $course) {
+        $link = '<a href="' . esc_url(get_permalink($course)) . '">' . bfnd_e(get_the_title($course)) . '</a>';
+        if (bfnd_meta($course->ID, 'mode') === 'online') { $online .= $link; } else { $onsite .= $link; }
+    }
+    if ($onsite === '') { $onsite = '<a href="' . esc_url($school . '#onsite-courses') . '">課程資訊近期公布</a>'; }
+    if ($online === '') { $online = '<a href="' . esc_url($school . '#online-courses') . '">線上課程近期公布</a>'; }
+    return '<div><strong>實體課程</strong><small>到工坊上課・實作體驗</small>' . $onsite . '</div><div><strong>線上課程</strong><small>隨時隨地・在家學木作</small>' . $online . '</div><a class="bf-nav-course-all" href="' . esc_url($school . '#onsite-courses') . '">查看所有課程 ↗</a>';
+}
 function bfnd_render_header($active) {
     $nav = array('home' => '首頁', 'furniture' => '家具', 'lifestyle' => '生活木作', 'school' => '木作學堂', 'story' => '品牌故事', 'collaboration' => '合作提案');
     $account = function_exists('wc_get_page_id') && wc_get_page_id('myaccount') > 0 ? get_permalink(wc_get_page_id('myaccount')) : bfnd_page_url('service');
@@ -120,7 +132,7 @@ function bfnd_render_header($active) {
     foreach ($links as $link) {
         $current = $active_url && bfnd_same_url($link['url'], $active_url) ? ' aria-current="page"' : '';
         if (bfnd_same_url($link['url'], $school)) {
-            echo '<div class="bf-nav-school"><a' . $current . ' href="' . esc_url($school) . '">' . bfnd_e($link['title']) . '</a><button class="bf-nav-school-toggle" type="button" aria-label="展開木作學堂課程選單" aria-expanded="false" aria-controls="bf-school-menu">⌄</button><div id="bf-school-menu" class="bf-nav-course-menu"><div><strong>實體課程</strong><small>到工坊上課・實作體驗</small><a href="' . esc_url($school . '#onsite-courses') . '">木工基礎入門班</a><a href="' . esc_url($school . '#onsite-courses') . '">自由創作會員</a><a href="' . esc_url($school . '#onsite-courses') . '">CNC 數位木工</a><a href="' . esc_url($school . '#onsite-courses') . '">磨刀實戰班</a></div><div><strong>線上課程</strong><small>隨時隨地・在家學木作</small><a href="' . esc_url($school . '#online-courses') . '">CNC / VCarve</a><a href="' . esc_url($school . '#online-courses') . '">磨刀技術</a><a href="' . esc_url($school . '#online-courses') . '">更多課程籌備中</a></div><a class="bf-nav-course-all" href="' . esc_url($school . '#onsite-courses') . '">查看所有課程 ↗</a></div></div>';
+            echo '<div class="bf-nav-school"><a' . $current . ' href="' . esc_url($school) . '">' . bfnd_e($link['title']) . '</a><button class="bf-nav-school-toggle" type="button" aria-label="展開木作學堂課程選單" aria-expanded="false" aria-controls="bf-school-menu">⌄</button><div id="bf-school-menu" class="bf-nav-course-menu">' . bfnd_school_menu_html($school) . '</div></div>';
         } else { echo bfnd_link_html($link, $current); }
     }
     $secondary = bfnd_menu_links('bf_mobile_secondary') ?: array(
