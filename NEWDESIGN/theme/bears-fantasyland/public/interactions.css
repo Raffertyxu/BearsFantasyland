@@ -513,3 +513,24 @@ body.bfnd-body :is(.bf-breadcrumb a,.bf-back,.bf-text-link,.bf-shop-categories a
 /* Furniture filter row scrolls sideways: fade the edge so the cut-off buttons read as more. */
 body.bfnd-body .bf-filter-list{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent);padding-right:calc(24*var(--bfnd-px))}
 }
+
+/* Mobile (<=760): hero carousel controls smaller with a fixed gap below the buttons; footer stacked and centred. */
+@media (max-width:760px){
+body.bfnd-body .bfnd-banner-controls button{width:calc(40*var(--bfnd-px));height:calc(40*var(--bfnd-px));font-size:calc(16*var(--bfnd-px))}
+body.bfnd-body .bfnd-banner-count{min-width:calc(46*var(--bfnd-px));font-size:calc(11*var(--bfnd-px))}
+body.bfnd-body .bfnd-banner-controls{right:calc(16*var(--bfnd-px));bottom:calc(16*var(--bfnd-px));padding:calc(2*var(--bfnd-px))}
+body.bfnd-body .bf-home-hero{height:auto;min-height:calc(480*var(--bfnd-px))}
+body.bfnd-body .bf-home-hero-content{padding-bottom:calc(90*var(--bfnd-px))}
+body.bfnd-body .bf-footer .bf-footer-main{display:flex;flex-direction:column;align-items:center;text-align:center;gap:calc(18*var(--bfnd-px));padding-block:calc(36*var(--bfnd-px)) calc(28*var(--bfnd-px))}
+body.bfnd-body .bf-footer-main .bf-footer-brand{width:calc(160*var(--bfnd-px))}
+body.bfnd-body .bf-footer-main .bf-footer-motto{text-align:center;margin-top:calc(-6*var(--bfnd-px));color:var(--bf-muted)}
+body.bfnd-body .bf-footer-main .bf-footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:0 calc(4*var(--bfnd-px));margin:0}
+body.bfnd-body .bf-footer-main .bf-footer-links a{min-height:calc(40*var(--bfnd-px));padding:0 calc(12*var(--bfnd-px));display:flex;align-items:center}
+body.bfnd-body .bf-footer-main .bf-footer-social{justify-content:center;flex-wrap:wrap;gap:calc(12*var(--bfnd-px));margin:0}
+body.bfnd-body .bf-footer-main .bf-footer-maker{align-items:center;text-align:center;border:0;padding:0;min-height:0}
+body.bfnd-body .bf-footer-bottom{padding-block:calc(14*var(--bfnd-px))}
+body.bfnd-body .bf-footer-bottom .bf-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:calc(6*var(--bfnd-px))}
+body.bfnd-body .bf-footer-bottom small{white-space:normal}
+body.bfnd-body .bf-footer-bottom nav{justify-content:center}
+body.bfnd-body .bf-footer-bottom nav a{min-height:calc(32*var(--bfnd-px))}
+}
