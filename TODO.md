@@ -10,9 +10,9 @@
 | 項目 | 狀態 |
 |---|---|
 | 正式站 | https://a1.haotaimaker.com/ （WordPress + WooCommerce 11.1.2 + Yoast + Wordfence + 綠界 ECPay） |
-| 啟用主題 | 「飛熊入夢」**1.3.44**（合作頁市話回歸；修正版 `bears-fantasyland-1.3.45.zip` 待上傳） |
+| 啟用主題 | 「飛熊入夢」**1.3.45**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.45.zip`） |
 | 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.42**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.42.zip`） |
-| 與正式站一致的程式碼 | `claude/batch3-cleanup` 的 commit `9bcbc8c`（尚未併入 main） |
+| 與正式站一致的程式碼 | `main` 分支 |
 | 回退用 ZIP | 主題 1.3.35～1.3.42、外掛 0.5.36／0.5.38～0.5.40 都在 `dist/`（Git LFS） |
 | 綠界 | **正式收款模式**（「啟用測試模式」關閉）。刷卡測試會真的扣款 |
 
@@ -22,8 +22,8 @@
 
 ## 1. 等使用者回覆或動手的事（優先）
 
-- [ ] 🔴 **合作頁聯絡清單少了市話（主題 1.3.44 回歸）**：修正版主題 `1.3.45` 已打包（分支 `claude/batch3-cleanup`），等使用者同意上傳。也可以回退 1.3.43。詳見 `DEPLOYMENT.md` 2026-10-07 段落。
-  - 根本修法：合作頁網站版面文字覆寫錯位一列（伺服器輸出表單說明取代市話），重新儲存覆寫後才能移除 `site.js` 的補丁。**`site.js` 這段補丁不要刪。**
+- [x] 合作頁聯絡清單跑版（主題 1.3.44 回歸）：主題 `1.3.45` 2026-10-07 已上線修正。
+- [ ] 合作頁網站版面覆寫錯位一列的根本修法：合作頁網站版面文字覆寫錯位一列（伺服器輸出表單說明取代市話），重新儲存覆寫後才能移除 `site.js` 的補丁。**`site.js` 這段補丁不要刪。**
 
 - [ ] **課程付款測試**
   - 使用者要自己下一筆單：學堂頁 → 入門班 → 選梯次 → 結帳 → 付款選「**綠界超商代碼**」→ 下單 → **不去繳費**。
@@ -93,8 +93,8 @@
 
 | 分支 | 內容 | 處置 |
 |---|---|---|
-| `main` | = 正式站（主題 1.3.43／外掛 0.5.41） | 從這裡開新分支 |
-| `claude/batch1-inquiry-shop-link-filter`、`claude/batch2-security-hardening` | 已併入 main | 可刪 |
+| `main` | = 正式站（主題 1.3.45／外掛 0.5.42） | 從這裡開新分支 |
+| `claude/batch1-inquiry-shop-link-filter`、`claude/batch2-security-hardening`、`claude/batch3-cleanup` | 已併入 main | 可刪 |
 | `claude/product-page-design-2cb8d1` | 本 session 的工作，已併入 main | 可刪 |
 | `claude/website-rwd-large-screens-777491` | 1.3.35 大螢幕等比例縮放，已包含在 main | 可刪 |
 | `claude/upload-plugin-theme-files-15c122` | 未上線的 1.3.36／0.5.37「作品加入購物車」（WIP commit） | **不要合併**，見 1.4 |
