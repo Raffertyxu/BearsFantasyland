@@ -214,3 +214,26 @@ function bfnd_inquiry_action() {
     wp_safe_redirect(add_query_arg('sent', '1', bfnd_page_url('collaboration')));
     exit;
 }
+
+
+// 飛熊日誌 articles are WordPress's native posts. Name them that in the admin menu and explain
+// on the list screen where each part is edited, so editors don't look for articles under 網站版面
+// (which only holds the journal page's header text and image).
+add_filter('post_type_labels_post', function ($labels) {
+    $labels->name = '飛熊日誌';
+    $labels->menu_name = '飛熊日誌';
+    $labels->all_items = '所有日誌文章';
+    $labels->add_new_item = '新增日誌文章';
+    $labels->edit_item = '編輯日誌文章';
+    $labels->new_item = '新日誌文章';
+    $labels->view_item = '檢視日誌文章';
+    $labels->search_items = '搜尋日誌文章';
+    $labels->not_found = '還沒有日誌文章。';
+    return $labels;
+});
+add_action('admin_notices', function () {
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$screen || $screen->id !== 'edit-post') { return; }
+    echo '<div class="notice notice-info"><p><strong>這裡是飛熊日誌的文章。</strong>按「新增日誌文章」撰寫，按「發佈」後會自動出現在飛熊日誌頁；最新 3 篇也會出現在首頁與合作頁。不想公開就移到回收桶，或改成草稿。</p>'
+        . '<p>卡片會使用文章的<strong>精選圖片</strong>、<strong>第一個分類</strong>與發佈日期，請記得設定精選圖片。日誌頁最上方的標題、介紹文字與主圖，請到 <a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-journal')) . '">網站版面 → 飛熊日誌</a> 修改。</p></div>';
+});

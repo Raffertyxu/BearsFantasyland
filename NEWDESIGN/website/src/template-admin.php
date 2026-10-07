@@ -112,6 +112,15 @@ function bfnd_template_content_links($key) {
         'journal' => array('post' => '飛熊日誌'),
     );
     if (empty($lists[$key])) { return; }
+    if (isset($lists[$key]['post'])) {
+        // Journal articles are native WordPress posts; this screen only holds the page's fixed text and images.
+        $journal_notes = array(
+            'journal' => '這一頁只改日誌頁<strong>最上方的標題、介紹文字與主圖</strong>。',
+            'home' => '首頁的「飛熊日誌」區塊會自動顯示最新 3 篇文章，不用在這裡編輯文章。',
+            'collaboration' => '合作頁的「飛熊日誌」區塊會自動顯示最新 3 篇文章，不用在這裡編輯文章。',
+        );
+        echo '<div class="notice notice-info inline"><p>' . wp_kses($journal_notes[$key] ?? '', array('strong' => array())) . ' <strong>日誌文章的新增、修改、刪除，請到左側選單「飛熊日誌」。</strong></p><p><a class="button button-primary" href="' . esc_url(admin_url('edit.php')) . '">前往飛熊日誌文章列表</a> <a class="button" href="' . esc_url(admin_url('post-new.php')) . '">新增一篇日誌文章</a></p></div>';
+    }
     echo '<p><strong>逐筆內容：</strong> ';
     foreach ($lists[$key] as $type => $label) {
         $url = $type === 'post' ? admin_url('edit.php') : admin_url('edit.php?post_type=' . $type);
