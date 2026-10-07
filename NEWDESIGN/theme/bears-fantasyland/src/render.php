@@ -85,21 +85,48 @@ function bfnd_render_banner_controls($count, $label) {
 function bfnd_button($label, $url, $light = false) {
     echo '<a class="bf-button' . ($light ? ' bf-button-light' : '') . '" href="' . esc_url($url) . '"><span>' . bfnd_e($label) . '</span><span aria-hidden="true">↗</span></a>';
 }
+// Top-level items of a WordPress menu (外觀 → 選單) assigned to $location, or null when none is set.
+function bfnd_menu_links($location) {
+    $locations = get_nav_menu_locations();
+    if (empty($locations[$location])) { return null; }
+    $items = wp_get_nav_menu_items($locations[$location]);
+    if (!$items) { return null; }
+    $links = array();
+    foreach ($items as $item) {
+        if ((int) $item->menu_item_parent) { continue; }
+        $links[] = array('url' => $item->url, 'title' => $item->title, 'target' => $item->target);
+    }
+    return $links ?: null;
+}
+function bfnd_same_url($a, $b) {
+    return untrailingslashit(strtok((string) $a, '#?')) === untrailingslashit(strtok((string) $b, '#?'));
+}
+function bfnd_link_html($link, $attrs = '') {
+    $target = !empty($link['target']) ? ' target="' . esc_attr($link['target']) . '" rel="noopener noreferrer"' : '';
+    return '<a' . $attrs . $target . ' href="' . esc_url($link['url']) . '">' . bfnd_e($link['title']) . '</a>';
+}
 function bfnd_render_header($active) {
     $nav = array('home' => '首頁', 'furniture' => '家具', 'lifestyle' => '生活木作', 'school' => '木作學堂', 'story' => '品牌故事', 'collaboration' => '合作提案');
     $account = function_exists('wc_get_page_id') && wc_get_page_id('myaccount') > 0 ? get_permalink(wc_get_page_id('myaccount')) : bfnd_page_url('service');
     $cart = function_exists('wc_get_cart_url') ? wc_get_cart_url() : bfnd_page_url('collaboration');
+    $links = bfnd_menu_links('bf_primary');
+    if (!$links) { $links = array(); foreach ($nav as $key => $label) { $links[] = array('url' => bfnd_page_url($key), 'title' => $label, 'target' => ''); } }
+    $active_url = $active ? bfnd_page_url($active) : '';
+    $school = bfnd_page_url('school');
     echo '<header class="bf-header bf-new-header"><div class="bf-header-inner"><a class="bf-logo" href="' . esc_url(bfnd_page_url('home')) . '" aria-label="飛熊入夢首頁">';
     echo '<img src="' . esc_url(bfft_asset('public/logo-transparent.png')) . '" alt="飛熊入夢 Bear’s Fantasyland"></a>';
     echo '<button class="bf-menu-button" type="button" aria-expanded="false" aria-controls="bf-nav">選單 <span aria-hidden="true">☰</span></button>';
     echo '<nav id="bf-nav" class="bf-nav" aria-label="主要導覽">';
-    foreach ($nav as $key => $label) {
-        if ($key === 'school') {
-            $school = bfnd_page_url('school');
-            echo '<div class="bf-nav-school"><a' . ($key === $active ? ' aria-current="page"' : '') . ' href="' . esc_url($school) . '">' . bfnd_e($label) . '</a><button class="bf-nav-school-toggle" type="button" aria-label="展開木作學堂課程選單" aria-expanded="false" aria-controls="bf-school-menu">⌄</button><div id="bf-school-menu" class="bf-nav-course-menu"><div><strong>實體課程</strong><small>到工坊上課・實作體驗</small><a href="' . esc_url($school . '#onsite-courses') . '">木工基礎入門班</a><a href="' . esc_url($school . '#onsite-courses') . '">自由創作會員</a><a href="' . esc_url($school . '#onsite-courses') . '">CNC 數位木工</a><a href="' . esc_url($school . '#onsite-courses') . '">磨刀實戰班</a></div><div><strong>線上課程</strong><small>隨時隨地・在家學木作</small><a href="' . esc_url($school . '#online-courses') . '">CNC / VCarve</a><a href="' . esc_url($school . '#online-courses') . '">磨刀技術</a><a href="' . esc_url($school . '#online-courses') . '">更多課程籌備中</a></div><a class="bf-nav-course-all" href="' . esc_url($school . '#onsite-courses') . '">查看所有課程 ↗</a></div></div>';
-        } else { echo '<a' . ($key === $active ? ' aria-current="page"' : '') . ' href="' . esc_url(bfnd_page_url($key)) . '">' . bfnd_e($label) . '</a>'; }
+    foreach ($links as $link) {
+        $current = $active_url && bfnd_same_url($link['url'], $active_url) ? ' aria-current="page"' : '';
+        if (bfnd_same_url($link['url'], $school)) {
+            echo '<div class="bf-nav-school"><a' . $current . ' href="' . esc_url($school) . '">' . bfnd_e($link['title']) . '</a><button class="bf-nav-school-toggle" type="button" aria-label="展開木作學堂課程選單" aria-expanded="false" aria-controls="bf-school-menu">⌄</button><div id="bf-school-menu" class="bf-nav-course-menu"><div><strong>實體課程</strong><small>到工坊上課・實作體驗</small><a href="' . esc_url($school . '#onsite-courses') . '">木工基礎入門班</a><a href="' . esc_url($school . '#onsite-courses') . '">自由創作會員</a><a href="' . esc_url($school . '#onsite-courses') . '">CNC 數位木工</a><a href="' . esc_url($school . '#onsite-courses') . '">磨刀實戰班</a></div><div><strong>線上課程</strong><small>隨時隨地・在家學木作</small><a href="' . esc_url($school . '#online-courses') . '">CNC / VCarve</a><a href="' . esc_url($school . '#online-courses') . '">磨刀技術</a><a href="' . esc_url($school . '#online-courses') . '">更多課程籌備中</a></div><a class="bf-nav-course-all" href="' . esc_url($school . '#onsite-courses') . '">查看所有課程 ↗</a></div></div>';
+        } else { echo bfnd_link_html($link, $current); }
     }
-    echo '<div class="bf-mobile-secondary"><a href="' . esc_url(bfnd_shop_url()) . '">商品選購</a><a href="' . esc_url(bfnd_page_url('journal')) . '">飛熊日誌</a><a href="' . esc_url(bfnd_page_url('service')) . '">購買與服務</a><a href="' . esc_url($account) . '">會員中心</a><a href="' . esc_url($cart) . '">購物車</a></div>';
+    $secondary = bfnd_menu_links('bf_mobile_secondary') ?: array(
+        array('url' => bfnd_shop_url(), 'title' => '商品選購', 'target' => ''), array('url' => bfnd_page_url('journal'), 'title' => '飛熊日誌', 'target' => ''),
+        array('url' => bfnd_page_url('service'), 'title' => '購買與服務', 'target' => ''), array('url' => $account, 'title' => '會員中心', 'target' => ''), array('url' => $cart, 'title' => '購物車', 'target' => ''));
+    echo '<div class="bf-mobile-secondary">'; foreach ($secondary as $link) { echo bfnd_link_html($link); } echo '</div>';
     echo '</nav><div class="bf-header-tools"><a href="' . esc_url(bfnd_page_url('furniture') . '#bf-search') . '" aria-label="搜尋家具作品"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></a>';
     echo '<a href="' . esc_url($account) . '" aria-label="會員中心"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 21c0-4.5 2.7-7 7.5-7s7.5 2.5 7.5 7"/></svg></a><a href="' . esc_url($cart) . '" aria-label="購物車"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg></a></div></div></header>';
 }
@@ -111,17 +138,28 @@ function bfnd_render_footer() {
     $contact_url = bfnd_page_url('collaboration') . '#inquiry';
 
     echo '<footer class="bf-footer"><div class="bf-footer-main bf-wrap"><a class="bf-footer-brand" href="' . esc_url(bfnd_page_url('home')) . '"><img src="' . esc_url(bfft_asset('public/logo-transparent.png')) . '" alt="飛熊入夢 Bear’s Fantasyland"></a>';
-    echo '<p class="bf-footer-motto">木，讓生活更美好。</p><nav class="bf-footer-links" aria-label="頁尾導覽"><a href="' . esc_url(bfnd_page_url('furniture')) . '">家具</a><a href="' . esc_url(bfnd_page_url('lifestyle')) . '">生活木作</a><a href="' . esc_url(bfnd_page_url('school')) . '">木作學堂</a><a href="' . esc_url(bfnd_page_url('story')) . '">品牌故事</a><a href="' . esc_url(bfnd_page_url('collaboration')) . '">合作提案</a></nav>';
+    $footer_links = bfnd_menu_links('bf_footer') ?: array(
+        array('url' => bfnd_page_url('furniture'), 'title' => '家具', 'target' => ''), array('url' => bfnd_page_url('lifestyle'), 'title' => '生活木作', 'target' => ''),
+        array('url' => bfnd_page_url('school'), 'title' => '木作學堂', 'target' => ''), array('url' => bfnd_page_url('story'), 'title' => '品牌故事', 'target' => ''),
+        array('url' => bfnd_page_url('collaboration'), 'title' => '合作提案', 'target' => ''));
+    echo '<p class="bf-footer-motto">' . bfnd_e(bfft_footer_setting('bf_footer_motto')) . '</p><nav class="bf-footer-links" aria-label="頁尾導覽">';
+    foreach ($footer_links as $link) { echo bfnd_link_html($link); }
+    echo '</nav>';
     echo '<div class="bf-footer-social" role="group" aria-label="社群平台">';
-    echo '<a href="https://www.instagram.com/bearloveearth/" target="_blank" rel="noopener noreferrer" aria-label="Instagram（另開新視窗）"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.7" cy="6.6" r=".8" fill="currentColor" stroke="none"></circle></svg></a>';
-    echo '<a href="https://www.facebook.com/iaz2765b" target="_blank" rel="noopener noreferrer" aria-label="Facebook（另開新視窗）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5H17V3.9c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5V10H7v3h3v8z" fill="currentColor" stroke="none"></path></svg></a>';
-    echo '<a href="https://www.youtube.com/@%E9%A3%9B%E7%86%8A%E5%85%A5%E5%A4%A2" target="_blank" rel="noopener noreferrer" aria-label="YouTube（另開新視窗）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 7.2a2.7 2.7 0 0 0-1.9-1.9C17.4 4.8 12 4.8 12 4.8s-5.4 0-7.1.5A2.7 2.7 0 0 0 3 7.2 28 28 0 0 0 2.5 12a28 28 0 0 0 .5 4.8 2.7 2.7 0 0 0 1.9 1.9c1.7.5 7.1.5 7.1.5s5.4 0 7.1-.5a2.7 2.7 0 0 0 1.9-1.9 28 28 0 0 0 .5-4.8 28 28 0 0 0-.5-4.8Z"></path><path d="m10 15.5 5-3.5-5-3.5z" fill="currentColor" stroke="none"></path></svg></a>';
-    echo '<a class="bf-footer-line" href="https://line.me/R/ti/p/%40iaz2765b" target="_blank" rel="noopener noreferrer" aria-label="加入飛熊入夢官方 LINE（另開新視窗）"><img src="' . esc_url(bfft_asset('public/line-brand-icon.png')) . '" alt="" aria-hidden="true"><span>加入官方 LINE</span><span class="bf-social-arrow" aria-hidden="true">↗</span></a></div>';
-    echo '<a class="bf-footer-maker" href="' . esc_url(bfnd_page_url('story')) . '"><strong>台中 Maker 工藝基地</strong><small>木作設計・木工教育・實木家具</small></a></div>';
-    echo '<div class="bf-footer-bottom"><div class="bf-wrap"><small>© ' . esc_html(date_i18n('Y')) . ' 飛熊入夢 Bear’s Fantasyland. All rights reserved.</small><nav aria-label="政策與聯絡資訊">';
-    echo $privacy_url ? '<a href="' . esc_url($privacy_url) . '">隱私權政策</a>' : '<span aria-disabled="true">隱私權政策</span>';
-    echo $terms_url ? '<a href="' . esc_url($terms_url) . '">服務條款</a>' : '<span aria-disabled="true">服務條款</span>';
-    echo '<a href="' . esc_url($contact_url) . '">聯絡我們</a></nav></div></div></footer>';
+    echo '<a href="' . esc_url(bfft_footer_setting('bf_social_instagram')) . '" target="_blank" rel="noopener noreferrer" aria-label="Instagram（另開新視窗）"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.7" cy="6.6" r=".8" fill="currentColor" stroke="none"></circle></svg></a>';
+    echo '<a href="' . esc_url(bfft_footer_setting('bf_social_facebook')) . '" target="_blank" rel="noopener noreferrer" aria-label="Facebook（另開新視窗）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5H17V3.9c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5V10H7v3h3v8z" fill="currentColor" stroke="none"></path></svg></a>';
+    echo '<a href="' . esc_url(bfft_footer_setting('bf_social_youtube')) . '" target="_blank" rel="noopener noreferrer" aria-label="YouTube（另開新視窗）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 7.2a2.7 2.7 0 0 0-1.9-1.9C17.4 4.8 12 4.8 12 4.8s-5.4 0-7.1.5A2.7 2.7 0 0 0 3 7.2 28 28 0 0 0 2.5 12a28 28 0 0 0 .5 4.8 2.7 2.7 0 0 0 1.9 1.9c1.7.5 7.1.5 7.1.5s5.4 0 7.1-.5a2.7 2.7 0 0 0 1.9-1.9 28 28 0 0 0 .5-4.8 28 28 0 0 0-.5-4.8Z"></path><path d="m10 15.5 5-3.5-5-3.5z" fill="currentColor" stroke="none"></path></svg></a>';
+    echo '<a class="bf-footer-line" href="' . esc_url(bfft_footer_setting('bf_social_line')) . '" target="_blank" rel="noopener noreferrer" aria-label="加入飛熊入夢官方 LINE（另開新視窗）"><img src="' . esc_url(bfft_asset('public/line-brand-icon.png')) . '" alt="" aria-hidden="true"><span>加入官方 LINE</span><span class="bf-social-arrow" aria-hidden="true">↗</span></a></div>';
+    echo '<a class="bf-footer-maker" href="' . esc_url(bfnd_page_url('story')) . '"><strong>' . bfnd_e(bfft_footer_setting('bf_footer_maker_title')) . '</strong><small>' . bfnd_e(bfft_footer_setting('bf_footer_maker_text')) . '</small></a></div>';
+    echo '<div class="bf-footer-bottom"><div class="bf-wrap"><small>© ' . esc_html(date_i18n('Y')) . ' ' . bfnd_e(bfft_footer_setting('bf_footer_copyright')) . '</small><nav aria-label="政策與聯絡資訊">';
+    $legal = bfnd_menu_links('bf_legal');
+    if ($legal) { foreach ($legal as $link) { echo bfnd_link_html($link); } }
+    else {
+        echo $privacy_url ? '<a href="' . esc_url($privacy_url) . '">隱私權政策</a>' : '<span aria-disabled="true">隱私權政策</span>';
+        echo $terms_url ? '<a href="' . esc_url($terms_url) . '">服務條款</a>' : '<span aria-disabled="true">服務條款</span>';
+        echo '<a href="' . esc_url($contact_url) . '">聯絡我們</a>';
+    }
+    echo '</nav></div></div></footer>';
 }
 function bfnd_section_head($en, $title, $link = '', $link_label = '') {
     echo '<div class="bf-section-head"><div><span class="bf-kicker">' . bfnd_e($en) . '</span><h2>' . bfnd_e($title) . '</h2></div>';
