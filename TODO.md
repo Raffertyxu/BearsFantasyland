@@ -39,7 +39,9 @@
 - [ ] **資安（見 `NEWDESIGN/website/SECURITY-AUDIT-2026-10-06.md`）**
   - [ ] 🔴 主機上來源不明的 `wp-content/mu-plugins/customize-controlsse.php`：每次請求都會執行，9/17 起就記錄，至今未查明。需主機權限下載檢視，或請主機商協助。**不可宣稱已確認是惡意或已確認根因**（見 `PM-AUDIT.md`）。使用者可能需要一份給主機商的說明。
   - [x] （外掛 0.5.40，**2026-10-07 已上線**，限流未在正式站實測：每 IP 10 分鐘 5 次、全站每小時 40 次、欄位長度上限）🟠 詢問表單沒有頻率限制與伺服器端長度限制（外掛 `src/admin.php` 約 500 行 `bfnd_inquiry`），可能被灌單。可加 transient 依 IP 限流＋欄位長度上限。
-  - [ ] 🟠 `xmlrpc.php` 開啟。先確認 Jetpack 是否在用，再用 Wordfence 關閉 XML-RPC 驗證。改設定前要問使用者。
+  - [x] 🟠 `xmlrpc.php`：確認未安裝 Jetpack 後，外掛 0.5.43（`src/hardening.php`）整個關閉，**2026-10-07 已上線**，POST 回 403。
+  - [ ] 停用但未刪除的外掛：Code Snippets、三個 BF Shop System（其中兩個同名）。檔案仍在主機上，建議確認不用後刪除（刪除前問使用者）。
+  - [ ] 飛熊日誌分類新舊混用（10 個，皆 0 篇）與回收桶 8 篇示範／測試文章：請使用者決定保留哪些分類；永久刪除須由使用者自己操作。
   - [ ] 低風險 10 條見報告。分支 `claude/batch2-security-hardening`（主題 1.3.43／外掛 0.5.41，**2026-10-07 已上線**）已修程式能修的 7 條：
     - L1 匯入頁不再因 `run=1` 連結自動送出；L2 詢問表單 `?work=`／`?course=` 只接受已發布內容；L3 前台私密作品／課程改看 `read_private_posts`；
     - L5 主題 ZIP 不含 README.md，外掛 `data/` 加 `.htaccess` 禁止直接讀 `content.json`（上線後要驗證回 403）；

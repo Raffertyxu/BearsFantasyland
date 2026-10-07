@@ -2,7 +2,14 @@
 
 初次上線日期：2026-09-18
 正式站：https://a1.haotaimaker.com/  
-目前最新核對：主題「飛熊入夢」`1.3.45` 為啟用主題，外掛「飛熊入夢 NEWDESIGN 官網」`0.5.42` 為啟用外掛。部署及驗收紀錄見下方最新段落；其後較早版本條目是歷史記錄，不代表目前版本。
+目前最新核對：主題「飛熊入夢」`1.3.45` 為啟用主題，外掛「飛熊入夢 NEWDESIGN 官網」`0.5.44` 為啟用外掛。部署及驗收紀錄見下方最新段落；其後較早版本條目是歷史記錄，不代表目前版本。
+
+## 2026-10-07 外掛 0.5.43／0.5.44：關閉 XML-RPC、日誌後台單一入口
+
+- 使用者當次要求。外掛清單確認**未安裝 Jetpack**（啟用中只有 ECPay、WooCommerce、Wordfence、Yoast、本外掛；另有停用未刪的 Code Snippets 與三個 BF Shop System）。改前唯讀 `system.listMethods` 回 80 個方法（含 `system.multicall`、`pingback.ping`）。
+- 外掛 `0.5.42 → 0.5.43`（SHA-256 `1af49c60…fbb7b3`，新檔 `src/hardening.php`）：`xmlrpc.php` 請求回 403，並移除 XML-RPC 方法、pingback、`X-Pingback` 標頭與 RSD 連結。未改 Wordfence 設定。即時驗收：POST `xmlrpc.php` → 403「XML-RPC is disabled on this site.」；`/wp-json/`、Store API、`wp-login.php` 200；首頁無 `X-Pingback`、無 EditURI；`check_live_routes.py`、`check_live_content.py` 全過。
+- 外掛 `0.5.43 → 0.5.44`（SHA-256 `c93a36a8…0f704f6`）：原生「文章」選單與標籤改名為「飛熊日誌」（`post_type_labels_post`）；文章列表頂端說明文章會出現在哪、卡片用精選圖片與第一個分類、頁首在網站版面改；網站版面的日誌／首頁／合作頁加提示與「前往飛熊日誌文章列表」按鈕。後台實測選單、列表標題、新增按鈕與兩處說明皆生效；前台主要頁 200。
+- 正式站日誌目前 0 篇已發布；回收桶 8 篇示範／測試文章；分類 10 個（新舊混用：作品、品牌、工藝、活動、課程，以及舊的飛熊誌、熊熊速報、活動速報、工坊公告、最新消息，皆 0 篇）。
 
 ## 2026-10-07 主題 1.3.45：修正合作頁聯絡清單跑版
 
