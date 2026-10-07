@@ -106,8 +106,7 @@ function bfnd_save_banners_action() {
 }
 
 function bfnd_template_shared_layout_notice() {
-    $story_url = admin_url('admin.php?page=bfnd-layout-story');
-    echo '<div class="notice notice-info inline"><p><strong>共用頁首與頁尾不屬於單頁 CRUD 欄位。</strong>頁首的 Maker 連結已依設計圖稿移除；頁尾 Maker 資訊保留。品牌故事內文的 Maker 基地段落仍可在 <a href="' . esc_url($story_url) . '">品牌故事版面管理</a> 編輯或隱藏。</p></div>';
+        echo '<div class="notice notice-info inline"><p><strong>頁首與頁尾不在這裡改。</strong>連結請到<strong>外觀 → 選單</strong>；頁尾標語、社群與 LINE 網址請到<strong>外觀 → 自訂 → 飛熊入夢頁首頁尾</strong>。頁首「木作學堂」的課程下拉會自動列出已發佈的木作課程。</p><p><a class="button" href="' . esc_url(admin_url('nav-menus.php')) . '">選單</a> <a class="button" href="' . esc_url(admin_url('customize.php?autofocus[section]=bf_header_footer')) . '">頁尾文字與社群網址</a> <a class="button" href="' . esc_url(function_exists('bfnd_guide_url') ? bfnd_guide_url('layout') : admin_url('index.php')) . '">網站版面教學</a></p></div>';
 }
 
 function bfnd_template_content_links($key) {
