@@ -15,11 +15,11 @@ add_action('after_setup_theme', function () {
 });
 
 add_action('wp_enqueue_scripts', function () {
-    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.47');
-    wp_enqueue_style('bfft-interactions', bfft_asset('public/interactions.css'), array('bfft-style'), '1.3.47');
-    wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.3.47', true);
+    wp_enqueue_style('bfft-style', bfft_asset('public/style.css'), array(), '1.3.48');
+    wp_enqueue_style('bfft-interactions', bfft_asset('public/interactions.css'), array('bfft-style'), '1.3.48');
+    wp_enqueue_script('bfft-site', bfft_asset('public/site.js'), array(), '1.3.48', true);
     if (function_exists('is_product') && is_product()) {
-        wp_enqueue_style('bfft-product', bfft_asset('public/product.css'), array('bfft-interactions'), '1.3.47');
+        wp_enqueue_style('bfft-product', bfft_asset('public/product.css'), array('bfft-interactions'), '1.3.48');
     }
 }, 100);
 

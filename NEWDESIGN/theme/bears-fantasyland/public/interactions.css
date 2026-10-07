@@ -485,3 +485,31 @@ body.bfnd-body .bf-footer-main .bf-footer-brand img{max-width:100%}
 body.bfnd-body .bf-footer .bf-footer-social > a.bf-footer-line img{display:block}
 body.bfnd-body .bf-footer .bf-footer-social > a.bf-footer-line::before{content:none;display:none}
 @media (min-width:1101px){body.bfnd-body .bf-footer .bf-footer-bottom{min-height:calc(30*var(--bfnd-px));padding-block:calc(6*var(--bfnd-px))}}
+
+/* RWD-AUDIT-2026-10-07.md fixes. */
+/* Footer: the >=1920 rule added 82 padding, so zooming out past 1920 CSS px suddenly tripled the footer height. */
+@media (min-width:1920px){body.bfnd-body .bf-footer .bf-footer-main{padding-block:calc(8*var(--bfnd-px));min-height:calc(76*var(--bfnd-px))}}
+/* Mobile menu: the 木作學堂 submenu was squeezed (flex-shrink) and painted over the links below it. */
+@media (max-width:1100px){body.bfnd-body .bf-nav>*{flex-shrink:0}}
+/* Native/WooCommerce controls that ignored --bfnd-px at large widths. */
+body.bfnd-body select{appearance:none;-webkit-appearance:none;background-color:#fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23342b25' stroke-width='1.6'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right calc(14*var(--bfnd-px)) center!important;background-size:calc(12*var(--bfnd-px)) auto!important;padding-right:calc(38*var(--bfnd-px))!important}
+body.bfnd-body .woocommerce form .show-password-input{width:calc(22*var(--bfnd-px));height:calc(22*var(--bfnd-px));background-size:calc(22*var(--bfnd-px))}
+body.bfnd-body .woocommerce input[type=checkbox]{width:calc(16*var(--bfnd-px));height:calc(16*var(--bfnd-px))}
+body.bfnd-body .woocommerce form .form-row{padding:calc(3*var(--bfnd-px))}
+body.bfnd-body .bf-product-reviews p.stars a{font-size:calc(24*var(--bfnd-px));width:1em;height:1em}
+body.bfnd-body article.page :is(ul,ol){padding-left:calc(24*var(--bfnd-px))}
+/* Sale badge was 11px, below the 12px desktop floor. */
+body.bfnd-body .bf-commerce-content .woocommerce ul.products li.product span.onsale,body.bfnd-body ul.products li.product span.onsale{font-size:calc(12*var(--bfnd-px))}
+/* Mobile footer: readable text and 44px touch targets. */
+@media (max-width:1100px){
+body.bfnd-body .bf-footer-main .bf-footer-maker small,body.bfnd-body .bf-footer-bottom small,body.bfnd-body .bf-footer-bottom nav a,body.bfnd-body .bf-footer-bottom nav span{font-size:calc(12*var(--bfnd-px))}
+body.bfnd-body .bf-footer-main .bf-footer-maker strong,body.bfnd-body .bf-footer-main .bf-footer-links a,body.bfnd-body .bf-footer-main .bf-footer-motto{font-size:calc(13*var(--bfnd-px))}
+}
+@media (max-width:760px){
+body.bfnd-body .bf-footer-bottom nav a{display:inline-flex;align-items:center;min-height:calc(44*var(--bfnd-px))}
+body.bfnd-body .bf-footer-main .bf-footer-links a{min-height:calc(44*var(--bfnd-px));display:flex;align-items:center;justify-content:center}
+body.bfnd-body .bf-footer-main .bf-footer-maker{min-height:calc(44*var(--bfnd-px));display:flex;flex-direction:column;justify-content:center}
+body.bfnd-body :is(.bf-breadcrumb a,.bf-back,.bf-text-link,.bf-shop-categories a,ul.products a.button,#faq summary,.reset_variations){display:inline-flex;align-items:center;min-height:calc(44*var(--bfnd-px))}
+/* Furniture filter row scrolls sideways: fade the edge so the cut-off buttons read as more. */
+body.bfnd-body .bf-filter-list{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent);padding-right:calc(24*var(--bfnd-px))}
+}
