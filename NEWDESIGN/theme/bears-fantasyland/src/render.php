@@ -652,7 +652,8 @@ function bfnd_render_shop_categories($shop) {
     $current = is_product_category() ? get_queried_object_id() : 0;
     echo '<nav class="bf-shop-categories" aria-label="商品分類"><a' . ($current ? '' : ' aria-current="page"') . ' href="' . esc_url($shop) . '">全部商品</a>';
     foreach ($terms as $term) {
-        if ($term->slug === 'uncategorized') { continue; }
+        // Course products are hidden from the shop and bought from 木作學堂, so their category stays out of the tabs.
+        if (in_array($term->slug, array('uncategorized', 'woodworking-courses'), true)) { continue; }
         if ($term->name === '手工具') { echo '<span class="bf-shop-category-group">木作學堂</span>'; }
         echo '<a' . ((int) $term->term_id === $current ? ' aria-current="page"' : '') . ' href="' . esc_url(get_term_link($term)) . '">' . esc_html($term->name) . '</a>';
     }

@@ -107,6 +107,9 @@ function bfnd_save_course_product($product) {
         }
         update_post_meta($product->get_id(), '_bfnd_course_product', 'yes');
         $product->set_virtual(true);
+        // File course products under 木作課程 so the product list shows what they are.
+        $course_term = get_term_by('slug', 'woodworking-courses', 'product_cat');
+        if ($course_term) { $product->set_category_ids(array_values(array_unique(array_merge(array_diff($product->get_category_ids(), array((int) get_option('default_product_cat'))), array((int) $course_term->term_id))))); }
         if ($product->is_type('variable')) {
             foreach ($product->get_children() as $child_id) {
                 $child = wc_get_product($child_id);

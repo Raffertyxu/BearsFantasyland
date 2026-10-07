@@ -61,10 +61,10 @@ function bfnd_guide_tasks() {
                 '<b>開新梯次或改價格名額</b>：左側<b>商品</b> → 找名稱有「課程報名」的商品（例如「木工基礎入門班｜課程報名」）→ <b>變化</b>分頁。',
                 '新梯次：<b>屬性</b>分頁的「梯次」加一個值（例如 2027 年 1 月梯）→ 儲存屬性 → <b>變化</b>分頁「新增變化」→ 選該梯次，填價格；勾<b>管理庫存</b>，<b>庫存數量</b>就是名額。',
                 '按<b>更新</b>。課程頁的按鈕會自動變成「選擇梯次／方案」。',
-                '<b>新開一門課</b>：先在<b>木作課程 → 新增</b>建立課程；再到<b>商品 → 新增商品</b>建立課程商品，右側勾<b>將此商品作為課程報名／會員方案收款項目</b>；最後回課程頁，在「WooCommerce 課程／會員方案商品」選這個商品。',
+                '<b>新開一門課</b>：先在<b>木作課程 → 新增</b>建立課程；再到<b>商品 → 新增商品</b>建立課程商品，右側勾<b>將此商品作為課程報名／會員方案收款項目</b>（會自動歸到「木作課程」分類，並且不在商店列出）；最後回課程頁，在「WooCommerce 課程／會員方案商品」選這個商品。',
             ),
             'tips' => array('課程發佈後會自動出現在學堂頁與頁首下拉選單，不用另外改選單。', '梯次額滿時名額歸零，客人就無法再選那個梯次。'),
-            'links' => array('所有課程' => $u('edit.php?post_type=bf_course'), '新增課程' => $u('post-new.php?post_type=bf_course'), '課程商品' => $u('edit.php?post_type=product&s=%E8%AA%B2%E7%A8%8B')),
+            'links' => array('所有課程' => $u('edit.php?post_type=bf_course'), '新增課程' => $u('post-new.php?post_type=bf_course'), '課程商品' => $u('edit.php?post_type=product&product_cat=woodworking-courses')),
         ),
         'order' => array(
             'icon' => 'dashicons-clipboard', 'title' => '處理訂單', 'summary' => '客人付款後的訂單、出貨、課程報名。',
