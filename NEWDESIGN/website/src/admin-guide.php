@@ -186,3 +186,10 @@ function bfnd_render_guide_page() {
     }
     echo '</div>';
 }
+
+// 外觀 → 選單: the 木作學堂 course dropdown is built from 木作課程 posts, not from a menu.
+add_action('admin_notices', function () {
+    $screen = function_exists('get_current_screen') ? get_current_screen() : null;
+    if (!$screen || $screen->id !== 'nav-menus') { return; }
+    echo '<div class="notice notice-info"><p><strong>頁首「木作學堂」的課程下拉選單是自動產生的，不在這裡設定。</strong>它會列出所有已發佈的木作課程（實體／線上分開），新增、改名或下架課程後會自動更新。這裡只要保留一個連到木作學堂頁的項目，下拉就會出現。</p><p><a class="button" href="' . esc_url(admin_url('edit.php?post_type=bf_course')) . '">前往木作課程</a> <a class="button" href="' . esc_url(bfnd_guide_url('menu')) . '">選單教學</a></p></div>';
+});

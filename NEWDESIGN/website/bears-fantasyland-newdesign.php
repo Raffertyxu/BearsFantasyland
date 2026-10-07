@@ -2,7 +2,7 @@
 /**
  * Plugin Name: 飛熊入夢 NEWDESIGN 官網
  * Description: 飛熊入夢品牌頁、家具作品、生活木作、木作學堂、日誌與詢問管理。
- * Version: 0.5.50
+ * Version: 0.5.51
  * Author: Haotai Maker
  * Text Domain: bf-newdesign
  */
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) { exit; }
 
 define('BFND_DIR', plugin_dir_path(__FILE__));
 define('BFND_URL', plugin_dir_url(__FILE__));
-define('BFND_VERSION', '0.5.50');
+define('BFND_VERSION', '0.5.51');
 require_once BFND_DIR . 'src/hardening.php';
 require_once BFND_DIR . 'src/content.php';
 require_once BFND_DIR . 'src/work-options.php';
