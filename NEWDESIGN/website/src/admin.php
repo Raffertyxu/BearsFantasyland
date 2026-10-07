@@ -237,3 +237,6 @@ add_action('admin_notices', function () {
     echo '<div class="notice notice-info"><p><strong>這裡是飛熊日誌的文章。</strong>按「新增日誌文章」撰寫，按「發佈」後會自動出現在飛熊日誌頁；最新 3 篇也會出現在首頁與合作頁。不想公開就移到回收桶，或改成草稿。</p>'
         . '<p>卡片會使用文章的<strong>精選圖片</strong>、<strong>第一個分類</strong>與發佈日期，請記得設定精選圖片。日誌頁最上方的標題、介紹文字與主圖，在左側 <a href="' . esc_url(bfnd_layout_admin_url('journal')) . '">飛熊日誌 → 日誌頁面設定</a>。</p></div>';
 });
+
+// Journal cards show only the first category; tags were unused and confused editors.
+add_action('init', function () { unregister_taxonomy_for_object_type('post_tag', 'post'); }, 20);
