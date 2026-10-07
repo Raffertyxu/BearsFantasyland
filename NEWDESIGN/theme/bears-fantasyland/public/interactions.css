@@ -476,3 +476,12 @@ body.bfnd-body .bf-promo-copy .bf-plain-link{transition:background-color .2s eas
 body.bfnd-body .bf-split-promos>a:hover .bf-plain-link,body.bfnd-body .bf-split-promos>a:focus-visible .bf-plain-link{background:var(--bf-white);border-color:var(--bf-white);color:var(--bf-ink)!important}
 body.bfnd-body .bf-split-promos>a:hover .bf-promo-image img,body.bfnd-body .bf-split-promos>a:focus-visible .bf-promo-image img{transform:scale(1.04)}
 @media (prefers-reduced-motion:reduce){body.bfnd-body .bf-split-promos>a:hover .bf-promo-image img,body.bfnd-body .bf-split-promos>a:focus-visible .bf-promo-image img{transform:none}}
+
+/* Footer at small browser zoom (e.g. 25%, viewport 7680px). The WordPress 額外 CSS holds a raw-px
+   copy of old footer rules: it hides the LINE icon for a 17x14px drawn badge and fixes the bottom
+   bar height, so neither scales. The logo image (250 at >=1920) also overflowed its 150 box. */
+body.bfnd-body .bf-footer-main .bf-footer-brand img{max-width:100%}
+@media (min-width:1920px){body.bfnd-body .bf-footer-main .bf-footer-brand{width:calc(250*var(--bfnd-px))}}
+body.bfnd-body .bf-footer .bf-footer-social > a.bf-footer-line img{display:block}
+body.bfnd-body .bf-footer .bf-footer-social > a.bf-footer-line::before{content:none;display:none}
+@media (min-width:1101px){body.bfnd-body .bf-footer .bf-footer-bottom{min-height:calc(30*var(--bfnd-px));padding-block:calc(6*var(--bfnd-px))}}
