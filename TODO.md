@@ -10,11 +10,13 @@
 | 項目 | 狀態 |
 |---|---|
 | 正式站 | https://a1.haotaimaker.com/ （WordPress + WooCommerce 11.1.2 + Yoast + Wordfence + 綠界 ECPay） |
-| 啟用主題 | 「飛熊入夢」**1.3.45**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.45.zip`） |
-| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.42**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.42.zip`） |
+| 啟用主題 | 「飛熊入夢」**1.3.54**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.54.zip`） |
+| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.53**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.53.zip`） |
 | 與正式站一致的程式碼 | `main` 分支 |
-| 回退用 ZIP | 主題 1.3.35～1.3.42、外掛 0.5.36／0.5.38～0.5.40 都在 `dist/`（Git LFS） |
+| 回退用 ZIP | 主題 1.3.35～1.3.54、外掛 0.5.36～0.5.53 都在 `dist/`（Git LFS；1.3.49 未上線） |
 | 綠界 | **正式收款模式**（「啟用測試模式」關閉）。刷卡測試會真的扣款 |
+| 後台教學 | 控制台「飛熊入夢｜我想要…」＋「控制台 → 飛熊入夢使用教學」；改後台流程時要同步更新 `NEWDESIGN/website/src/admin-guide.php` |
+| 後台額外 CSS | 已清空（備份在 `NEWDESIGN/website/qa-screenshots/custom-css/`） |
 
 每次上線的完整紀錄、SHA-256 與即時驗收結果：`NEWDESIGN/website/DEPLOYMENT.md` 最上面幾段。
 
@@ -65,6 +67,16 @@
   - 待使用者決定：(1) 上述分配與生活木作要不要加；(2) 位置是否都放頁尾前，或學堂頁放在課程列表上方方便放開課公告。
   - 實作時注意：網站版面以區塊順序對應覆寫（`page-editor.php` 的 `section_N`），新增區塊要加在各頁最後、或加 `data-bfnd-design-ignore`，避免後面區塊的覆寫錯位；教學頁（`src/admin-guide.php`）要補一節。
 - [x] 留言與商品評價已關閉（外掛 0.5.52，2026-10-07）；要恢復就移除 `src/hardening.php` 最後一段。
+
+- [ ] **生活木作詢問不帶作品、款式寫死（待使用者決定 A／B／C）**
+  - 現況：生活木作內頁（主題 `src/render.php` 的 `bfnd_render_lifestyle_work`）「詢問作品」只連 `collaboration#inquiry`，沒帶作品；詢問表單（`bfnd_render_inquiry_form`）下拉只列 `bf_work`，外掛 `src/admin.php` 約 184 行送出驗證也只接受 `bf_work`。
+  - 另一個缺陷：標語「一器承日常，一圓納天地。」與「竹款｜Bamboo Edition／木款｜Wood Edition」寫死在程式裡，**所有生活木作都會顯示同樣內容**、款式也不能點選。
+  - 建議：
+    - A：詢問表單加入生活木作（下拉分「家具作品／生活木作」兩組），按鈕帶 `?work=`，送出驗證允許 `bf_lifestyle`。
+    - B：生活木作加欄位「一句話介紹」「可選款式」（一行一個，比照家具「可選木材」），可點選並帶進表單；把晨露圓境托盤現有文字搬進它自己的欄位，前台外觀不變。
+    - C（選做）：加「對應的商店商品」，有販售時顯示「前往選購」。
+  - 待使用者回覆：A＋B 是否一起做；C 要不要做、托盤是否會上架販售。
+- [x] 自由內容區使用者已實測（2026-10-08，木作學堂填「你好」正確顯示）。
 
 ## 2. 客戶要提供的資料（目前都是預設值，要換成真的）
 
