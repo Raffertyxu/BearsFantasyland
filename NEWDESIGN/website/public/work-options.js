@@ -38,7 +38,7 @@
         event.preventDefault();
         group.classList.add('is-error');
         const feedback = group.querySelector('[data-bf-work-choice-feedback]');
-        if (feedback) feedback.textContent = `請先選擇${group.querySelector('legend')?.childNodes[0]?.textContent.trim() || '作品規格'}。`;
+        if (feedback) feedback.textContent = `請先選擇${group.querySelector('legend')?.childNodes[0]?.textContent.replace(/，請選擇一項$/, '').replace(/^選擇/, '').trim() || '作品規格'}。`;
         const firstChoice = group.querySelector('input[type="radio"]');
         firstChoice?.setAttribute('aria-invalid', 'true');
         firstChoice?.focus();

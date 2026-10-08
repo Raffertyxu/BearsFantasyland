@@ -75,7 +75,7 @@ function bfnd_render_inquiry_option_field($work_id, $kind, $label, $selected_val
 
     echo '<label class="bf-inquiry-option-field" data-bf-inquiry-option-field="' . esc_attr($kind) . '"' . $hidden . '><span>' . esc_html($label) . '</span>';
     echo '<select id="' . esc_attr($field_id) . '" name="' . esc_attr($field_name) . '" data-bf-inquiry-option-select="' . esc_attr($kind) . '" data-selected="' . esc_attr($selected_value) . '" aria-describedby="' . esc_attr($field_id . '-feedback') . '"' . ($options ? ' required' : $disabled) . '>';
-    echo '<option value="">請選擇' . esc_html($label) . '</option>';
+    echo '<option value="">請選擇' . esc_html(preg_replace('/^選擇/u', '', $label)) . '</option>';
     foreach ($options as $option) {
         echo '<option value="' . esc_attr($option) . '"' . ($option === $selected_value ? ' selected' : '') . '>' . esc_html($option) . '</option>';
     }
