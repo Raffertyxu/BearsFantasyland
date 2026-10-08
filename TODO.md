@@ -11,7 +11,7 @@
 |---|---|
 | 正式站 | https://a1.haotaimaker.com/ （WordPress + WooCommerce 11.1.2 + Yoast + Wordfence + 綠界 ECPay） |
 | 啟用主題 | 「飛熊入夢」**1.3.54**（`NEWDESIGN/theme/dist/bears-fantasyland-1.3.54.zip`） |
-| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.53**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.53.zip`） |
+| 啟用外掛 | 「飛熊入夢 NEWDESIGN 官網」**0.5.54**（`NEWDESIGN/website/dist/bears-fantasyland-newdesign-0.5.54.zip`） |
 | 與正式站一致的程式碼 | `main` 分支 |
 | 回退用 ZIP | 主題 1.3.35～1.3.54、外掛 0.5.36～0.5.53 都在 `dist/`（Git LFS；1.3.49 未上線） |
 | 綠界 | **正式收款模式**（「啟用測試模式」關閉）。刷卡測試會真的扣款 |
@@ -68,7 +68,7 @@
   - 實作時注意：網站版面以區塊順序對應覆寫（`page-editor.php` 的 `section_N`），新增區塊要加在各頁最後、或加 `data-bfnd-design-ignore`，避免後面區塊的覆寫錯位；教學頁（`src/admin-guide.php`）要補一節。
 - [x] 留言與商品評價已關閉（外掛 0.5.52，2026-10-07）；要恢復就移除 `src/hardening.php` 最後一段。
 
-- [ ] **生活木作詢問不帶作品、款式寫死（待使用者決定 A／B／C）**
+- [ ] **生活木作詢問不帶作品、款式寫死**（A+B+C 已實作；外掛 0.5.54 已上線，**主題 1.3.55 待上線**——上傳被權限擋下，需使用者授權或自行到「外觀 → 佈景主題 → 上傳」安裝 `NEWDESIGN/theme/dist/bears-fantasyland-1.3.55.zip`）
   - 現況：生活木作內頁（主題 `src/render.php` 的 `bfnd_render_lifestyle_work`）「詢問作品」只連 `collaboration#inquiry`，沒帶作品；詢問表單（`bfnd_render_inquiry_form`）下拉只列 `bf_work`，外掛 `src/admin.php` 約 184 行送出驗證也只接受 `bf_work`。
   - 另一個缺陷：標語「一器承日常，一圓納天地。」與「竹款｜Bamboo Edition／木款｜Wood Edition」寫死在程式裡，**所有生活木作都會顯示同樣內容**、款式也不能點選。
   - 建議：
