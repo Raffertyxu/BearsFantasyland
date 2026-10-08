@@ -39,6 +39,7 @@ else {
         if (function_exists('bfnd_page_layout_html')) { echo bfnd_page_layout_html($page_type, get_queried_object_id()); }
         if (trim($extra)) { echo '<section class="bf-page-extra bf-wrap">' . apply_filters('the_content', $extra) . '</section>'; }
     }
+    if ($page_type && function_exists('bfnd_render_free_area')) { bfnd_render_free_area($page_type); }
 }
 ?>
 </main>

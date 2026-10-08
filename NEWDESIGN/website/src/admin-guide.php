@@ -100,6 +100,19 @@ function bfnd_guide_tasks() {
             'tips' => array('改壞了可以按該欄位旁的<b>恢復預設文字</b>或<b>恢復預設圖</b>。', '作品、課程、日誌、商品這些「一筆一筆」的內容不在這裡改，請用各自的選單。'),
             'links' => array('網站版面' => $u('admin.php?page=bfnd-layout-overview')),
         ),
+        'free' => array(
+            'icon' => 'dashicons-megaphone', 'title' => '在頁面加一段公告或新內容', 'summary' => '首頁、生活木作、木作學堂、購買與服務頁最下方（頁尾前）。',
+            'where' => '左側選單「網站版面」→ 選頁面 →「編輯自由內容區」',
+            'steps' => array(
+                '點左側<b>網站版面</b> → 點<b>飛熊入夢</b>（首頁）、<b>生活木作</b>、<b>木作學堂</b>或<b>購買與服務</b>。',
+                '在說明框按<b>編輯自由內容區</b>，會打開一般的區塊編輯器。',
+                '按 <b>+</b> 加入<b>標題</b>、<b>段落</b>、<b>圖片</b>、<b>按鈕</b>或 <b>YouTube</b>，像寫日誌一樣排版。',
+                '按右上角<b>儲存</b>，到前台該頁最下方確認。',
+                '不需要時把內容全部刪掉再儲存，網站上就不會顯示。',
+            ),
+            'tips' => array('只有這四頁有自由內容區；其他頁照設計稿，只能改文字圖片或隱藏區塊。', '開課公告、休假通知、活動資訊放這裡最方便。'),
+            'links' => array('網站版面' => $u('admin.php?page=bfnd-layout-overview'), '所有自由內容區' => $u('edit.php?post_type=wp_block')),
+        ),
         'banner' => array(
             'icon' => 'dashicons-images-alt2', 'title' => '更換首頁與各頁輪播圖', 'summary' => '首頁、家具、生活木作、學堂最上方的大圖輪播。',
             'where' => '左側選單「網站版面 → Banner 輪播」',

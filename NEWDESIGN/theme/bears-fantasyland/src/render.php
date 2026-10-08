@@ -173,6 +173,15 @@ function bfnd_render_footer() {
     }
     echo '</nav></div></div></footer>';
 }
+// 自由內容區 (plugin src/free-areas.php): optional block content at the end of the page, before the footer.
+function bfnd_render_free_area($key) {
+    if (!function_exists('bfnd_free_area_post')) { return; }
+    $post = bfnd_free_area_post($key);
+    if (!$post || $post->post_status !== 'publish' || trim($post->post_content) === '') { return; }
+    $html = do_blocks($post->post_content);
+    if (trim(wp_strip_all_tags($html)) === '' && !preg_match('/<(img|iframe|video|figure)/i', $html)) { return; }
+    echo '<section class="bf-section bf-wrap bf-free-area" aria-label="' . esc_attr(get_the_title($post)) . '"><div class="bf-free-area-inner">' . apply_filters('the_content', $post->post_content) . '</div></section>';
+}
 function bfnd_section_head($en, $title, $link = '', $link_label = '') {
     echo '<div class="bf-section-head"><div><span class="bf-kicker">' . bfnd_e($en) . '</span><h2>' . bfnd_e($title) . '</h2></div>';
     if ($link) { echo '<a class="bf-text-link" href="' . esc_url($link) . '">' . bfnd_e($link_label) . ' <span aria-hidden="true">↗</span></a>'; }

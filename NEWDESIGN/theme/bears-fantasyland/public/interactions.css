@@ -534,3 +534,19 @@ body.bfnd-body .bf-footer-bottom small{white-space:normal}
 body.bfnd-body .bf-footer-bottom nav{justify-content:center}
 body.bfnd-body .bf-footer-bottom nav a{min-height:calc(32*var(--bfnd-px))}
 }
+
+/* 自由內容區: block-editor content before the footer, styled like the rest of the site. */
+body.bfnd-body .bf-free-area-inner{max-width:calc(860*var(--bfnd-px));margin-inline:auto;font-size:calc(16*var(--bfnd-px));line-height:2;color:var(--bf-ink)}
+body.bfnd-body .bf-free-area-inner>:first-child{margin-top:0}
+body.bfnd-body .bf-free-area-inner>:last-child{margin-bottom:0}
+body.bfnd-body .bf-free-area-inner :is(h2,h3,h4){margin:1.6em 0 .6em;font-family:var(--bf-serif);font-weight:500;line-height:1.45;letter-spacing:.06em}
+body.bfnd-body .bf-free-area-inner h2{font-size:clamp(calc(26*var(--bfnd-px)),2.2vw,calc(36*var(--bfnd-px)))}
+body.bfnd-body .bf-free-area-inner h3{font-size:calc(22*var(--bfnd-px))}
+body.bfnd-body .bf-free-area-inner p{margin:0 0 1.2em}
+body.bfnd-body .bf-free-area-inner img{width:auto;max-width:100%;height:auto;object-fit:initial}
+body.bfnd-body .bf-free-area-inner figure{margin:1.6em 0}
+body.bfnd-body .bf-free-area-inner a:not(.wp-block-button__link){color:var(--bf-wood);border-bottom:calc(1*var(--bfnd-px)) solid currentColor}
+body.bfnd-body .bf-free-area-inner .wp-block-button__link{display:inline-block;padding:calc(14*var(--bfnd-px)) calc(26*var(--bfnd-px));border:calc(1*var(--bfnd-px)) solid var(--bf-wood);border-radius:0;background:var(--bf-wood);color:#fff;font-size:calc(14*var(--bfnd-px));letter-spacing:.08em}
+body.bfnd-body .bf-free-area-inner .wp-block-button__link:hover{background:transparent;color:var(--bf-wood)}
+body.bfnd-body .bf-free-area-inner :is(ul,ol){margin:0 0 1.2em;padding-left:1.4em}
+body.bfnd-body .bf-free-area-inner .wp-block-embed iframe{width:100%;aspect-ratio:16/9;height:auto}

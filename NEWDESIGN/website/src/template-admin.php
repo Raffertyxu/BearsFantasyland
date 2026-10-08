@@ -213,6 +213,7 @@ function bfnd_template_editor($key) {
     echo '<p>在這裡修改手稿固定版型的文字與圖片。圖片使用 WordPress 媒體庫；恢復預設會使用原始版型內容。家具作品、生活木作作品、課程與飛熊日誌的內容請在各自的 WordPress 清單新增、編輯或移到回收桶。</p>';
     bfnd_template_shared_layout_notice();
     bfnd_template_content_links($key);
+    if (function_exists('bfnd_free_area_admin_box')) { bfnd_free_area_admin_box($key); }
     echo '<p>' . ($key === 'journal' ? '<a href="' . esc_url(admin_url('edit.php')) . '">← 返回飛熊日誌文章</a>' : '<a href="' . esc_url(admin_url('admin.php?page=bfnd-layout-overview')) . '">← 返回網站版面</a>') . '　<a href="' . esc_url(get_permalink($page)) . '" target="_blank" rel="noopener noreferrer">查看前台 ↗</a></p>';
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '"><input type="hidden" name="action" value="bfnd_save_template"><input type="hidden" name="page_key" value="' . esc_attr($key) . '">';
     wp_nonce_field('bfnd_save_template_' . $key);
