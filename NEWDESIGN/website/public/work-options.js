@@ -70,7 +70,7 @@
     if (!field || !select) return;
 
     const selected = keepSelected ? (select.dataset.selected || select.value) : '';
-    const prompt = kind === 'material' ? '請選擇木材／材質' : '請選擇尺寸';
+    const prompt = kind === 'material' ? '請選擇木材／材質／款式' : '請選擇尺寸';
     select.replaceChildren(new Option(prompt, ''));
     for (const value of values) select.add(new Option(value, value));
 

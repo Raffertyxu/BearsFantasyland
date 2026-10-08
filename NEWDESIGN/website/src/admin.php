@@ -20,7 +20,7 @@ function bfnd_fields($type) {
     $shared = array('english' => '英文名稱', 'tagline' => '一句話介紹', 'seo_title' => 'SEO Title', 'seo_description' => 'SEO Description');
     if ($type === 'bf_work') { return array_merge($shared, array('type' => '作品類型', 'material' => '木材／材質', 'material_options' => '可選木材／材質（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸（請填經確認的尺寸）', 'size_options' => '可選尺寸（每行一項；需先勾選尺寸資料已核對才會公開）', 'size_confirmed' => '尺寸資料已核對，可以在網站顯示', 'size_adjustable' => '部分作品可依空間需求調整尺寸（勾選後顯示說明）', 'craft' => '製作方式', 'craft_image_id' => '此件作品的實際製作過程照片 ID（未填即隱藏製作區）', 'finish' => '表面處理', 'featured' => '首頁精選作品（1 顯示，0 不顯示）', 'related_ids' => '相關作品 ID（依序，以逗號分隔）', 'shop_product_id' => '對應的商店商品（選填；設定後作品頁顯示「前往選購」）', 'gallery_ids' => '作品圖片；第 1 張主圖、第 2 張 STORY、第 3 張起 DETAILS（可在媒體庫排序）')); }
     if ($type === 'bf_course') { return array_merge($shared, array('track' => '課程軌道：level1 / level2 / level3 / program / specialist / membership', 'mode' => '課程模式：onsite / online', 'features' => '課程特色（每行一項）', 'audience' => '適合對象（每行一項）', 'learning' => '學習內容（每行一項）', 'tools' => '使用工具（每行一項）', 'outcomes' => '完成成果（每行一項）', 'duration' => '課程時數', 'price_label' => '價格標籤（例如：優惠價）', 'price' => '課程顯示價格（尚未綁商品時使用；正式售價以 WooCommerce 商品為準）', 'level' => '程度標籤', 'schedule' => '開課梯次資訊（文字顯示；多梯次請使用 WooCommerce 變化商品）', 'notices' => '注意事項（每行一項）', 'woo_id' => 'WooCommerce 課程／會員方案商品', 'registration_button' => '報名按鈕文字（選填）', 'gallery_ids' => '課程照片／簡章（第一張作簡章；媒體庫可編輯 ALT）')); }
-    if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'size' => '參考尺寸', 'gallery_ids' => '作品照片')); }
+    if ($type === 'bf_lifestyle') { return array_merge($shared, array('material' => '材質', 'material_options' => '可選款式（每行一項，順序即前台顯示順序）', 'size' => '參考尺寸', 'shop_product_id' => '對應的商店商品（選填；設定後作品頁顯示「前往選購」）', 'gallery_ids' => '作品照片')); }
     return array();
 }
 
@@ -60,7 +60,7 @@ function bfnd_meta_box($post) {
             }
             continue;
         }
-        if ($post->post_type === 'bf_work' && $key === 'shop_product_id') {
+        if (in_array($post->post_type, array('bf_work', 'bf_lifestyle'), true) && $key === 'shop_product_id') {
             bfnd_work_shop_product_field(absint($value), $label);
             continue;
         }
@@ -89,11 +89,11 @@ function bfnd_meta_box($post) {
 }
 
 function bfnd_inquiry_meta_box($post) {
-    foreach (array('contact' => '聯絡方式', 'work' => '詢問作品', 'work_id' => '作品資料 ID', 'material_choice' => '選擇木材／材質', 'size_choice' => '選擇尺寸', 'dimension' => '其他尺寸需求', 'space' => '使用空間', 'budget' => '預算／其他需求', 'attachment' => '參考附件') as $key => $label) {
+    foreach (array('contact' => '聯絡方式', 'work' => '詢問作品', 'work_id' => '作品資料 ID', 'material_choice' => '選擇木材／材質／款式', 'size_choice' => '選擇尺寸', 'dimension' => '其他尺寸需求', 'space' => '使用空間', 'budget' => '預算／其他需求', 'attachment' => '參考附件') as $key => $label) {
         $value = get_post_meta($post->ID, '_bfnd_' . $key, true);
         echo '<p><strong>' . esc_html($label) . '</strong>：';
         if ($key === 'attachment' && $value) { echo '<a href="' . esc_url($value) . '" target="_blank" rel="noopener noreferrer">查看附件</a>'; }
-        elseif ($key === 'work_id' && absint($value) && get_post_type(absint($value)) === 'bf_work') { $edit_link = get_edit_post_link(absint($value)); echo $edit_link ? '<a href="' . esc_url($edit_link) . '">' . esc_html(get_the_title(absint($value))) . '</a>' : esc_html(get_the_title(absint($value))); }
+        elseif ($key === 'work_id' && absint($value) && in_array(get_post_type(absint($value)), array('bf_work', 'bf_lifestyle'), true)) { $edit_link = get_edit_post_link(absint($value)); echo $edit_link ? '<a href="' . esc_url($edit_link) . '">' . esc_html(get_the_title(absint($value))) . '</a>' : esc_html(get_the_title(absint($value))); }
         else { echo esc_html((string) $value ?: '—'); }
         echo '</p>';
     }
@@ -113,7 +113,7 @@ function bfnd_save_meta($post_id) {
         $value = in_array($key, array('features', 'audience', 'learning', 'tools', 'outcomes', 'schedule', 'notices', 'material_options', 'size_options'), true)
             ? sanitize_textarea_field($raw_value)
             : sanitize_text_field($raw_value);
-        if (($type === 'bf_course' && $key === 'woo_id') || ($type === 'bf_work' && $key === 'shop_product_id')) { $value = absint($raw_value); }
+        if (($type === 'bf_course' && $key === 'woo_id') || (in_array($type, array('bf_work', 'bf_lifestyle'), true) && $key === 'shop_product_id')) { $value = absint($raw_value); }
         if ($key === 'gallery_ids' || $key === 'related_ids') { $value = array_values(array_filter(array_map('absint', explode(',', $value)))); }
         if ($key === 'featured') { $value = $value === '1' ? '1' : '0'; }
         if ($key === 'size_adjustable' || $key === 'size_confirmed') { $value = $value === '1' ? '1' : '0'; }
@@ -181,7 +181,7 @@ function bfnd_inquiry_action() {
     bfnd_inquiry_check_lengths();
     bfnd_inquiry_check_rate_limit();
     $work_id = absint($_POST['work_id'] ?? 0);
-    if ($work_id && (get_post_type($work_id) !== 'bf_work' || get_post_status($work_id) !== 'publish')) {
+    if ($work_id && (!in_array(get_post_type($work_id), array('bf_work', 'bf_lifestyle'), true) || get_post_status($work_id) !== 'publish')) {
         wp_die('作品資料已更新，請返回作品頁重新選擇後送出。', '請重新選擇作品', array('response' => 400));
     }
     $work = $work_id ? get_the_title($work_id) : '';
@@ -240,3 +240,16 @@ add_action('admin_notices', function () {
 
 // Journal cards show only the first category; tags were unused and confused editors.
 add_action('init', function () { unregister_taxonomy_for_object_type('post_tag', 'post'); }, 20);
+
+// One-time migration (plugin 0.5.54): the lifestyle page used to hard-code its tagline and the
+// 竹款／木款 lines. Copy them into the new fields of every existing 生活木作 that has them empty,
+// so the public text stays the same. Safe to delete once every site has run it.
+add_action('admin_init', function () {
+    if (!current_user_can('manage_options') || get_option('bfnd_lifestyle_fields_v1') === '1') { return; }
+    $ids = get_posts(array('post_type' => 'bf_lifestyle', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids'));
+    foreach ($ids as $id) {
+        if ((string) get_post_meta($id, '_bfnd_tagline', true) === '') { update_post_meta($id, '_bfnd_tagline', '一器承日常，一圓納天地。'); }
+        if (bfnd_normalize_work_option_text(get_post_meta($id, '_bfnd_material_options', true)) === '') { update_post_meta($id, '_bfnd_material_options', "竹款｜Bamboo Edition\n木款｜Wood Edition"); }
+    }
+    update_option('bfnd_lifestyle_fields_v1', '1', false);
+});

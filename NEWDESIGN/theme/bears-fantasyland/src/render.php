@@ -403,7 +403,19 @@ function bfnd_render_lifestyle() {
 
 function bfnd_render_lifestyle_work($id) {
     $title = get_the_title($id);
-    echo '<section class="bf-lifestyle-detail bf-wrap"><a class="bf-back" href="' . esc_url(bfnd_page_url('lifestyle')) . '">← 返回生活木作</a><div class="bf-lifestyle-detail-grid"><div class="bf-lifestyle-main-image">'; bfnd_image(bfnd_work_image($id, 'full'), $title, '', false); echo '</div><div><span class="bf-kicker">LIFESTYLE WORKS</span><h1>' . bfnd_e($title) . '</h1><p class="bf-serif">一器承日常，一圓納天地。</p><p>' . nl2br(esc_html(get_post_field('post_content', $id))) . '</p><p>竹款｜Bamboo Edition<br>木款｜Wood Edition</p>'; bfnd_button('詢問作品', bfnd_page_url('collaboration') . '#inquiry'); echo '</div></div></section>';
+    echo '<section class="bf-lifestyle-detail bf-wrap"><a class="bf-back" href="' . esc_url(bfnd_page_url('lifestyle')) . '">← 返回生活木作</a><div class="bf-lifestyle-detail-grid"><div class="bf-lifestyle-main-image">'; bfnd_image(bfnd_work_image($id, 'full'), $title, '', false); echo '</div><div><span class="bf-kicker">LIFESTYLE WORKS</span><h1>' . bfnd_e($title) . '</h1>';
+    $tagline = (string) bfnd_meta($id, 'tagline');
+    if ($tagline !== '') { echo '<p class="bf-serif">' . bfnd_e($tagline) . '</p>'; }
+    echo '<p>' . nl2br(esc_html(get_post_field('post_content', $id))) . '</p>';
+    // Same choice markup and data hooks as furniture works, so public/work-options.js carries the chosen 款式 into the inquiry link.
+    echo '<div class="bf-lifestyle-choice" data-bf-work-choice-detail data-work-id="' . esc_attr($id) . '">';
+    if (bfnd_work_option_values($id, 'material')) { echo '<p class="bf-lifestyle-choice-title">款式</p>'; bfnd_render_work_choice_group($id, 'material', '款式'); }
+    $inquiry_url = add_query_arg('work', $id, bfnd_page_url('collaboration')) . '#inquiry';
+    $shop_product = function_exists('bfnd_get_work_shop_product') ? bfnd_get_work_shop_product($id) : false;
+    echo '<div class="bf-cta-actions">';
+    if ($shop_product) { echo '<a class="bf-button" data-bf-work-shop href="' . esc_url($shop_product->get_permalink()) . '"><span>前往選購</span><span aria-hidden="true">→</span></a>'; }
+    echo '<a class="bf-button' . ($shop_product ? ' bf-button-outline' : '') . '" data-bf-work-inquiry data-bf-work-id="' . esc_attr($id) . '" href="' . esc_url($inquiry_url) . '"><span>詢問作品</span><span aria-hidden="true">↗</span></a></div></div>';
+    echo '</div></div></section>';
     $gallery = bfnd_gallery($id);
     if ($gallery) { echo '<section class="bf-section bf-wrap">'; bfnd_section_head('THE DETAILS', '器物與光影'); echo '<div class="bf-detail-gallery">'; foreach ($gallery as $src) { echo '<button class="bf-gallery-button" type="button" aria-label="放大作品照片">'; bfnd_image($src, $title); echo '</button>'; } echo '</div></section>'; }
     echo '<dialog id="bf-image-dialog" class="bf-image-dialog" aria-label="生活木作照片放大檢視"><button type="button" aria-label="關閉照片">關閉 ×</button><img alt="生活木作照片放大檢視"></dialog>';
@@ -566,7 +578,7 @@ function bfnd_render_collaboration() {
 
 function bfnd_render_inquiry_form() {
     $work_id = isset($_GET['work']) ? absint($_GET['work']) : 0;
-    if (!$work_id || get_post_type($work_id) !== 'bf_work' || get_post_status($work_id) !== 'publish') { $work_id = 0; }
+    if (!$work_id || !in_array(get_post_type($work_id), array('bf_work', 'bf_lifestyle'), true) || get_post_status($work_id) !== 'publish') { $work_id = 0; }
     $selected_material = bfnd_requested_work_option($work_id, 'material');
     $selected_size = bfnd_requested_work_option($work_id, 'size');
     $course_id = isset($_GET['course']) ? absint($_GET['course']) : 0;
@@ -578,13 +590,19 @@ function bfnd_render_inquiry_form() {
     echo '<div class="bf-form-row"><label>姓名 <span aria-hidden="true">*</span><input required maxlength="80" name="name" autocomplete="name"></label><label>聯絡方式 <span aria-hidden="true">*</span><input required maxlength="150" name="contact" placeholder="Email 或電話" autocomplete="email"></label></div>';
     echo '<label>詢問作品<select name="work_id" data-bf-inquiry-work><option value="">一般合作／其他需求</option>';
     $works = bfnd_work_query(array('orderby' => 'title', 'order' => 'ASC'));
-    foreach ($works->posts as $post) {
-        $material_json = bfnd_work_option_json($post->ID, 'material');
-        $size_json = bfnd_work_option_json($post->ID, 'size');
-        echo '<option value="' . esc_attr($post->ID) . '" data-material-options="' . esc_attr($material_json) . '" data-size-options="' . esc_attr($size_json) . '"' . selected($work_id, $post->ID, false) . '>' . bfnd_e(get_the_title($post)) . '</option>';
+    $lifestyle_works = get_posts(array('post_type' => 'bf_lifestyle', 'post_status' => 'publish', 'numberposts' => -1, 'orderby' => 'title', 'order' => 'ASC'));
+    foreach (array('家具作品' => $works->posts, '生活木作' => $lifestyle_works) as $group_label => $group_posts) {
+        if (!$group_posts) { continue; }
+        echo '<optgroup label="' . esc_attr($group_label) . '">';
+        foreach ($group_posts as $post) {
+            $material_json = bfnd_work_option_json($post->ID, 'material');
+            $size_json = bfnd_work_option_json($post->ID, 'size');
+            echo '<option value="' . esc_attr($post->ID) . '" data-material-options="' . esc_attr($material_json) . '" data-size-options="' . esc_attr($size_json) . '"' . selected($work_id, $post->ID, false) . '>' . bfnd_e(get_the_title($post)) . '</option>';
+        }
+        echo '</optgroup>';
     }
     echo '</select></label><div class="bf-inquiry-option-grid">';
-    bfnd_render_inquiry_option_field($work_id, 'material', '選擇木材／材質', $selected_material);
+    bfnd_render_inquiry_option_field($work_id, 'material', '選擇木材／材質／款式', $selected_material);
     bfnd_render_inquiry_option_field($work_id, 'size', '選擇尺寸', $selected_size);
     echo '</div><div class="bf-form-row"><label>其他尺寸需求（選填）<input name="dimension" maxlength="150" placeholder="例如希望再加長 10 公分"></label><label>使用空間<input name="space" maxlength="150" placeholder="例如住宅餐廳、商業空間"></label></div>';
     echo '<label>預算／其他需求<input name="budget" maxlength="300" placeholder="可簡述預算範圍或想法"></label><label>補充說明<textarea name="message" rows="5" maxlength="3000" placeholder="告訴我們你期待的材質、用途與合作方式">' . ($course_title ? esc_textarea('我想詢問課程｜' . $course_title) : ($online_interest ? esc_textarea('我想收到線上課程上架通知。') : esc_textarea(bfnd_inquiry_product_line()))) . '</textarea></label>';

@@ -1,10 +1,12 @@
 <?php
 if (!defined('ABSPATH')) { exit; }
 
-/** Return the configured, public choices for one furniture work. */
+/** Return the configured, public choices for a furniture work or a lifestyle work (lifestyle: 款式 via material only, never size). */
 function bfnd_work_option_values($work_id, $kind) {
     if (!in_array($kind, array('material', 'size'), true)) { return array(); }
-    if (function_exists('get_post_type') && get_post_type($work_id) !== 'bf_work') { return array(); }
+    $post_type = function_exists('get_post_type') ? get_post_type($work_id) : 'bf_work';
+    if (!in_array($post_type, array('bf_work', 'bf_lifestyle'), true)) { return array(); }
+    if ($kind === 'size' && $post_type === 'bf_lifestyle') { return array(); }
     if ($kind === 'size' && get_post_meta($work_id, '_bfnd_size_confirmed', true) !== '1') { return array(); }
 
     $raw = get_post_meta($work_id, '_bfnd_' . $kind . '_options', true);
@@ -83,6 +85,7 @@ function bfnd_render_inquiry_option_field($work_id, $kind, $label, $selected_val
 /** Published, purchasable, non-course shop product linked to a work, or false. */
 function bfnd_get_work_shop_product($work_id) {
     if (!function_exists('wc_get_product')) { return false; }
+    if (function_exists('get_post_type') && !in_array(get_post_type($work_id), array('bf_work', 'bf_lifestyle'), true)) { return false; }
     $product_id = absint(get_post_meta($work_id, '_bfnd_shop_product_id', true));
     $product = $product_id ? wc_get_product($product_id) : false;
     if (!$product || $product->get_status() !== 'publish' || !$product->is_purchasable()) { return false; }

@@ -26,6 +26,21 @@ function bfnd_guide_tasks() {
             'tips' => array('刪除：在作品列表把滑鼠移到作品上，按<b>移至回收桶</b>，30 天內可在「回收桶」還原。', '想讓作品可以直接購買：在<b>對應的商店商品</b>選擇商品，作品頁會出現「前往選購」。'),
             'links' => array('新增作品' => $u('post-new.php?post_type=bf_work'), '所有作品' => $u('edit.php?post_type=bf_work'), '家具分類' => $u('edit-tags.php?taxonomy=bf_work_cat&post_type=bf_work'), '作品系列' => $u('edit-tags.php?taxonomy=bf_series&post_type=bf_work')),
         ),
+        'lifestyle' => array(
+            'icon' => 'dashicons-palmtree', 'title' => '上架或修改生活木作', 'summary' => '生活木作頁的作品與作品內頁（例如晨露圓境托盤）。',
+            'where' => '左側選單「生活木作」',
+            'steps' => array(
+                '點左側<b>生活木作</b>。要新增就按上方<b>新增生活木作</b>；要修改就點作品名稱。',
+                '最上方填<b>作品名稱</b>，下面大框填作品介紹（作品頁標題下方那段文字）。',
+                '往下到<b>飛熊入夢作品資料</b>：<b>一句話介紹</b>是作品名稱下方的那句標語，留空就不顯示。',
+                '<b>可選款式（每行一項，順序即前台顯示順序）</b>：一行一個款式（例如「竹款｜Bamboo Edition」換行「木款｜Wood Edition」），客人就能在作品頁點選「款式」並帶進詢問表單；留空就不顯示款式。',
+                '<b>對應的商店商品（選填；設定後作品頁顯示「前往選購」）</b>：選擇商品後，作品頁「詢問作品」旁會出現「前往選購」；選「不連結商品（只顯示詢問）」就只有詢問按鈕。',
+                '照片：<b>作品照片</b>欄按<b>從媒體庫選取照片</b>，可拖曳排序或按 × 移除。',
+                '按右上角藍色<b>發佈</b>（修改時是<b>更新</b>）。',
+            ),
+            'tips' => array('商品需已發布且可購買，作品頁才會顯示「前往選購」。', '刪除：在列表把滑鼠移到作品上，按<b>移至回收桶</b>，30 天內可在「回收桶」還原。'),
+            'links' => array('新增生活木作' => $u('post-new.php?post_type=bf_lifestyle'), '所有生活木作' => $u('edit.php?post_type=bf_lifestyle')),
+        ),
         'journal' => array(
             'icon' => 'dashicons-edit', 'title' => '發一篇飛熊日誌', 'summary' => '日誌文章，最新 3 篇也會出現在首頁與合作頁。',
             'where' => '左側選單「飛熊日誌」',

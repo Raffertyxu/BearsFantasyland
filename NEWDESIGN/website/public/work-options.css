@@ -186,3 +186,20 @@ body.bfnd-body [data-bf-work-inquiry][aria-busy="true"] {
     transition-duration: .01ms;
   }
 }
+
+/* Lifestyle work page: 款式 choices above the inquiry/shop buttons. */
+body.bfnd-body .bf-lifestyle-choice {
+  display: grid;
+  gap: calc(14*var(--bfnd-px));
+  margin-top: calc(24*var(--bfnd-px));
+}
+
+body.bfnd-body .bf-lifestyle-choice-title {
+  margin: 0;
+  font-size: calc(14*var(--bfnd-px));
+  letter-spacing: 0.08em;
+}
+
+body.bfnd-body .bf-lifestyle-choice .bf-cta-actions {
+  margin-top: calc(6*var(--bfnd-px));
+}
